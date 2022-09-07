@@ -116,6 +116,10 @@ age_gender_cases_plot.update_xaxes(title = "Age categories", showgrid=False)
 # #what contents to link with sidebar
 classname = "p-3 ps-4 pb-0 border rounded-top rounded-bottom bg-light bg-opacity-10" #formatting columns in rows
 
+#still under development for unupdated links
+under_development = html.H3("Sorry still under development", className = "text-xxl-center text-danger")
+
+
 #image cards to set the side bar for selecting multiple counties from the dataset
 
 image_card = html.Div([
@@ -148,6 +152,7 @@ graph_card_2 = html.Div([
                 dbc.Col([dcc.Graph(id = "line_chart", figure = {})], width = 11)
         ], className = "ms-5 mt-3", style = {"background-color":"#FFF6F9"})
 ])
+sidebar_style = {"background-color": "#F8F6F0","position":"fixed","padding":"3rem 2rem"}
 
 sidebar = html.Div([
         html.Div([html.H6("Select to view"),html.Hr(),                           
@@ -155,7 +160,7 @@ sidebar = html.Div([
                         dbc.NavLink("Country-wide ", href = "/", active = "exact"),
                         dbc.NavLink("County Level", href = "/county_cases", active = "exact"),
                 ],vertical = True, pills = True),                                                                                       
-        ],style = {"background-color": "#F8F6F0","position":"fixed","padding":"3rem 2rem"}),
+        ],style = sidebar_style),
 ])
 
 app.layout = html.Div([
@@ -196,6 +201,7 @@ app.layout = html.Div([
                         sidebar,
                         html.Div(id = "deathes-content", children=[], 
                                 style ={"margin-left" : "14rem", "margin-right":"2rem"}),
+
                 ],labelClassName = "fw-bold",activeLabelClassName="text-light bg-danger bg-opacity-75"),
                 dbc.Tab(label = "Vaccination", children = [
                         html.H4("Vaccination in Kenya", className = "text-dark fw-bold ms-5"),
@@ -257,6 +263,7 @@ app.layout = html.Div([
 
                 ],labelClassName = "fw-bold", activeLabelClassName="text-dark bg-warning"),
                 dbc.Tab(label = "Seroprevalence", children = [ 
+                        under_development
                 ],labelClassName = "fw-bold", activeLabelClassName="text-dark bg-info"),
                 dbc.Tab(label = "Genomics", children = [
 
@@ -265,21 +272,24 @@ app.layout = html.Div([
                         dbc.Nav([
                                 dbc.NavLink("summary", href = "/", active = "exact"),
                                 dbc.NavLink("civet report", href = "/civet_report", active = "exact"),
-                                dbc.NavLink("Nextrain report", href = "/civet_report", active = "exact"), 
+                                dbc.NavLink("Nexstrain report", href = "/nexstrain_report", active = "exact"), 
                                 dbc.NavLink("Other reports", href = "/other_report", active = "exact")
                         ],vertical = True, pills = True),                      
-                        
-                        ],style = {"background-color": "#F8F6F0", "position":"absolute","width":"12rem"}),
-                        html.Div(id = "page-content", children=[], style ={"margin-left" : "8rem", "margin-right":"1rem"})                 
-                                                               
-                
-                
+                        ],style = sidebar_style),
+
+                        html.Div(id = "page-content", children=[], style ={"margin-left" : "14rem", "margin-right":"2rem"})  
+
+                                        
                 ],className = "bgcolor-dark",labelClassName = "fw-bold", activeLabelClassName="text-dark bg-info"),
+
                 dbc.Tab(label = "Summary", children = [
+                        under_development
                 ],labelClassName = "fw-bold", activeLabelClassName="text-dark bg-info"),     
-                html.Div([image_card,graph_card_2]), 
+                image_card,graph_card_2,
         ], class_name = "gap-5 pb-1 ps-1 ms-4 mb-2 sticky-top"),
 ])
+
+
 #Content for countrywide cases tab
 cardbody_style = {"background-color":"#FFF6F9"}
 
@@ -303,7 +313,7 @@ countrywide = html.Div([
 
                 dbc.CardBody([
                         dbc.Row([
-                                dbc.Col([dcc.Graph(id = "Cases by Region", figure = fig4)],width = 8),
+                                dbc.Col([dcc.Graph(id = "Cases by Region", figure = fig4)],width = 7),
                                 dbc.Col([html.Img(src='data:image/png;base64,{}'.format(county_cases_image.decode()), height = 350)])                                                        
                         ],justify = "around"),
                 ], className = "mt-3",style = cardbody_style),
@@ -369,10 +379,10 @@ countrywide_deaths = html.Div([
                 ],className = "mt-3",style = cardbody_style),                               
                 dbc.CardBody([
                         dbc.Row([
-                                dbc.Col([dcc.Graph(id = "daily Death cases", figure = fig8)], width=8),
+                                dbc.Col([dcc.Graph(id = "daily Death cases", figure = fig8)], width=7),
                                 dbc.Col([html.Img(src='data:image/png;base64,{}'.format(county_death_image.decode()), height = 350)]),
                         ])                        
-                ])
+                ],className = "mt-3",style = cardbody_style)
         ],className = "ms-5 border-0")              
 ])
 
@@ -385,36 +395,13 @@ def render_deaths_content(pathname):
         if pathname == "/":
                 return countrywide_deaths
         elif pathname == "/county_cases":
-                return html.H4("404 Error:Still under development")
-#     Output("line_chart_death", "figure"),
-#     [Input("county_chosen", "value"), Input("my-date-picker" , "start_date"),Input("my-date-picker" , "end_date")]
-# )
-# def update_graph_card(county, start_date, end_date):
-#     if len(county) == 0:
-#         return dash.no_update
-#     else:
-#         data = county_daily_data[county_daily_data["outcome"] == "Dead"]
-#         data = data[data["county"].isin(county)]
-#         data = data.sort_index().loc[start_date : end_date]
-#         data = data[["county","lab_results", "date_of_lab_confirmation"]].groupby(["county","date_of_lab_confirmation"]).count().reset_index()
-
-#         fig = px.line(data, x="date_of_lab_confirmation" , y = "lab_results" , color = "county")
-#         fig.update_yaxes(title = "Reported Death Cases", showline=True, linewidth = 0.2, linecolor = "gray", gridcolor = "gainsboro")
-#         fig.update_xaxes(title = "Date Reported", showgrid=False)
-#         fig.update_traces(mode = 'lines', marker_color = "#7086CE")
-#         fig.update_layout(paper_bgcolor="#FFF6F9",plot_bgcolor = "#FFF6F9",uniformtext_minsize = 3, font_color = "#4F4F4F", bargap =0.05)     
-#         return fig
-
-
+                return under_development
 
 
 #genomics summary and civet report--------------------------------------------------------------------------------------------------------
 civet_report = html.Div([
         html.Iframe(src="assets/civet.html", style = {"height":"1067px","width" : "100%"})
 ])
-
-
-
 
 #chart figure-------------------------------------------------------------------------------------------------------------------------------------
 
@@ -447,30 +434,24 @@ count_fig= go.Figure(data = data, layout= layout)
 
 genomics_chart = html.Div([
         dbc.Card([
-                dbc.Row([
-                        dbc.Col([
-                                dbc.CardBody([ 
+                html.H5("Overview of Genomics data processing and analysis countrywide", className = "text-dark"),
+                dbc.CardBody([
+                        dbc.Row([
+                                dbc.Col([
                                         html.P("Overview of samples collected and those that were sequenced", className = "text-dark"),
-                                        dcc.Graph(id = "chart", figure = chart_fig)])], width = 4),
-                        dbc.Col([
-                                dbc.CardBody([                                       
+                                        dcc.Graph(id = "chart", figure = chart_fig)]),
+                                dbc.Col([
                                         html.P("Geographical representation of samples collected and those sequenced",className = "text-dark"),
-                                        dbc.CardImg(
-                                                src='data:image/png;base64,{}'.format(county_cases_image.decode())),
-                                ]),
-                        ], width = 4),
-                ],justify = "around"),
-                dbc.Row([
-
-                        dbc.Col([
-                                dbc.CardBody([
-                                        html.P("Summary of samples collected and those sequenced in each county across the country", className = "text-dark"),
-                                        dcc.Graph(id = "bar_graph", figure = count_fig)
-                                ])                       
+                                        dbc.CardImg(src='data:image/png;base64,{}'.format(county_cases_image.decode()))
+                                ], width=4),
                         ]),
+                ],className = "mt-3",style = cardbody_style),
 
-                ])
-        ],className = "ms-5 border rounded-top rounded-bottom",style = {"background-color":"#FFF6F9"})
+                dbc.CardBody([
+                        html.P("Summary of samples collected and those sequenced in each county across the country", className = "text-dark"),
+                        dcc.Graph(id = "bar_graph", figure = count_fig),
+                ],className = "mt-3",style = cardbody_style),
+        ],className = "ms-3 border-0")
         
 ])
 
@@ -484,6 +465,11 @@ def render_content(pathname):
 
         elif pathname == "/civet_report":
                 return civet_report
+
+        elif pathname == "/nexstrain_report":
+                return under_development
+        elif pathname == "/other_report":
+                return under_development
 
 #age_gender graph------------------------------------------------------------------------------------------------------------------
 age_graph = dcc.Graph(id = "age_gender casesw", figure = age_gender_cases_plot)
