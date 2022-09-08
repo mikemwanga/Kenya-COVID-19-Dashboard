@@ -38,12 +38,28 @@ def daily_plots(observation):
         fig = go.Figure(layout=layout)
         fig.add_trace(go.Scatter( x = daily_cases["Date"],  y = daily_cases[observation], 
                         fill = "tonext",marker = dict(color ="#3D59AB" )))
-        fig.update_layout(font_color = "#4F4F4F", height = 500)
-        fig.update_yaxes(title =  "National daily cases", showline=True, linewidth = 0.2, linecolor = "gray", gridcolor = "gainsboro")
+        fig.update_traces(mode="markers+lines", hovertemplate=None),
+        fig.update_layout(font_color = "#4F4F4F", height = 500,hovermode="x unified")
+        fig.update_yaxes( showline=True, linewidth = 0.2, linecolor = "gray", gridcolor = "gainsboro")
         fig.update_xaxes(title = "Period", showgrid=False)
         return fig
+
 fig2 = daily_plots("Reported_Cases") #plot of daily reported infections
 fig5 = daily_plots("death_cases") #plot of daily death cases
+
+##plot for cumulative cases----------------------------------------------------------------------------------------------------------
+def cumulative_cases(observation):
+        fig = go.Figure(layout=layout)
+        fig.add_trace(go.Scatter(x = daily_cases["Date"],  y = daily_cases[observation],fill = "tozeroy",marker = dict(color ="#3D59AB" )))
+        fig.update_traces(mode="markers+lines", hovertemplate=None)
+        fig.update_layout(font_color = "#4F4F4F", height = 500,hovermode="x unified")
+        fig.update_yaxes( showline=True, linewidth = 0.2, linecolor = "gray", gridcolor = "gainsboro")
+        fig.update_xaxes(title = "Period", showgrid=False)
+        return fig
+
+cumilative_cases_figure = cumulative_cases("Cum_Cases")
+cumilative_death_figure = cumulative_cases("Cum_Deaths")
+
 
 #plot2 monthly cases----------------------------------------------------------------------------------------------------------------------------
 Monthly_cases = pd.read_csv("covid_monthly_data.csv")
@@ -52,7 +68,8 @@ def monthly_plot(observation):
         fig = go.Figure(layout=layout)
         fig.add_trace(go.Scatter( x = Monthly_cases["Month_year"],  y = Monthly_cases[observation],
                             fill = 'tonext', marker = dict(color = "#3D59AB")))
-        fig.update_layout(title = f"COVID-19 Monthly {observation}", font_color = "#4F4F4F")
+        fig.update_traces(mode="markers+lines", hovertemplate=None),
+        fig.update_layout(font_color = "#4F4F4F",hovermode="x unified")
         fig.update_yaxes(title =  "Counts", showline=True, linewidth = 1, linecolor = "gray", gridcolor = "gainsboro")
         fig.update_xaxes(title = "Period", showgrid=False,linewidth = 1, linecolor = "gray")
         return fig
@@ -101,7 +118,7 @@ vac_fig.add_trace(go.Bar(x = county_vaccination["Proportion_vaccinated"],
                                         orientation = "h",text = county_vaccination["Proportion_vaccinated"], textposition = "outside"))
 vac_fig.update_layout(uniformtext_minsize = 3, font_color = "#000000", bargap =0.2, paper_bgcolor="#FFF6F9", 
                     plot_bgcolor = "#FFF6F9")
-vac_fig.update_traces(marker_color =  "#1F77B4")
+vac_fig.update_traces( marker_color =  "#1F77B4")
 vac_fig.update_xaxes(title = "Proportion Vaccinated", showgrid=True,showline=True, linewidth = 0.1, linecolor = "gray", gridcolor = "gainsboro")
 
 
@@ -117,9 +134,8 @@ age_gender_cases_plot.update_xaxes(title = "Age categories", showgrid=False)
 classname = "p-3 ps-4 pb-0 border rounded-top rounded-bottom bg-light bg-opacity-10" #formatting columns in rows
 
 #still under development for unupdated links
-under_development = html.H3("Sorry still under development", className = "text-xxl-center text-danger")
-
-
+under_development = html.H3("Sorry still under development", className = "text-xxl-center align-middle text-danger")
+cardbody_style = {"background-color":"#FFF6F9"}
 #image cards to set the side bar for selecting multiple counties from the dataset
 
 image_card = html.Div([
@@ -248,18 +264,14 @@ app.layout = html.Div([
                                                         html.P("Booster Doses"),
                                                         html.Hr()]),]),             
                                 ]),
+                        ],className = "ms-4 mb-3 me-3" ,style = cardbody_style),
 
-                                dbc.Row([
-                                        dbc.Col([
-                                                dbc.CardBody([
-                                                        html.H5("Proportion of fully vaccinated persons by county", className = "text-dark ms-5"),
-                                                        dcc.Graph(id = "vaccination summary", figure = vac_fig)]),
-                                        dbc.Col([
-
-                                        ])
-                                ])
-                                ]),
-                        ],className = "m-5 border rounded-top rounded-bottom",style = {"background-color":"#FFF6F9"})
+                        dbc.Card([
+                                dbc.CardBody([
+                                        html.H5("Proportion of fully vaccinated persons by county", className = "text-dark ms-5"),
+                                        dcc.Graph(figure = vac_fig)
+                                ]),                        
+                        ],className = "ms-4 me-3",style = cardbody_style)
 
                 ],labelClassName = "fw-bold", activeLabelClassName="text-dark bg-warning"),
                 dbc.Tab(label = "Seroprevalence", children = [ 
@@ -281,39 +293,44 @@ app.layout = html.Div([
 
                                         
                 ],className = "bgcolor-dark",labelClassName = "fw-bold", activeLabelClassName="text-dark bg-info"),
-
                 dbc.Tab(label = "Summary", children = [
                         under_development
                 ],labelClassName = "fw-bold", activeLabelClassName="text-dark bg-info"),     
                 image_card,graph_card_2,
         ], class_name = "gap-5 pb-1 ps-1 ms-4 mb-2 sticky-top"),
+
+        
 ])
 
 
-#Content for countrywide cases tab
-cardbody_style = {"background-color":"#FFF6F9"}
+#Content for countrywide cases tab--------------------------------------------------------------------------------------------------------
+
 
 countrywide = html.Div([
 
         dbc.Card([
                 dbc.CardBody([
+                        html.H5("COVID-19 Cumulative Cases across Kenya", className = "text-dark fw-bold"),
+                        dcc.Graph(figure = cumilative_cases_figure)
+                ],className = "mt-3",style = cardbody_style),
+                dbc.CardBody([
                         html.H5("COVID-19 Daily Cases across Kenya", className = "text-dark fw-bold"),
-                        dcc.Graph(id = "daily cases", figure = fig2)
+                        dcc.Graph( figure = fig2)
                 ],className = "mt-3",style = cardbody_style),
                 
                 dbc.CardBody([
                         html.H5("COVID-19 Monthly Cases across Kenya", className = "text-dark fw-bold"),
-                        dcc.Graph(id = "Monthly cases", figure = fig1)
+                        dcc.Graph(figure = fig1)
                 ], className = "mt-3",style = cardbody_style),
 
                 dbc.CardBody([
                         html.H5("COVID-19 Cases across Kenya by county", className = "text-dark fw-bold"),
-                        dcc.Graph(id = "Cases by County", figure = fig3)
+                        dcc.Graph( figure = fig3)
                 ], className = "mt-3",style = cardbody_style), 
 
                 dbc.CardBody([
                         dbc.Row([
-                                dbc.Col([dcc.Graph(id = "Cases by Region", figure = fig4)],width = 7),
+                                dbc.Col([dcc.Graph(figure = fig4)],width = 7),
                                 dbc.Col([html.Img(src='data:image/png;base64,{}'.format(county_cases_image.decode()), height = 350)])                                                        
                         ],justify = "around"),
                 ], className = "mt-3",style = cardbody_style),
@@ -321,10 +338,9 @@ countrywide = html.Div([
                 dbc.CardBody([
                         html.H5("Cases  by Age and Sex", className = "text-dark fw-bold"),
                         html.P("Total number of cases since the beginning of pandemic by age and sex",className = "text-dark"),
-                        dcc.Graph(id = "Cases by Region", figure = age_gender_cases_plot)
-
+                        dcc.Graph(figure = age_gender_cases_plot)
                 ], className = "mt-3",style = cardbody_style),
-                
+
         ],className = "ms-5 border-0")
 
         ])
@@ -333,7 +349,6 @@ countywide = html.Div([
                 image_card,
                 graph_card_2])
 
-#Callback to cases try tab--------------------------------------------------------------------------------------------------------
 @app.callback(
         Output("cases-content", "children"),
         [Input("cases_url", "pathname")]
@@ -369,20 +384,19 @@ def update_graph_card(county, start_date, end_date):
 countrywide_deaths = html.Div([
         dbc.Card([
                 dbc.CardBody([
-                        dcc.Graph(id = "daily Death cases", figure = fig5)
-                ],className = "mt-3",style = cardbody_style),
+                        html.H5("COVID-19 cumulative death cases across Kenya", className = "text-dark fw-bold"),
+                        dcc.Graph(figure=cumilative_death_figure)
+                                ],className = "mt-3",style = cardbody_style),     
                 dbc.CardBody([
-                        dcc.Graph(id = "daily Death cases", figure = fig6)
-                ],className = "mt-3",style = cardbody_style),
-                dbc.CardBody([
-                        dcc.Graph(id = "daily Death cases", figure = fig7)
-                ],className = "mt-3",style = cardbody_style),                               
+                        html.H5("COVID-19 daily death cases across Kenya", className = "text-dark fw-bold"),
+                        dcc.Graph(figure = fig5)],className = "mt-3",style = cardbody_style),
+                dbc.CardBody([dcc.Graph(figure = fig6)],className = "mt-3",style = cardbody_style),
+                dbc.CardBody([dcc.Graph(figure = fig7)],className = "mt-3",style = cardbody_style),                               
                 dbc.CardBody([
                         dbc.Row([
-                                dbc.Col([dcc.Graph(id = "daily Death cases", figure = fig8)], width=7),
+                                dbc.Col([dcc.Graph(figure = fig8)], width=7),
                                 dbc.Col([html.Img(src='data:image/png;base64,{}'.format(county_death_image.decode()), height = 350)]),
-                        ])                        
-                ],className = "mt-3",style = cardbody_style)
+                        ]) ],className = "mt-3",style = cardbody_style)
         ],className = "ms-5 border-0")              
 ])
 
@@ -404,7 +418,6 @@ civet_report = html.Div([
 ])
 
 #chart figure-------------------------------------------------------------------------------------------------------------------------------------
-
 labels = ["sequenced", "Not sequenced"]
 values = [county_prevalence["sequenced"].sum(),county_prevalence["samples_collected"].sum() - county_prevalence["sequenced"].sum()]
 chart_fig = go.Figure(layout = Layout(paper_bgcolor="#FFF6F9", plot_bgcolor = "#FFF6F9",height = 400, width = 500))
@@ -439,7 +452,7 @@ genomics_chart = html.Div([
                         dbc.Row([
                                 dbc.Col([
                                         html.P("Overview of samples collected and those that were sequenced", className = "text-dark"),
-                                        dcc.Graph(id = "chart", figure = chart_fig)]),
+                                        dcc.Graph(figure = chart_fig)]),
                                 dbc.Col([
                                         html.P("Geographical representation of samples collected and those sequenced",className = "text-dark"),
                                         dbc.CardImg(src='data:image/png;base64,{}'.format(county_cases_image.decode()))
@@ -449,10 +462,9 @@ genomics_chart = html.Div([
 
                 dbc.CardBody([
                         html.P("Summary of samples collected and those sequenced in each county across the country", className = "text-dark"),
-                        dcc.Graph(id = "bar_graph", figure = count_fig),
+                        dcc.Graph(figure = count_fig),
                 ],className = "mt-3",style = cardbody_style),
-        ],className = "ms-3 border-0")
-        
+        ],className = "ms-3 border-0"),
 ])
 
 @app.callback(
@@ -472,7 +484,7 @@ def render_content(pathname):
                 return under_development
 
 #age_gender graph------------------------------------------------------------------------------------------------------------------
-age_graph = dcc.Graph(id = "age_gender casesw", figure = age_gender_cases_plot)
+age_graph = dcc.Graph(figure = age_gender_cases_plot)
  
 # table2 = dash_table.DataTable(
 #         columns=[{"name":i, "id":i} for i in age_gender.columns],
