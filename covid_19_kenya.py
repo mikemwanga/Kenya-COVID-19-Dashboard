@@ -1,4 +1,5 @@
 from gc import callbacks
+from logging.handlers import TimedRotatingFileHandler
 from pickle import TRUE
 from pydoc import classname
 from statistics import multimode
@@ -123,12 +124,23 @@ vac_fig.update_xaxes(title = "Proportion Vaccinated", showgrid=True,showline=Tru
 
 
 #age gender plots-----------------------------------------------------------------------------------------------------------------------------
-age_gender = pd.read_csv("age_gender_cases_data.csv")
-age_gender_cases_plot= px.bar(age_gender, x = "age_groups", y = ["Female","Male"], barmode="group")
-age_gender_cases_plot.update_layout(uniformtext_minsize = 3, font_color = "#4F4F4F", bargap =0.2, paper_bgcolor="#FFF6F9", 
+age_gender_cases = pd.read_csv("age_gender_cases_data.csv")
+age_gender_deaths = pd.read_csv("age_gender_death_cases_data.csv")
+
+def age_gender_plots(data):
+        total_female = data["Female"].sum()
+        total_male = data["Male"].sum()
+        perc_female = total_female/(total_male+total_female)
+        perc_male = total_male/(total_male+total_female)
+        fig = px.bar(data, x = "age_groups", y = ["Female","Male"], barmode="group")
+        fig.update_layout(uniformtext_minsize = 3, font_color = "#4F4F4F", bargap =0.2, paper_bgcolor="#FFF6F9", 
                     plot_bgcolor = "#FFF6F9", legend_title = "Gender")
-age_gender_cases_plot.update_yaxes(title = "No of Cases", showline=True, linewidth = 0.2, linecolor = "gray", gridcolor = "gainsboro")
-age_gender_cases_plot.update_xaxes(title = "Age categories", showgrid=False)
+        fig.update_yaxes(title = "No of Cases", showline=True, linewidth = 0.2, linecolor = "gray", gridcolor = "gainsboro")
+        fig.update_xaxes(title = "Age categories", showgrid=False)
+        return fig, total_female, total_male, perc_female,perc_male
+
+age_gender_cases_plot, total_female_cases, total_male_cases, perc_female_cases,perc_male_cases = age_gender_plots(age_gender_cases)
+age_gender_death_plot, total_female_death,total_male_death,perc_female_deaths,perc_male_deaths = age_gender_plots(age_gender_deaths)
 #-----------------------------------------------------------------------------------------------------------------------------------------------
 # #what contents to link with sidebar
 classname = "p-3 ps-4 pb-0 border rounded-top rounded-bottom bg-light bg-opacity-10" #formatting columns in rows
@@ -192,11 +204,13 @@ app.layout = html.Div([
                ], color = "secondary" )], width = 3),
 
                dbc.Col([dbc.Alert([
-               html.H6("Discharged"), html.H2(f"{discharged:,}"), html.Hr(className="my-0")], color = "secondary",  ),
+               html.H6("Discharged", className = "text-success"), html.H2(f"{discharged:,}",className = "text-success"), html.Hr(className="my-0 ")], color = "secondary",  ),
                ],width=3),
        
                dbc.Col([ dbc.Alert([
-               html.H6("Reported Deaths"), html.H2(f"{dead:,}"), html.Hr(className="my-0 ")], color = "secondary" )
+               html.H6("Reported Deaths",className = "text-danger"), 
+               html.H2(f"{dead:,}",className = "text-danger"), 
+               html.Hr(className="my-0 ")], color = "secondary" )
                ],width=3),
         ], justify="around", className = "p-5 ps-5 pb-0 bg-secondary bg-opacity-10 g-1"),
 
@@ -293,19 +307,14 @@ app.layout = html.Div([
 
                                         
                 ],className = "bgcolor-dark",labelClassName = "fw-bold", activeLabelClassName="text-dark bg-info"),
-                dbc.Tab(label = "Summary", children = [
+                dbc.Tab(label = "Special Reports", children = [
                         under_development
                 ],labelClassName = "fw-bold", activeLabelClassName="text-dark bg-info"),     
                 image_card,graph_card_2,
         ], class_name = "gap-5 pb-1 ps-1 ms-4 mb-2 sticky-top"),
-
-        
 ])
 
-
 #Content for countrywide cases tab--------------------------------------------------------------------------------------------------------
-
-
 countrywide = html.Div([
 
         dbc.Card([
@@ -336,18 +345,15 @@ countrywide = html.Div([
                 ], className = "mt-3",style = cardbody_style),
 
                 dbc.CardBody([
-                        html.H5("Cases  by Age and Sex", className = "text-dark fw-bold"),
+                        html.H5("Cases  by Age and Gender", className = "text-dark fw-bold"),
                         html.P("Total number of cases since the beginning of pandemic by age and sex",className = "text-dark"),
+                        html.H6(f"Female-{total_female_cases}({perc_female_cases:.2f})",  className = "text-end text-primary"),
+                        html.H6(f"Male-{total_male_cases}({perc_male_cases:.2f})",className = "text-end text-danger"),
                         dcc.Graph(figure = age_gender_cases_plot)
                 ], className = "mt-3",style = cardbody_style),
-
         ],className = "ms-5 border-0")
-
         ])
-
-countywide = html.Div([
-                image_card,
-                graph_card_2])
+countywide = html.Div([ image_card, graph_card_2])
 
 @app.callback(
         Output("cases-content", "children"),
@@ -396,7 +402,14 @@ countrywide_deaths = html.Div([
                         dbc.Row([
                                 dbc.Col([dcc.Graph(figure = fig8)], width=7),
                                 dbc.Col([html.Img(src='data:image/png;base64,{}'.format(county_death_image.decode()), height = 350)]),
-                        ]) ],className = "mt-3",style = cardbody_style)
+                        ]) ],className = "mt-3",style = cardbody_style),
+                dbc.CardBody([
+                        html.H5("Fatalities  by Age and Gender", className = "text-dark fw-bold"),
+                        html.P("Total number of fatalities since the beginning of pandemic by age and sex",className = "text-dark"),
+                        html.H6(f"Female-{total_female_death}({perc_female_deaths:.2f})",  className = "text-end text-primary"),
+                        html.H6(f"Male-{total_male_death}({perc_male_deaths:.2f})",className = "text-end text-danger"),
+                        dcc.Graph(figure = age_gender_death_plot)
+                ], className = "mt-3",style = cardbody_style)
         ],className = "ms-5 border-0")              
 ])
 
@@ -512,4 +525,4 @@ age_graph = dcc.Graph(figure = age_gender_cases_plot)
 
 
 if __name__ == "__main__":
-    app.run_server(debug = True, port = 3041)
+    app.run_server(debug = True,port = 3044)
