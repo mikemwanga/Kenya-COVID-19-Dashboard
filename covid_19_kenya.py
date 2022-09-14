@@ -3,7 +3,6 @@ from logging.handlers import TimedRotatingFileHandler
 from pickle import TRUE
 from pydoc import classname
 from statistics import multimode
-from turtle import fillcolor, width
 from datetime import datetime as dt
 
 import dash
@@ -16,6 +15,7 @@ import plotly.graph_objects as go
 from plotly.graph_objects import Layout
 import base64
 import os
+from plotly.subplots import make_subplots
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 #app.config.suppress_callback_exceptions=True
@@ -33,7 +33,10 @@ discharged = covid_data[covid_data["outcome_death_Discharge_still_in_hospital_"]
 dead = covid_data[covid_data["outcome_death_Discharge_still_in_hospital_"] \
                         == "Dead"]["outcome_death_Discharge_still_in_hospital_"].value_counts().sum()
 ##plots-----------------------------------------------------------------------------------------------------------------------------
-layout = Layout(plot_bgcolor = "#FFF6F9",paper_bgcolor="#FFF6F9")
+pcolor = "#FFFAFA"
+layout = Layout(plot_bgcolor = pcolor,paper_bgcolor=pcolor)
+cardbody_style = {"background-color":pcolor}
+
 daily_cases = pd.read_csv("covid_daily_data.csv")
 def daily_plots(observation):
         fig = go.Figure(layout=layout)
@@ -60,7 +63,6 @@ def cumulative_cases(observation):
 
 cumilative_cases_figure = cumulative_cases("Cum_Cases")
 cumilative_death_figure = cumulative_cases("Cum_Deaths")
-
 
 #plot2 monthly cases----------------------------------------------------------------------------------------------------------------------------
 Monthly_cases = pd.read_csv("covid_monthly_data.csv")
@@ -113,12 +115,11 @@ county_death_image = base64.b64encode(open('plot_county_death_cases.png', 'rb').
 
 #vaccinated proportion------------------
 county_vaccination = pd.read_csv("county_vaccination.csv")
-vac_fig = go.Figure(layout=Layout(paper_bgcolor="#FFF6F9", plot_bgcolor = "#FFF6F9", font_size=10,autosize=False, width = 600, height=800))
+vac_fig = go.Figure(layout=layout)
 vac_fig.add_trace(go.Bar(x = county_vaccination["Proportion_vaccinated"],
                                         y = county_vaccination["County"], \
                                         orientation = "h",text = county_vaccination["Proportion_vaccinated"], textposition = "outside"))
-vac_fig.update_layout(uniformtext_minsize = 3, font_color = "#000000", bargap =0.2, paper_bgcolor="#FFF6F9", 
-                    plot_bgcolor = "#FFF6F9")
+vac_fig.update_layout(uniformtext_minsize = 3, font_color = "#000000", bargap =0.2,font_size=10,autosize=False, width = 600, height=800)
 vac_fig.update_traces( marker_color =  "#1F77B4")
 vac_fig.update_xaxes(title = "Proportion Vaccinated", showgrid=True,showline=True, linewidth = 0.1, linecolor = "gray", gridcolor = "gainsboro")
 
@@ -133,8 +134,8 @@ def age_gender_plots(data):
         perc_female = total_female/(total_male+total_female)
         perc_male = total_male/(total_male+total_female)
         fig = px.bar(data, x = "age_groups", y = ["Female","Male"], barmode="group")
-        fig.update_layout(uniformtext_minsize = 3, font_color = "#4F4F4F", bargap =0.2, paper_bgcolor="#FFF6F9", 
-                    plot_bgcolor = "#FFF6F9", legend_title = "Gender")
+        fig.update_layout(uniformtext_minsize = 3, font_color = "#4F4F4F", bargap =0.2, paper_bgcolor=pcolor, 
+                    plot_bgcolor = pcolor, legend_title = "Gender")
         fig.update_yaxes(title = "No of Cases", showline=True, linewidth = 0.2, linecolor = "gray", gridcolor = "gainsboro")
         fig.update_xaxes(title = "Age categories", showgrid=False)
         return fig, total_female, total_male, perc_female,perc_male
@@ -147,7 +148,7 @@ classname = "p-3 ps-4 pb-0 border rounded-top rounded-bottom bg-light bg-opacity
 
 #still under development for unupdated links
 under_development = html.H3("Sorry still under development", className = "text-xxl-center align-middle text-danger")
-cardbody_style = {"background-color":"#FFF6F9"}
+
 #image cards to set the side bar for selecting multiple counties from the dataset
 
 image_card = html.Div([
@@ -178,7 +179,7 @@ image_card = html.Div([
 graph_card_2 = html.Div([
         dbc.Row([
                 dbc.Col([dcc.Graph(id = "line_chart", figure = {})], width = 11)
-        ], className = "ms-5 mt-3", style = {"background-color":"#FFF6F9"})
+        ], className = "ms-5 mt-3", style = {"background-color":pcolor})
 ])
 sidebar_style = {"background-color": "#F8F6F0","position":"fixed","padding":"3rem 2rem"}
 
@@ -190,6 +191,75 @@ sidebar = html.Div([
                 ],vertical = True, pills = True),                                                                                       
         ],style = sidebar_style),
 ])
+
+#seroprevalence data processing and figures-------------------------------------------------------------------------------------------------------------------
+sero_data = pd.read_excel("KWTRP_serosurveillance_data_Dashboard_09Sep2022.xlsx") #read in the data
+sero_data["Period"] = sero_data[["Month(s)", "Year"]].astype(str).agg(" ".join, axis=1) #create the period column for processing
+
+
+population = sero_data["Population"].value_counts().to_frame()
+population["%"] = round(population["Population"]/population["Population"].sum() * 100, 2)
+population_chart = px.pie(population, values = "%",names=population.index, hole = .4)
+population_chart.update_layout(autosize=False,height = 300, width = 300, margin = dict(t=10,l=1,r=10),
+                                font = dict(size=9),  legend_orientation = "h",
+                                plot_bgcolor = pcolor, paper_bgcolor = pcolor,)
+
+gender = sero_data["Sex"].value_counts().to_frame()
+gender["%"] = round(gender["Sex"]/gender["Sex"].sum() * 100, 2 )
+gender_chart = px.pie(gender, values = "%", names = gender.index, hole = .4)
+gender_chart.update_layout(autosize=False,height = 300, width = 300,legend_orientation = "h", 
+                                margin = dict(t=20,l=1,r=10),plot_bgcolor = pcolor, paper_bgcolor = pcolor,
+                                )
+
+#population relative to age
+Health_workers = sero_data[sero_data["Population"] == "Health workers"][["Population","Age in years"]]
+Health_workers = Health_workers.groupby("Age in years").count().reset_index()
+Truck_crews = sero_data[sero_data["Population"] == "Trucking crews"][["Population","Age in years"]]
+Truck_crews = Truck_crews.groupby("Age in years").count().reset_index()
+anc_attendees = sero_data[sero_data["Population"] == "ANC attendees"][["Population","Age in years"]]
+anc_attendees = anc_attendees.groupby("Age in years").count().reset_index()
+HDSS = sero_data[sero_data["Population"] == "HDSS residents"][["Population","Age in years"]]
+HDSS = HDSS.groupby("Age in years").count().reset_index()
+HDSS = HDSS.rename(columns={"Population":"Frequency"})
+HDSS["Values"] = [3,4,5,6,7,2,1,8]
+HDSS = HDSS.sort_values(by="Values")
+blood_donors = sero_data[sero_data["Population"] == "Blood donors"][["Population","Age in years"]]
+blood_donors = blood_donors.groupby("Age in years").count().reset_index()
+blood_donors = blood_donors.rename(columns={"Population":"Frequency"})
+
+age_pop_chart = make_subplots(rows = 2,cols=3, vertical_spacing = 0.2, 
+                                subplot_titles = ("Blood donors","HDSS","Health workers","Truck crews","ANC Attendees"))
+age_pop_chart.add_trace(go.Bar(x = blood_donors["Age in years"], y = blood_donors["Frequency"],name = "Blood donors"), row=1,col=1)
+age_pop_chart.add_trace(go.Bar(x = HDSS["Age in years"], y = HDSS["Frequency"], name = "HDSS"), row=1,col=2)
+age_pop_chart.add_trace(go.Bar(x = Health_workers["Age in years"], y = Health_workers["Population"],name = "Health workers"), row=1,col=3)
+age_pop_chart.add_trace(go.Bar(x = Truck_crews["Age in years"], y = Truck_crews["Population"],name = "Truck crews"), row=2,col=1)
+age_pop_chart.add_trace(go.Bar(x = anc_attendees["Age in years"], y = anc_attendees["Population"],name = "ANC Attendees"), row=2,col=2)
+age_pop_chart.update_yaxes( showline=True, linewidth = 0.2, linecolor = "gray", gridcolor = "gainsboro")
+age_pop_chart.update_xaxes( showline=True, linewidth = 0.2,linecolor = "gray")
+age_pop_chart.update_traces(width = 0.5)
+age_pop_chart.update_layout(height=500, width=500,bargap = 0.005, plot_bgcolor = pcolor, paper_bgcolor = pcolor, 
+                                font = dict(size=9),showlegend = False,margin = dict(t=20,l=1,r=10))
+age_pop_chart.update_annotations(font = dict(size=10))      
+
+period = sero_data[["Population","Period"]].groupby(["Period","Population"])["Period"].count().to_frame()
+period.index.names = ["Periods","Population"]
+period = period.reset_index()
+period = period.rename(columns = {"Periods" :"Period", "Period":"Frequency"})
+period_chart = px.bar(period, x = "Period", y = "Frequency", barmode="group", color = "Population")
+period_chart.update_traces(width = 0.5)
+period_chart.update_layout(height = 400, width = 500, bargap = 0.005,plot_bgcolor = pcolor,showlegend=True, 
+                        paper_bgcolor = pcolor,font = dict(size=9),legend_orientation ="v")
+period_chart.update_yaxes( showline=True, linewidth = 0.2, linecolor = "gray", gridcolor = "gainsboro")
+period_chart.update_xaxes(showline=True, linewidth = 0.2,linecolor = "gray")
+
+#serology plot
+sero_plot = px.box(sero_data, x = "Population", y = "Anti-spike IgG seroprevalence",color="Population", points="all")
+sero_plot.update_yaxes( showline=True, linewidth = 0.2, linecolor = "gray", gridcolor = "gainsboro")
+sero_plot.update_xaxes(showline=True, linewidth = 0.2,linecolor = "gray")
+sero_plot.update_layout(height = 400, width = 600, bargap = 0.005,plot_bgcolor = pcolor,showlegend=True, 
+                        paper_bgcolor = pcolor,font = dict(size=10))
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app.layout = html.Div([
         html.H2("Coronavirus (COVID-19) in Kenya", className="bg-dark h-1 text-start text-light p-1"),
@@ -278,18 +348,29 @@ app.layout = html.Div([
                                                         html.P("Booster Doses"),
                                                         html.Hr()]),]),             
                                 ]),
-                        ],className = "ms-4 mb-3 me-3" ,style = cardbody_style),
+                        ],className = "border-0 ms-4 mb-3 me-3" ,style = cardbody_style),
 
                         dbc.Card([
                                 dbc.CardBody([
                                         html.H5("Proportion of fully vaccinated persons by county", className = "text-dark ms-5"),
                                         dcc.Graph(figure = vac_fig)
                                 ]),                        
-                        ],className = "ms-4 me-3",style = cardbody_style)
+                        ],className = "border-0 ms-4 me-3",style = cardbody_style)
 
                 ],labelClassName = "fw-bold", activeLabelClassName="text-dark bg-warning"),
                 dbc.Tab(label = "Seroprevalence", children = [ 
-                        under_development
+                        html.Hr(),
+                        dcc.Location(id = "seroprevalence_url"),
+                        html.Div([html.H6("Select to view"),html.Hr(),                           
+                                dbc.Nav([
+                                        dbc.NavLink("Overview", href = "/", active = "exact"),
+                                        dbc.NavLink("Serology by Population", href = "/sero_population", active = "exact"),
+                                ],vertical = True, pills = True),                                                                                       
+                        ],style = sidebar_style),
+
+                        html.Div(id = "sero-content", children=[], 
+                                style ={"margin-left" : "14rem", "margin-right":"2rem"}),
+
                 ],labelClassName = "fw-bold", activeLabelClassName="text-dark bg-info"),
                 dbc.Tab(label = "Genomics", children = [
 
@@ -339,26 +420,24 @@ countrywide = html.Div([
 
                 dbc.CardBody([
                         dbc.Row([
-                                dbc.Col([dcc.Graph(figure = fig4)],width = 7),
-                                dbc.Col([html.Img(src='data:image/png;base64,{}'.format(county_cases_image.decode()), height = 350)])                                                        
+                                dbc.Col([html.H5("Cases by Region",className = "text-dark fw-bold"),
+                                        dcc.Graph(figure = fig4)],width = 9),
+                                #dbc.Col([html.Img(src='data:image/png;base64,{}'.format(county_cases_image.decode()), height = 350)])                                                        
                         ],justify = "around"),
                 ], className = "mt-3",style = cardbody_style),
 
                 dbc.CardBody([
                         html.H5("Cases  by Age and Gender", className = "text-dark fw-bold"),
                         html.P("Total number of cases since the beginning of pandemic by age and sex",className = "text-dark"),
-                        html.H6(f"Female-{total_female_cases}({perc_female_cases:.2f})",  className = "text-end text-primary"),
-                        html.H6(f"Male-{total_male_cases}({perc_male_cases:.2f})",className = "text-end text-danger"),
+                        html.H6(f"Female-{total_female_cases}({perc_female_cases:.2f}%)",  className = "text-end text-primary"),
+                        html.H6(f"Male-{total_male_cases}({perc_male_cases:.2f}%)",className = "text-end text-danger"),
                         dcc.Graph(figure = age_gender_cases_plot)
                 ], className = "mt-3",style = cardbody_style),
         ],className = "ms-5 border-0")
         ])
 countywide = html.Div([ image_card, graph_card_2])
 
-@app.callback(
-        Output("cases-content", "children"),
-        [Input("cases_url", "pathname")]
-)
+@app.callback(Output("cases-content", "children"),[Input("cases_url", "pathname")])
 
 def render_cases_content(pathname):
         if pathname == "/":
@@ -367,9 +446,7 @@ def render_cases_content(pathname):
         elif pathname == "/county_cases":
                 return countywide
 #callback to link county image to graph card 
-@app.callback( 
-    Output("line_chart", "figure"),
-    [Input("county_chosen", "value"), Input("my-date-picker" , "start_date"),Input("my-date-picker" , "end_date")]
+@app.callback( Output("line_chart", "figure"),[Input("county_chosen", "value"), Input("my-date-picker" , "start_date"),Input("my-date-picker" , "end_date")]
 )
 def update_graph_card(county, start_date, end_date):
     if len(county) == 0:
@@ -400,30 +477,27 @@ countrywide_deaths = html.Div([
                 dbc.CardBody([dcc.Graph(figure = fig7)],className = "mt-3",style = cardbody_style),                               
                 dbc.CardBody([
                         dbc.Row([
-                                dbc.Col([dcc.Graph(figure = fig8)], width=7),
-                                dbc.Col([html.Img(src='data:image/png;base64,{}'.format(county_death_image.decode()), height = 350)]),
+                                dbc.Col([html.H5("Fatalities by Region",className = "text-dark fw-bold"),
+                                        dcc.Graph(figure = fig8)], width=9),
+                                #dbc.Col([html.Img(src='data:image/png;base64,{}'.format(county_death_image.decode()), height = 350)]),
                         ]) ],className = "mt-3",style = cardbody_style),
                 dbc.CardBody([
                         html.H5("Fatalities  by Age and Gender", className = "text-dark fw-bold"),
                         html.P("Total number of fatalities since the beginning of pandemic by age and sex",className = "text-dark"),
-                        html.H6(f"Female-{total_female_death}({perc_female_deaths:.2f})",  className = "text-end text-primary"),
-                        html.H6(f"Male-{total_male_death}({perc_male_deaths:.2f})",className = "text-end text-danger"),
+                        html.H6(f"Female-{total_female_death}({perc_female_deaths:.2f}%)",  className = "text-end text-primary"),
+                        html.H6(f"Male-{total_male_death}({perc_male_deaths:.2f}%)",className = "text-end text-danger"),
                         dcc.Graph(figure = age_gender_death_plot)
                 ], className = "mt-3",style = cardbody_style)
         ],className = "ms-5 border-0")              
 ])
 
-@app.callback(
-        Output("deathes-content", "children"),
-        [Input("deaths_url", "pathname")]
+@app.callback(Output("deathes-content", "children"),[Input("deaths_url", "pathname")]
 )
-
 def render_deaths_content(pathname):
         if pathname == "/":
                 return countrywide_deaths
         elif pathname == "/county_cases":
                 return under_development
-
 
 #genomics summary and civet report--------------------------------------------------------------------------------------------------------
 civet_report = html.Div([
@@ -433,10 +507,9 @@ civet_report = html.Div([
 #chart figure-------------------------------------------------------------------------------------------------------------------------------------
 labels = ["sequenced", "Not sequenced"]
 values = [county_prevalence["sequenced"].sum(),county_prevalence["samples_collected"].sum() - county_prevalence["sequenced"].sum()]
-chart_fig = go.Figure(layout = Layout(paper_bgcolor="#FFF6F9", plot_bgcolor = "#FFF6F9",height = 400, width = 500))
+chart_fig = go.Figure(layout = layout)
 chart_fig.add_trace(go.Pie(labels = labels, values = values, hole = .4, hoverinfo="label + value + percent"))
-                        #color_discrete_map = {"labels" : "#1F77B4", "values": })
-
+chart_fig.update_layout(height = 400, width = 500)
 #----------------------------------------------------------------------------------------------------------
 #returns data for genomics tab
 sample_bar = go.Bar(x = county_prevalence["County"], 
@@ -448,16 +521,14 @@ sequenced_bar = go.Bar(x = county_prevalence["County"],
                         name  = "sequenced", yaxis = "y2",
                         offsetgroup=2, marker_color = "#1F77B4", width = 0.3)
 data = [sample_bar, sequenced_bar]
-
 layout = go.Layout( barmode = "group",hovermode="closest",
                         xaxis = dict(showline = True, ticks = "outside",tickfont = dict(size = 10)),
                         yaxis=dict(title='total samples collected',showgrid=True,showline=True, linewidth = 0.1, linecolor = "gray", gridcolor = "gainsboro"),
                         yaxis2=dict(title='proportion sequenced', side='right',overlaying='y',showgrid=False,showline=True, linewidth = 0.2, linecolor = "gray", gridcolor = "gainsboro"), 
-                        paper_bgcolor="#FFF6F9", plot_bgcolor = "#FFF6F9",
+                        paper_bgcolor=pcolor, plot_bgcolor = pcolor,
                         legend = dict(x=0.3, y=1, traceorder="normal",orientation = "h"))
 
 count_fig= go.Figure(data = data, layout= layout)
-
 genomics_chart = html.Div([
         dbc.Card([
                 html.H5("Overview of Genomics data processing and analysis countrywide", className = "text-dark"),
@@ -499,30 +570,47 @@ def render_content(pathname):
 #age_gender graph------------------------------------------------------------------------------------------------------------------
 age_graph = dcc.Graph(figure = age_gender_cases_plot)
  
-# table2 = dash_table.DataTable(
-#         columns=[{"name":i, "id":i} for i in age_gender.columns],
-#         data = age_gender.to_dict("records"), 
-#         style_cell = {"fontSize":20,"align":"centre","padding":"7px"}, 
-#         style_as_list_view=True,
-#         style_header = {"color":"black", 'fontWeight': 'bold',"fontSize":20},
-#         style_data = {"color":"black", "fontweight":"bold", "backgroundColor" :"#FFF6F9" },fixed_rows={'headers': True},
-#         page_action = "none", 
-#         style_table = {"height" :"300px","width":"800px", "overflow" :"hidden", "textOverflow" :"ellipsis"}
-#         )
+#Content for seroprevalence data---------------------------------------------------------------------------------------------------------------
+overview = html.Div([
+                        dbc.Row([
+                                dbc.Col([
+                                        html.H6("Summarty of the participants"),
+                                        dcc.Graph(figure = population_chart),
+                                        html.Hr(),
+                                        html.H6("Distribution of participants by Gender"),
+                                        dcc.Graph(figure=gender_chart)
+                                ], width =3,style = cardbody_style,className = "m-2 bg-light border-light"),
+                                dbc.Col([                                       
+                                        html.H6("Distribution of participants based on Age and Gender"),
+                                        dcc.Graph(figure = age_pop_chart)                                        
+                                ],width = 4,style = cardbody_style,className = "m-2 bg-light border-light"),
 
-# @app.callback(
-#         Output("age_chart", "children"),
-#         Input("url_age_chart", "pathname")
-# )
-# def render_age_chart(pathname):
-#         if pathname == "/":
-#                 return age_graph
-#         elif pathname == "/data_table":
-#                 return table2
+                                dbc.Col([                                        
+                                        html.H6("Distribution of participants based on Age and Gender"),
+                                        dcc.Graph(figure = period_chart)                                        
+                                ],width=4,style = cardbody_style,className = "m-2 bg-light border-light"),
 
-#-------------------------------------------------------------------------------------------------------------------------------
+                        ],justify = "around", className = "ms-4"),
+])
+sero_population = html.Div([
+                dbc.Row([                
+                        dbc.Col([                                
+                                html.H6("Observed Sero-prevalence levels among the studied populations"),
+                                dcc.Graph(figure = sero_plot)                                        
+                        ],width = 5,style = cardbody_style,className = "m-2 bg-light border-light")
+                ],justify = "centre", className = "ms-5 mt-1"),
+        ])
 
 
+
+@app.callback(Output("sero-content","children"), [Input("seroprevalence_url","pathname")])
+
+def render_sero_content(pathname):
+        if pathname == "/sero_population":
+                return sero_population
+        else:
+                return overview
+        
 
 if __name__ == "__main__":
-    app.run_server(debug = True,port = 3044)
+    app.run_server(debug = True,host = "0.0.0.0",port = "3042")
