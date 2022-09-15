@@ -4,6 +4,7 @@ from pickle import TRUE
 from pydoc import classname
 from statistics import multimode
 from datetime import datetime as dt
+from tkinter.tix import ExFileSelectBox
 
 import dash
 from dash import dcc, html, dash_table
@@ -396,6 +397,7 @@ app.layout = html.Div([
 ])
 
 #Content for countrywide cases tab--------------------------------------------------------------------------------------------------------
+seq_metadata = pd.read_table("sequence_metadata_region.tsv")
 countrywide = html.Div([
 
         dbc.Card([
@@ -445,6 +447,8 @@ def render_cases_content(pathname):
 
         elif pathname == "/county_cases":
                 return countywide
+        else:
+                return countrywide
 #callback to link county image to graph card 
 @app.callback( Output("line_chart", "figure"),[Input("county_chosen", "value"), Input("my-date-picker" , "start_date"),Input("my-date-picker" , "end_date")]
 )
@@ -498,26 +502,44 @@ def render_deaths_content(pathname):
                 return countrywide_deaths
         elif pathname == "/county_cases":
                 return under_development
+        else:
+                return countrywide_deaths
 
 #genomics summary and civet report--------------------------------------------------------------------------------------------------------
+
 civet_report = html.Div([
         html.Iframe(src="assets/civet.html", style = {"height":"1067px","width" : "100%"})
 ])
+seq_daily = pd.read_table("sequence_metadata.tsv") #number of sequences generated on a daily basis
 
-#chart figure-------------------------------------------------------------------------------------------------------------------------------------
+def daily_seq(observation):
+        fig = go.Figure(layout=layout)
+        fig.add_trace(go.Scatter( x = seq_daily["collection_date"],  y = seq_daily[observation], 
+                        fill = "tozeroy",marker = dict(color ="#3D59AB" )))
+        fig.update_traces(mode="markers+lines", hovertemplate=None),
+        fig.update_layout(font_color = "#4F4F4F", height = 500,hovermode="x unified")
+        fig.update_yaxes( showline=True, linewidth = 0.2, linecolor = "gray", gridcolor = "gainsboro")
+        fig.update_xaxes(title = "collection date", showgrid=False)
+        return fig
+
+daily_sequences_plot = daily_seq("sequences")
+cumilative_sequences_plot  = daily_seq("cum_sequences")
+
+
+#chart figure--------------------------------------------
 labels = ["sequenced", "Not sequenced"]
-values = [county_prevalence["sequenced"].sum(),county_prevalence["samples_collected"].sum() - county_prevalence["sequenced"].sum()]
+values = [seq_metadata["sequences"].sum(),total_cases - seq_metadata["sequences"].sum()] #proportion of sequenced samples uses number of sequences vs total positive cases
 chart_fig = go.Figure(layout = layout)
 chart_fig.add_trace(go.Pie(labels = labels, values = values, hole = .4, hoverinfo="label + value + percent"))
-chart_fig.update_layout(height = 400, width = 500)
-#----------------------------------------------------------------------------------------------------------
+chart_fig.update_layout(height = 300, width = 300,margin = dict(t=50,b=1,l=1,r=1), legend_orientation = "h")
+#--------------------------------------------------------
 #returns data for genomics tab
 sample_bar = go.Bar(x = county_prevalence["County"], 
-                    y = county_prevalence["samples_collected"],name= "collected",
+                    y = county_prevalence["cases"],name= "Cases",
                     yaxis = "y1", offsetgroup=1,marker_color = "#FF7F0E",width = 0.3 )
 
-sequenced_bar = go.Bar(x = county_prevalence["County"], 
-                        y = county_prevalence["Proportion_sequenced"],
+sequenced_bar = go.Bar(x = seq_metadata["County"], 
+                        y = seq_metadata["sequences"],
                         name  = "sequenced", yaxis = "y2",
                         offsetgroup=2, marker_color = "#1F77B4", width = 0.3)
 data = [sample_bar, sequenced_bar]
@@ -529,26 +551,26 @@ layout = go.Layout( barmode = "group",hovermode="closest",
                         legend = dict(x=0.3, y=1, traceorder="normal",orientation = "h"))
 
 count_fig= go.Figure(data = data, layout= layout)
-genomics_chart = html.Div([
-        dbc.Card([
-                html.H5("Overview of Genomics data processing and analysis countrywide", className = "text-dark"),
-                dbc.CardBody([
-                        dbc.Row([
-                                dbc.Col([
-                                        html.P("Overview of samples collected and those that were sequenced", className = "text-dark"),
-                                        dcc.Graph(figure = chart_fig)]),
-                                dbc.Col([
-                                        html.P("Geographical representation of samples collected and those sequenced",className = "text-dark"),
-                                        dbc.CardImg(src='data:image/png;base64,{}'.format(county_cases_image.decode()))
-                                ], width=4),
-                        ]),
-                ],className = "mt-3",style = cardbody_style),
 
-                dbc.CardBody([
-                        html.P("Summary of samples collected and those sequenced in each county across the country", className = "text-dark"),
-                        dcc.Graph(figure = count_fig),
-                ],className = "mt-3",style = cardbody_style),
-        ],className = "ms-3 border-0"),
+genomics_chart = html.Div([
+                html.H5("Overview of Genomics data processing and analysis countrywide", className = "text-dark"),
+                dbc.Row([
+                        dbc.Col([
+                                html.P("Overview of samples collected and those that were sequenced", className = "text-dark"),
+                                dcc.Graph(figure = chart_fig)
+                        ],width = 3, style = cardbody_style),
+                        dbc.Col([
+                                html.P("Cumulative number of samples sequenced relative to collection date"),
+                                dcc.Graph(figure = cumilative_sequences_plot)
+                        ],width=4, style = cardbody_style),
+                        dbc.Col([
+                                html.P("Number of samples sequenced relative to the collection date", className = "text-dark"),
+                                dcc.Graph(figure = daily_sequences_plot)
+                        ],width=4, style = cardbody_style)                              
+                ],justify = "around", className = "ms-2 mt-1"),
+                html.P("Summary of samples collected and those sequenced in each county across the country", className = "text-dark"),
+                dcc.Graph(figure = count_fig),
+                           
 ])
 
 @app.callback(
@@ -566,6 +588,9 @@ def render_content(pathname):
                 return under_development
         elif pathname == "/other_report":
                 return under_development
+        else:
+                return genomics_chart
+
 
 #age_gender graph------------------------------------------------------------------------------------------------------------------
 age_graph = dcc.Graph(figure = age_gender_cases_plot)
@@ -601,8 +626,6 @@ sero_population = html.Div([
                 ],justify = "centre", className = "ms-5 mt-1"),
         ])
 
-
-
 @app.callback(Output("sero-content","children"), [Input("seroprevalence_url","pathname")])
 
 def render_sero_content(pathname):
@@ -611,6 +634,5 @@ def render_sero_content(pathname):
         else:
                 return overview
         
-
 if __name__ == "__main__":
     app.run_server(debug = True,host = "0.0.0.0",port = "3042")
