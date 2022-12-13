@@ -34,7 +34,7 @@ color_patterns = ["#FF5733","#8E44AD","#2236A0","#252525","#1B6311"]
 
 #Load datasets
 daily_updates_moh =  pd.read_excel(DATA_PATH.joinpath("daily_updates_metadata.xlsx"))
-county_daily_updates = pd.read_excel("../COVID-19-Dashboard2/data/county_daily_updates.xlsx", parse_dates=["Date"], index_col='Date')
+county_daily_updates = pd.read_excel(DATA_PATH.joinpath("county_daily_updates.xlsx"), parse_dates=["Date"], index_col='Date')
 kenya_county = gpd.read_file(DATA_PATH.joinpath("kenyan-counties/County.shp"))
 data = pd.read_csv(DATA_PATH.joinpath("cases_per_county.csv"))
 lati_lot = pd.read_csv(DATA_PATH.joinpath("kenya_data_latitude_longitude.csv"))
