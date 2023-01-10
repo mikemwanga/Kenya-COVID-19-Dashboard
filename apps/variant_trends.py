@@ -85,8 +85,8 @@ layout = html.Div([
                    style = {"text-align":"center","font-size":14},className = "fw-bold text-dark ms-4"),
             
             dcc.Graph(figure = fig_var,responsive = True,style = {"height":"300px", "width":"800px"})
-        ], width = 8,xxl=10)
-    ],justify = "center", className = "me-2 mt-5 pt-5"),
+        ], width = 8,xxl=10),
+    ],justify = "center", className = "ms-5 mt-5 pt-5"),
     
     dbc.Row([
         html.Hr(className = "me-2 ms-2"),
@@ -96,31 +96,5 @@ layout = html.Div([
             
             dcc.Graph(figure = fig_kenya, responsive = True, style = {"height":"400px", "width":"800px"})
         ], width = 8,xxl=10)
-    ],justify = "center",className = "me-2 mt-3 pt-3")
+    ],justify = "center",className = "ms-5 mt-3 pt-3")
 ])
-
-
-
-# layout = html.Div([
-#         dbc.Row([
-#             dbc.Card([
-#                 dbc.CardBody([
-#                     html.P("Temporal prevalence of SARS-COV-2 variants in Kenya", className = "text-dark mt-2"),
-#                     dcc.Graph(figure = fig_var,responsive = True,style = {"height":"250px", "width":"600px"}),
-                    
-#                 ],style = cardbody_style),
-                
-#                 html.Hr(),
-                        
-#                 dbc.CardBody([
-#                     html.P("Overall summary days taken between date of sampling and sequence submission to GSAID database for all laboratories in Kenya"),
-#                     html.P("Total sequences submitted: 11495"),
-#                     dcc.Graph(figure = fig_submission)
-#                 ],style = cardbody_style),
-                        
-#                 html.Hr(),
-#             ],className = "border-0")
-                    
-#         ],className = "ms-2 me-2 mt-5 pt-5"),
-
-# ])

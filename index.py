@@ -9,7 +9,7 @@ from app import server
 app.title = "Kenya COVID-19 Dashboard"
 
 #connect to your app pages
-from apps import home,cases,deaths,vaccination,seroprevalence,trends,epidemiology, contact
+from apps import home,cases,deaths,vaccination,seroprevalence,variant_trends,phylogeny, contact
 #Navbar
 navbar =  html.Div([
                     dbc.NavbarSimple([
@@ -30,9 +30,9 @@ navbar =  html.Div([
                         	    dbc.DropdownMenuItem("Population", href="/apps/seroprevalence/population"),
                             ],nav=True,in_navbar=True,label="Seroprevalence"),
                         
-                        dbc.NavItem(dbc.NavLink("Trends", href="/apps/trends")),
-                        dbc.NavItem(dbc.NavLink("Epidemiology", href="/apps/epidemiology")),
-                        dbc.NavItem(dbc.NavLink("Contact", href = "/apps/contact"))
+                        dbc.NavItem(dbc.NavLink("Variant Trends", href="/apps/variant_trends")),
+                        dbc.NavItem(dbc.NavLink("Phylogeny", href="/apps/phylogeny")),
+                        #dbc.NavItem(dbc.NavLink("Contact", href = "/apps/contact")
             
                     ],              brand_href="/apps/home", 
                                     brand="Kenya COVID-19 Dashboard",
@@ -67,14 +67,14 @@ def display_page(pathname):
         return dbc.Spinner(seroprevalence.layout_summary)
     elif pathname == "/apps/seroprevalence/population":
         return dbc.Spinner(seroprevalence.sero_by_population)
-    elif pathname == "/apps/trends":
-        return trends.layout
-    elif pathname == "/apps/epidemiology":
-        return epidemiology.layout
+    elif pathname == "/apps/variant_trends":
+        return variant_trends.layout
+    elif pathname == "/apps/phylogeny":
+        return phylogeny.layout
     #elif pathname == "/apps/contact":
         #return contact.layout
     else:
         return home.layout
 
 if __name__ == '__main__':
-    app.run_server(debug=True,host="0.0.0.0", port = "3042")
+    app.run_server(debug=True,host="0.0.0.0", port = "3042", threaded=True)

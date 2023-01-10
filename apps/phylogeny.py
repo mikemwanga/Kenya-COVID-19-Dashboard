@@ -9,7 +9,7 @@ layout = html.Div([
     dbc.Row([
         dbc.Col([
             dbc.Spinner([
-            html.Iframe(src = "https://nextstrain.org/community/blab/ncov-africa@main/south-africa",style={"height": "1062px", "width": "100%"})
+            html.Iframe(src = "https://nextstrain.org/groups/africa-cdc/ncov/kenya?c=clade_membership&f_country=Kenya&p=grid&tl=country",style={"height": "1062px", "width": "100%"})
         ])
         ])
 

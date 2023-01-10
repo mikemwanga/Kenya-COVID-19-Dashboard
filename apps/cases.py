@@ -129,10 +129,10 @@ countrywide = html.Div([
                         dcc.Graph( figure = cumilative_cases_figure )
                 ],className = "mt-3",style = cardbody_style),
                 
-                dbc.CardBody([
-                        html.H5("COVID-19 Monthly Cases across Kenya", className = "text-dark fw-bold"),
-                        dcc.Graph(figure = fig1)
-                ], className = "mt-3",style = cardbody_style),
+                # dbc.CardBody([
+                #         html.H5("COVID-19 Monthly Cases across Kenya", className = "text-dark fw-bold"),
+                #         dcc.Graph(figure = fig1)
+                # ], className = "mt-3",style = cardbody_style),
 
                 dbc.CardBody([
                         html.H5("COVID-19 Cases across Kenya by county", className = "text-dark fw-bold"),

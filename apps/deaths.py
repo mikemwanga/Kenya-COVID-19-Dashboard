@@ -121,8 +121,13 @@ countrywide_deaths = html.Div([
                         dcc.Graph(figure=cumilative_death_figure)
                                 ],className = "mt-3",style = cardbody_style),
 
-                dbc.CardBody([dcc.Graph(figure = fig6)],className = "mt-3",style = cardbody_style),
-                dbc.CardBody([dcc.Graph(figure = fig7)],className = "mt-3",style = cardbody_style),                               
+                #dbc.CardBody([dcc.Graph(figure = fig6)],className = "mt-3",style = cardbody_style),
+                
+                dbc.CardBody([
+                    html.H5("COVID-19 death cases across counties", className = "text-dark fw-bold"),
+                    dcc.Graph(figure = fig7)
+                    ],className = "mt-3",style = cardbody_style),                               
+                
                 dbc.CardBody([
                         dbc.Row([
                                 dbc.Col([html.H5("Fatalities by Region",className = "text-dark fw-bold"),
