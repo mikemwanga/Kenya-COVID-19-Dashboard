@@ -46,7 +46,7 @@ class sero_prevalence:
                 fig.update_yaxes(title_text = "Cumulative Cases",ticks="outside", secondary_y = True, linecolor = "black")
                 fig.update_yaxes(title_text = "Average % Anti IgG seroprevalence",linecolor = "black",ticks="outside",col=1,nticks=20,secondary_y = False,range = [0,1])
                 fig.update_xaxes(dtick="M1",tickformat="%b\n%Y",linecolor = "black",ticks="outside")
-                fig.update_layout(plot_bgcolor = pcolor,paper_bgcolor = pcolor, width = 1100, height = 600,
+                fig.update_layout(plot_bgcolor = pcolor,paper_bgcolor = pcolor, width = 1200, height = 600,
                                 legend = dict(yanchor  = "top",y=1,x=0.01,xanchor="left"),legend_orientation ="h")
                 
                 return fig

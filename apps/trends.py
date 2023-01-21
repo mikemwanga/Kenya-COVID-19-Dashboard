@@ -15,7 +15,7 @@ variant_data = pd.read_table(DATA_PATH.joinpath("variant_month_data.txt"))
 average_df_clean = pd.read_csv(DATA_PATH.joinpath("average_weekly_submission_to_gsaid.csv"), parse_dates = ["date_sampled"])
 variants_kenya = pd.read_table(DATA_PATH.joinpath("variant_data_kenya.tsv"))
 variants_kenya["Month"] = pd.to_datetime(variants_kenya["Month"], format = "%Y-%m-%d")
-kenya_data = pd.read_table(DATA_PATH.joinpath("kenya.metadata_0111_120122.tsv"))
+kenya_data = pd.read_table(DATA_PATH.joinpath("kenya.metadata_01_30_11.tsv"))
 
 gridcolor="lightgray"
 pcolor = "#FFFAFA"
@@ -42,7 +42,7 @@ variant_plot = plots.variants_prevalence()
 
 #variants plot
 #variant plot
-fig_var = px.bar(variants_kenya, x = "Month", y = "percentage", color="variant",range_x=["2020-01-01","2023-01-12"],
+fig_var = px.bar(variants_kenya, x = "Month", y = "percentage", color="variant",range_x=["2020-01-01","2022-12-31"],
                  color_discrete_sequence = ["#1b9e77","#d95f02","#7570b3","#e7298a","#8111A5","#e6ab02","#a6761d"])
 #fig_var.update_traces(textfont_size=10,textposition="outside", text = variant_values["Frequency"])
 fig_var.update_xaxes(nticks = 10,linecolor = "black",ticks="outside",tickfont = dict(size=10),title = None)
@@ -84,17 +84,43 @@ layout = html.Div([
             html.Label("Temporal prevalence of SARS-COV-2 variants in Kenya", 
                    style = {"text-align":"center","font-size":14},className = "fw-bold text-dark ms-4"),
             
-            dcc.Graph(figure = fig_var,responsive = True,style = {"height":"400px", "width":"800px"})
-        ], width = {"size":8,"offset":1},lg=9),
-    ],justify = "center", className = "ms-5 mt-5 pt-5"),
+            dcc.Graph(figure = fig_var,responsive = True,style = {"height":"300px", "width":"800px"})
+        ], width = 8,xxl=10)
+    ],justify = "center", className = "me-2 mt-5 pt-5"),
     
     dbc.Row([
         html.Hr(className = "me-2 ms-2"),
         dbc.Col([
-            html.H6(f"SARS-CoV-2 lineages observed in Kenya in the last two months (November - December 2022)",
+            html.H6(f"SARS-CoV-2 lineages observed in Kenya in the last 30 days (1 - 30 November 2022)",
                     style = {"text-align":"start","font-size":14},className = "fw-bold text-dark ms-4"),
             
             dcc.Graph(figure = fig_kenya, responsive = True, style = {"height":"400px", "width":"800px"})
-        ],  width = {"size":8,"offset":1},lg=9)
-    ],justify = "center",className = "ms-5 mt-3 pt-3")
+        ], width = 8,xxl=10)
+    ],justify = "center",className = "me-2 mt-3 pt-3")
 ])
+
+
+
+# layout = html.Div([
+#         dbc.Row([
+#             dbc.Card([
+#                 dbc.CardBody([
+#                     html.P("Temporal prevalence of SARS-COV-2 variants in Kenya", className = "text-dark mt-2"),
+#                     dcc.Graph(figure = fig_var,responsive = True,style = {"height":"250px", "width":"600px"}),
+                    
+#                 ],style = cardbody_style),
+                
+#                 html.Hr(),
+                        
+#                 dbc.CardBody([
+#                     html.P("Overall summary days taken between date of sampling and sequence submission to GSAID database for all laboratories in Kenya"),
+#                     html.P("Total sequences submitted: 11495"),
+#                     dcc.Graph(figure = fig_submission)
+#                 ],style = cardbody_style),
+                        
+#                 html.Hr(),
+#             ],className = "border-0")
+                    
+#         ],className = "ms-2 me-2 mt-5 pt-5"),
+
+# ])

@@ -30,7 +30,7 @@ layout = Layout(plot_bgcolor = pcolor,paper_bgcolor=pcolor)
 cardbody_style = {"background-color":pcolor}
 cardbody_style_home = {"background-color":pcolor_home}
 cardbody_style_vac = {"background-color":pcolor_home, "height":"200%"}
-color_patterns = ["#FF5733","#8E44AD","#2236A0","#252525","#1B6311"]
+color_patterns = ["#e41a1c","#377eb8","#4daf4a","#984ea3","#073763"]
 
 #Load datasets
 daily_updates_moh =  pd.read_excel(DATA_PATH.joinpath("daily_updates_metadata.xlsx"))
@@ -140,7 +140,7 @@ layout = html.Div([
                     ], width = 11, xxl=10),
                     
                     html.Hr(),
-                    html.H5("Countrywide Summary"),
+                    #html.H5("Countrywide Summary"),
                 ],justify="center", className = "mb-2 ms-4 me-4 ps-4 pe-4 mt-5 pt-5"),
                 dbc.Row([
                     
@@ -320,7 +320,7 @@ layout = html.Div([
                     ]),
                    
                 ], justify = "around"),
-])#ß, style = {"width":"1090px"})
+])
 
                 
 kenya_county.loc[(kenya_county["COUNTY"] == "Keiyo-Marakwet"),"COUNTY"] = "Elgeyo Marakwet"

@@ -30,7 +30,7 @@ DATA_PATH = PATH.joinpath("../data/").resolve()
 
 county_vaccination = pd.read_csv(DATA_PATH.joinpath("county_vaccination.csv"))
 vaccination_updates = pd.read_csv(DATA_PATH.joinpath("vaccination_metadata_october.csv"), index_col="Group")
-#vaccination_updates.drop("Unnamed: 0", inplace=True, axis=1)
+daily_updates_moh =  pd.read_excel(DATA_PATH.joinpath("daily_updates_metadata.xlsx"))
 vaccination_updates.columns = pd.to_datetime(vaccination_updates.columns)#, format="%d/%m/%Y")
 
 vaccine_last_updated = vaccination_updates.columns[-1].strftime(format="%d-%B-%Y")

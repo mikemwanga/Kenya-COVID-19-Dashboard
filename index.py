@@ -9,36 +9,38 @@ from app import server
 app.title = "Kenya COVID-19 Dashboard"
 
 #connect to your app pages
-from apps import home,cases,deaths,vaccination,seroprevalence,variant_trends,phylogeny, contact
+from apps import counties, vaccination2,seroprevalence2,variant_trends,phylogeny,home2 #cases,deaths,home
 #Navbar
 navbar =  html.Div([
                     dbc.NavbarSimple([
-                        dbc.NavItem(dbc.NavLink("Home", href="/apps/home")),
-                        dbc.DropdownMenu([
-                        	dbc.DropdownMenuItem("Countrywide", href="/apps/cases/countrywide"),
-                        	dbc.DropdownMenuItem("Countywide", href="/apps/cases/countywide"),
-                        ],nav=True,in_navbar=True,label="Cases"),
-                        dbc.DropdownMenu([
-                        	dbc.DropdownMenuItem("Countrywide", href="/apps/deaths/countrywide"),
-                        	dbc.DropdownMenuItem("Countywide", href="/apps/deaths/countywide"),
-                        ],nav=True,in_navbar=True,label="Deaths"),
+                        #dbc.NavItem(dbc.NavLink("Home", href="/apps/home")),
+                        dbc.NavItem(dbc.NavLink("Home", href="/apps/home2")),
+                        dbc.NavItem(dbc.NavLink("County", href="/apps/counties")),
+                        # dbc.DropdownMenu([
+                        # 	dbc.DropdownMenuItem("Countrywide", href="/apps/cases/countrywide"),
+                        # 	dbc.DropdownMenuItem("Countywide", href="/apps/cases/countywide"),
+                        # ],nav=True,in_navbar=True,label="Cases"),
+                        # dbc.DropdownMenu([
+                        # 	dbc.DropdownMenuItem("Countrywide", href="/apps/deaths/countrywide"),
+                        # 	dbc.DropdownMenuItem("Countywide", href="/apps/deaths/countywide"),
+                        # ],nav=True,in_navbar=True,label="Deaths"),
                         
-                        dbc.NavItem(dbc.NavLink("Vaccination",href = "/apps/vaccination")),
-                        
-                            dbc.DropdownMenu([
-                        	    dbc.DropdownMenuItem("Summary", href="/apps/seroprevalence/summary"),
-                        	    dbc.DropdownMenuItem("Population", href="/apps/seroprevalence/population"),
-                            ],nav=True,in_navbar=True,label="Seroprevalence"),
+                        dbc.NavItem(dbc.NavLink("Vaccination",href = "/apps/vaccination2")),
+                        dbc.NavItem(dbc.NavLink("Seroprevalence",href = "/apps/seroprevalence2")),
+                            # dbc.DropdownMenu([
+                        	#     dbc.DropdownMenuItem("Summary", href="/apps/seroprevalence/summary"),
+                        	#     dbc.DropdownMenuItem("Population", href="/apps/seroprevalence/population"),
+                            # ],nav=True,in_navbar=True,label="Seroprevalence"),
                         
                         dbc.NavItem(dbc.NavLink("Variant Trends", href="/apps/variant_trends")),
                         dbc.NavItem(dbc.NavLink("Phylogeny", href="/apps/phylogeny")),
                         #dbc.NavItem(dbc.NavLink("Contact", href = "/apps/contact")
             
-                    ],              brand_href="/apps/home", 
+                    ],              brand_href="/apps/home2", 
                                     brand="Kenya COVID-19 Dashboard",
                                     style={"margin-bottom":5},
                                     color="#333972",dark=True,light=True,
-                                    fixed ="top",className = "text-light font-weight-bold"
+                                    fixed ="top",#className = "text-light font-weight-bold"
                                     )          
 ])                   
 
@@ -51,22 +53,24 @@ app.layout = html.Div([
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')], prevent_initial_callback=True)
 def display_page(pathname):
-    if pathname == "/apps/home":
-        return home.layout
-    elif pathname == '/apps/cases/countrywide':
-        return dbc.Spinner(cases.countrywide),
-    elif pathname == '/apps/cases/countywide':
-        return dbc.Spinner(cases.countywide_cases)
-    elif pathname == '/apps/deaths/countrywide':
-        return deaths.countrywide_deaths
-    elif pathname == '/apps/deaths/countywide':
-        return deaths.countywide_deaths
-    elif pathname == "/apps/vaccination":
-        return vaccination.layout
-    elif pathname == "/apps/seroprevalence/summary":
-        return dbc.Spinner(seroprevalence.layout_summary)
-    elif pathname == "/apps/seroprevalence/population":
-        return dbc.Spinner(seroprevalence.sero_by_population)
+    #if pathname == "/apps/home":
+     #   return home.layout
+    if pathname == "/apps/home2":
+        return home2.layout
+    # elif pathname == '/apps/cases/countrywide':
+    #     return dbc.Spinner(cases.countrywide),
+    elif pathname == '/apps/counties':
+         return dbc.Spinner(counties.layout)
+    # elif pathname == '/apps/deaths/countrywide':
+    #     return deaths.countrywide_deaths
+    # elif pathname == '/apps/deaths/countywide':
+    #     return deaths.countywide_deaths
+    elif pathname == "/apps/vaccination2":
+        return vaccination2.layout
+    elif pathname == "/apps/seroprevalence2":
+        return dbc.Spinner(seroprevalence2.layout)
+    #elif pathname == "/apps/seroprevalence/population":
+    #    return dbc.Spinner(seroprevalence.sero_by_population)
     elif pathname == "/apps/variant_trends":
         return variant_trends.layout
     elif pathname == "/apps/phylogeny":
@@ -74,7 +78,7 @@ def display_page(pathname):
     #elif pathname == "/apps/contact":
         #return contact.layout
     else:
-        return home.layout
+        return home2.layout
 
 if __name__ == '__main__':
     app.run_server(debug=True,host="0.0.0.0", port = "3042", threaded=True)
