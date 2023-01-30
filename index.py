@@ -9,7 +9,7 @@ from app import server
 app.title = "Kenya COVID-19 Dashboard"
 
 #connect to your app pages
-from apps import counties, vaccination2,seroprevalence2,variant_trends,phylogeny,home2 #cases,deaths,home
+from apps import counties,home2,vaccination2,seroprevalence2,variant_trends,phylogeny,home2 #cases,deaths,home
 #Navbar
 navbar =  html.Div([
                     dbc.NavbarSimple([
@@ -27,13 +27,14 @@ navbar =  html.Div([
                         
                         dbc.NavItem(dbc.NavLink("Vaccination",href = "/apps/vaccination2")),
                         dbc.NavItem(dbc.NavLink("Seroprevalence",href = "/apps/seroprevalence2")),
-                            # dbc.DropdownMenu([
-                        	#     dbc.DropdownMenuItem("Summary", href="/apps/seroprevalence/summary"),
-                        	#     dbc.DropdownMenuItem("Population", href="/apps/seroprevalence/population"),
-                            # ],nav=True,in_navbar=True,label="Seroprevalence"),
+                        #     # dbc.DropdownMenu([
+                        # 	#     dbc.DropdownMenuItem("Summary", href="/apps/seroprevalence/summary"),
+                        # 	#     dbc.DropdownMenuItem("Population", href="/apps/seroprevalence/population"),
+                        #     # ],nav=True,in_navbar=True,label="Seroprevalence"),
                         
                         dbc.NavItem(dbc.NavLink("Variant Trends", href="/apps/variant_trends")),
                         dbc.NavItem(dbc.NavLink("Phylogeny", href="/apps/phylogeny")),
+                        dbc.NavItem(dbc.NavLink("Summary Report", href="/apps/summaryreport"))
                         #dbc.NavItem(dbc.NavLink("Contact", href = "/apps/contact")
             
                     ],              brand_href="/apps/home2", 
@@ -64,17 +65,17 @@ def display_page(pathname):
     # elif pathname == '/apps/deaths/countrywide':
     #     return deaths.countrywide_deaths
     # elif pathname == '/apps/deaths/countywide':
-    #     return deaths.countywide_deaths
+    # #     return deaths.countywide_deaths
     elif pathname == "/apps/vaccination2":
-        return vaccination2.layout
+         return vaccination2.layout
     elif pathname == "/apps/seroprevalence2":
         return dbc.Spinner(seroprevalence2.layout)
-    #elif pathname == "/apps/seroprevalence/population":
-    #    return dbc.Spinner(seroprevalence.sero_by_population)
+    # #elif pathname == "/apps/seroprevalence/population":
+    # #    return dbc.Spinner(seroprevalence.sero_by_population)
     elif pathname == "/apps/variant_trends":
-        return variant_trends.layout
+         return variant_trends.layout
     elif pathname == "/apps/phylogeny":
-        return phylogeny.layout
+         return phylogeny.layout
     #elif pathname == "/apps/contact":
         #return contact.layout
     else:

@@ -8,6 +8,7 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.graph_objects import Layout
+from dash.exceptions import PreventUpdate
 import pathlib
 from datetime import datetime as datetime
 from app import app
@@ -52,7 +53,7 @@ county_daily_data["date_of_lab_confirmation"] = pd.to_datetime(county_daily_data
 county_daily_data["Date"] = county_daily_data["date_of_lab_confirmation"]#.dt.date
 county_daily_data.set_index("Date", inplace = True)
 
-classname_col = "bg-secondary bg-opacity-10 g-1 p-2 m-2"
+classname_col = "bg-secondary bg-opacity-10 p-2 m-2"
 class_style = "shadow-sm bg-light border rounded g-1"
 col_style  = {"margin-left":"15px","margin-right":"0px"}
 card_style = "bg-light border rounded-3 shadow"
@@ -72,117 +73,87 @@ kenya_data =  kenya_data.set_index("County")
 
 
 layout = html.Div([
-                dbc.Spinner([
+            dbc.Spinner([
                 dbc.Row([
                     dbc.Col([
                         html.H5("Visualization of trends at County level", style ={"text-align":"start"}),
                         html.Hr(),
                     ], width = 11, xxl=10),
-                    
-                    
-                    #html.H5("Countrywide Summary"),
                 ],justify="center", className = "mb-2 ms-4 me-4 ps-4 pe-4 mt-5 pt-5"),
+               
+                
                 dbc.Row([
-                    # dbc.Col([
-                    #     dbc.CardBody([
-                    #         html.H6("Filter by county"),
-                    #         dcc.Dropdown(
-                    #             id = "county_chosen" , 
-                    #             options = [{"label" : name, "value" : name} for name in county_daily_data["county"].sort_values().unique()],
-                    #             placeholder = "Select County",
-                    #             value = "Nairobi"),#,  multi = False, style = {"color":"#000000"}),
-                    #         html.Div(id = "selected_county"),
-                    #     ])
-                    # ],width=4),
-                    dbc.Col([
-                        dbc.CardBody([
-                            #html.H6("Filter by period"), 
-                            # dcc.DatePickerRange(
-                            #     id = "my-date-picker",
-                            #     calendar_orientation = "horizontal", day_size=30,# placeholder = "Return",with_portal = False,
-                            #     first_day_of_week = 0,with_portal=False,start_date_placeholder_text="1/3/2020",end_date_placeholder_text = ("4/2/2022"), #(0 = sunday)
-                            #     reopen_calendar_on_clear = False,is_RTL = False, clearable = True, number_of_months_shown = 2,
-                            #     min_date_allowed = datetime(2020, 3, 1),max_date_allowed  = datetime(2022, 11, 30),initial_visible_month = datetime(2021,2,1),
-                            #     start_date = datetime(2020, 3, 1),end_date = datetime(2022, 11, 30),minimum_nights = 2,persistence = True,
-                            #     persisted_props = ["start_date"],persistence_type = "session",updatemode = "singledate", show_outside_days = True,                        
-                            # )
-                        ])
-                    ],width = 4)
-                ],className = classname_col,justify = "center"),
-                dbc.Row([
-                    dbc.Col([
-                        dbc.CardBody([
-                            html.Label("Filter by county",className = "text-primary fs-6"),
+                    dbc.Row([
+                        dbc.Col([
+                            html.P('Select county',className ="fs-6 text-primary mb-1 pb-1"),
                             dcc.Dropdown(
-                                id = "county_chosen" , maxHeight=100,
-                                options = [{"label" : name, "value" : name} for name in county_daily_data["county"].sort_values().unique()
-                                           ],style = {"color":"blue"},
                                 
-                                placeholder = "Select County",
-                                value = "Nairobi"),#,  multi = False, style = {"color":"#000000"}),
-                            #html.Br(),
-                            html.Label("Filter by date",className = "text-primary fs-6"),
-                            dcc.DatePickerRange(
-                                id = "my-date-picker",
-                                calendar_orientation = "horizontal", day_size=30,# placeholder = "Return",with_portal = False,
-                                first_day_of_week = 0,with_portal=False,start_date_placeholder_text="1/3/2020",end_date_placeholder_text = ("4/2/2022"), #(0 = sunday)
-                                reopen_calendar_on_clear = False,is_RTL = False, clearable = True, number_of_months_shown = 2,
-                                min_date_allowed = datetime(2020, 3, 1),max_date_allowed  = datetime(2022, 11, 30),initial_visible_month = datetime(2021,2,1),
-                                start_date = datetime(2020, 3, 1),end_date = datetime(2022, 11, 30),minimum_nights = 2,persistence = True,
-                                persisted_props = ["start_date"],persistence_type = "session",updatemode = "singledate", show_outside_days = True,                        
-                            )
-                        ]),#className = card_class)
-                    ],width=3,className = "bg-white border-0",style = {"margin-right":"20px"}),
-                    
+                                id = "county_selected",
+                                 options = [
+                                     {"label" : name, "value" : name} for name in county_daily_data["county"].sort_values().unique()
+                                 ],
+                                 value = "Nairobi",
+                                 multi=False,
+                                 clearable=False,
+                                 style = {"width":150},
+                            ),
+                        ],width=2,className="me-2 mb-2")
+                    ],justify="end"),
                     
                     dbc.Col([
-                        dbc.CardBody([
-                            html.H3(id = "cases_value",className = "text-danger" ),
-                            html.P("total COVID-19 cases in the selected county",style = style_text),
+                        html.Br(),
+                        html.P("Trends in cases at the selected county (14-days average)",className = col_title),
+                        dcc.Graph(id = "trends_plot", figure = {}, responsive=True,style={"height":"250px"}),
+                        html.Hr(),
+                        
+                        html.Br(),
+                        html.P("Cumulative cases at the selected county",className = col_title),
+                        dcc.Graph(id = "cumulative_plot", figure = {},responsive=True,style={"height":"250px"}),
+                        html.Hr(),
+                        
+                        html.Br(),
+                        html.P("Trends in deaths at the selected county",className = col_title),
+                        dcc.Graph(id = "death_plot", figure = {},responsive=True,style={"height":"250px"})
+                    ],width=5,lg=5,className = col_class,style = {"height":"1000px"}),
+                    
+                    dbc.Col([
+                        
+                        dbc.Row([
                             
-                        ],className = card_class)
-                    ],width = 2,xxl=2,className = card_style,style = {"margin-right":"20px"}),
-                    
-                    dbc.Col([
-                        dbc.CardBody([
-                            html.H3(id = "death_value",className = "text-black"),
-                            html.P("total fatalities from COVID-19 in the selected county",style = style_text)
-                        ],className = card_class)
-                    ],width = 2,xxl=2,className = card_style,style = {"margin-right":"20px"}),
-                    dbc.Col([
-                        dbc.CardBody([
-                            html.Strong(id = "prevalence",className = "text-info fs-3"),html.Span(children="%",className = "text-info fw-bold fs-4"),
-                            html.P("Positivity in the selected county",style = style_text)
-                        ],className = card_class)
-                    ],width = 2,xxl=2,className = card_style),
-                    
-                    
-                    
-                ],className = classname_col,justify = "center"),
-                      
-                dbc.Row([
-                    
-                    dbc.Col([
-                        html.H6("Trends in cases for the selected county",className = col_title),
-                        dcc.Graph(id = "line_chart1",figure = {},responsive = True, style = {"width":"38vw","height":"30vh"}),
-                        html.Hr(className = hr_class,style = hr_style),
+                            html.P("Summary of cases, deaths and proportion of infected within the selected county.", 
+                                   className="fw-bold fs-6 mt-4 text-center"),
+                            dbc.Col([dbc.CardBody([
+                                html.H4(id="cases_value",className ="text-danger fs-3"),
+                                html.P("Total cases",style = style_text)
+                                ],className = card_class ),
+                            ]),
+                            dbc.Col([
+                                dbc.CardBody([
+                                html.H4(id="death_value",className ="text-black fs-3"),
+                                html.P("Total deaths",style = style_text)
+                                ],className = card_class ),
+                            ]),
+                            dbc.Col([
+                                dbc.CardBody([
+                                html.H4(id="prevalence",className ="text-info fs-3"),
+                                html.P("Proportion infected",style = style_text)
+                                ],className = card_class ),
+                            ]),
                         
+                        ]),
+                        html.Hr(),
                         
-                        html.H6("Cumulative cases in the seleced county",className = col_title),
-                        dcc.Graph(id = "line_chart2",figure = {},responsive = True, style = {"width":"38vw","height":"30vh"}),
-                      
-                  ],width=5,className =  col_class,style = {"margin-right":"10px","display":"inline-block"}),
-                    dbc.Col([
-                        dcc.RadioItems(
-                        id = "map-buttons",
-                        options = ["Cases","Fatalities"],value = "Cases",
-                        inputStyle = {"margin-right":"2px","margin-left":"20px"}
-                        ),
+                        html.Div([
+                            dbc.Button("Cases",id="cases_button",n_clicks=0,size="sm",color = "primary",outline=True,style = {"font-size":10}),
+                            dbc.Button("Deaths",id="deaths_button",n_clicks=0,size="sm",color = "primary",outline=True,className="me-2",style = {"font-size":10}),
+                        ],className = "d-grid gap-1 d-md-flex justify-content-sm-end"),
                         html.Div(id = "map-content", children = []),
-                    ],width = 5,className = col_class,style = {"margin-left":"10px"})
-                  
-                ],className = classname_col,justify = "center")
-                ])
+                        
+                    ],width=5,lg=5,className = col_class,style={"margin-left":"7px", "height":"1000px"})
+                    
+                ],justify = "center",className = classname_col),
+        
+            ])
 ])
 
 def map_plot(observation,value):
@@ -201,20 +172,34 @@ def map_plot(observation,value):
 cases_fig = map_plot("cases",0.02)
 fatality_fig = map_plot("Death_cases",0.5)
 
-@app.callback(Output("map-content","children"),[Input("map-buttons", "value")])
-def render_map_content(value):
-        if value == "Cases":
-                return [dbc.Spinner(
-                        dcc.Graph(figure = cases_fig, responsive=True,style = {"width":"40vw","height":"70vh"}))]
-        if value == "Fatalities":
-                return [dbc.Spinner(
-                        dcc.Graph(figure = fatality_fig, responsive = True,style = {"width":"40vw","height":"60vh"} ))
-                ]
-                
+@app.callback(Output("map-content","children"),
+              [Input("cases_button", "n_clicks"),
+                Input("deaths_button","n_clicks")])
 
+def render_map_content(click1,click2):
+        size = {"width":"37vw","height":"70vh"}
+        cases = html.Div([
+                    html.P("County distribution of COVID-19 cases",className="fs-6 text-center fw-bold"),
+                    dcc.Graph(figure = cases_fig,responsive=True, style = size ),
+                    ])
+        deaths = html.Div([
+                    html.P("County distribution of COVID-19 fatalities",className="fs-6 text-center fw-bold"),
+                    dcc.Graph(figure = fatality_fig,responsive=True,style = size)
+                    ]),
+        
+        ctx = dash.callback_context #used to determine which button is triggered
+        
+        button_id = ctx.triggered[0]['prop_id'].split('.')[0] #grab id of button triggered
+        if button_id == "cases_button":
+            return cases
+        elif button_id == "deaths_button":
+             return deaths
+        else:
+             return cases
+                
 #function for 7-day moving average
 def seven_day_average(data,column):
-    window_size = 7
+    window_size = 14
     moving_average = []
     data_col = data[column]
     for i in range(len(data)):
@@ -225,22 +210,23 @@ def seven_day_average(data,column):
     data["moving_average"] = moving_average
     return data
    
-@app.callback( [Output("line_chart1", "figure"),
-                Output("line_chart2", "figure"),
+@app.callback( [Output("trends_plot", "figure"),
+                Output("cumulative_plot", "figure"),
+                Output("death_plot","figure"),
                 Output("cases_value","children"),
                 Output("death_value","children"),
                 Output("prevalence","children")],
-                [Input("county_chosen", "value"),
-                Input("my-date-picker" , "start_date"),
-                Input("my-date-picker" , "end_date")])
+                [Input("county_selected", "value"),
+                #Input("my-date-picker" , "start_date"),Input("my-date-picker" , "end_date"
+                ])
 
-
-def update_graph_card(county, start_date, end_date):
+def update_graph_card(county):
     if len(county) == 0:
         return dash.no_update
     else:
         data_filter = county_daily_data[county_daily_data["county"] == county]
-        data_filter = data_filter.sort_index().loc[start_date : end_date]
+        death_data = data_filter[data_filter["outcome"] == "Dead"] 
+        #data_filter = data_filter.sort_index().loc[start_date : end_date]
         data_filter= data_filter[["county","lab_results", "date_of_lab_confirmation"]].groupby(["county","date_of_lab_confirmation"]).count().reset_index()
         
         fig2 = px.line(data_filter, x="date_of_lab_confirmation" , y = data_filter["lab_results"].cumsum() , color = "county")
@@ -254,12 +240,21 @@ def update_graph_card(county, start_date, end_date):
         fig.update_yaxes(title = None, showline=True, linewidth = 0.1, linecolor = "black")
         fig.update_xaxes(title = None, showline=True,showgrid=False,linecolor = "black",)
         fig.update_layout(hovermode="x unified",uniformtext_minsize = 3, bargap =0.05,margin=margin,
-                          legend = dict(orientation = "h"))#,yanchor = "bottom"))#,y = 0,xanchor = "right",x = 1))  
+                          legend = dict(orientation = "h"))#,yanchor = "bottom"))#,y = 0,xanchor = "right",x = 1)) 
+        
+        #death plot
+        death_data = death_data.groupby(["date_of_lab_confirmation"])[["date_of_lab_confirmation"]].count().rename(columns = {"date_of_lab_confirmation":"Freq"}).reset_index()
+        death_data = seven_day_average(death_data,"Freq")
+        fig_death = px.line(death_data, x = "date_of_lab_confirmation", y = "moving_average")
+        fig_death.update_yaxes(title = None, showline=True, linewidth = 0.1, linecolor = "black")
+        fig_death.update_xaxes(title = None, showline=True,showgrid=False,linecolor = "black",)
+        fig_death.update_layout(hovermode="x unified",uniformtext_minsize = 3, bargap =0.05,margin=margin,
+                          legend = dict(orientation = "h"))
         
         cases_value = data[data["County"]== county]["cases"]
         death_value = data[data["County"]== county]["Death_cases"]
         prevalence = round(cases_value/data[data["County"] == county]["Population"]*100,1)
        
-        return fig, fig2,cases_value,death_value, prevalence
+        return fig,fig2,fig_death,cases_value,death_value, prevalence #fig, fig2,
 
 #

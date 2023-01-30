@@ -106,17 +106,17 @@ layout = html.Div([
                     ),
         dbc.Row([
             dbc.Col([
-                html.P("Seroprevalence in Blood donors",className = col_title),
+                html.P("Overall Seroprevalence",className = col_title),
                 dcc.Graph(id = "graph"),
                 html.Br(),
-                html.P("Seroprevalence in Blood donors based on gender",className = col_title),
+                html.P("Seroprevalence by gender",className = col_title),
                 dcc.Graph(id = "graph3")
             ],width = 5,className = "bg-light"),
             dbc.Col([
-                html.P("Seroprevalence in Blood donors based on age",className = col_title),
+                html.P("Seroprevalence by age",className = col_title),
                 dcc.Graph(id = "graph2"),
                 html.Br(),
-                html.P("Seroprevalence in Blood donors based on region",className = col_title),
+                html.P("Seroprevalence in by region",className = col_title),
                 dcc.Graph(id = "graph4")
             ],width = 5,className = "bg-light"),
                 

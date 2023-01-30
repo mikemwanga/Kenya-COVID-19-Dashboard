@@ -238,7 +238,7 @@ card_style = "bg-light border rounded-3 shadow"
 col_title = "text-center text-black fw-normal"
 col_style  = {"margin-left":"15px","margin-right":"0px"}
 style_label={"font-size":35, "align":"center"}
-style_text ={"font-size":11,"text-align":"center"}
+style_text ={"font-size":15,"text-align":"center"}
 classname_shadow = "shadow border rounded-2 justify-content-center"
 hr_style = {"height":"5vh", "align":"center"}
 hr_class = "bg-secondary bg-opacity-10 justify-content-center"
@@ -250,48 +250,44 @@ layout = html.Div([
                         html.P(f"""Last updated: {update_date}""", className = "text-end fs-6 text-primary"),
                         html.P("This dashboard allows a visualization of COVID-19 disease trends in cases, fatalities, vaccination and variant diversity. \
                         This platform intergrates data from Ministry of Health of Republic of Kenya, GISAID and other SARS-CoV-2 associated studies.",
-                        style ={"font-size":13,"text-align":"start"}),
+                        className = "fs-6",style ={"text-align":"start"}),
                         html.Hr(),
-                    ], width = 11, xxl=10),
-                    
-                    
-                    #html.H5("Countrywide Summary"),
-                ],justify="center", className = "mb-2 ms-4 me-4 ps-4 pe-4 mt-5 pt-5"),
+                    ], width = 11, lg=10),
+                ],justify="center", className = "mb-2 ms-3 me-3 ps-3 pe-3 mt-5 pt-5"),
         dbc.Spinner([
-                
                 
                 dbc.Row([
                     dbc.Col([
                         dbc.CardBody([
-                            html.Label(f"{total_cases:,}",className ="text-danger fs-5"),
+                            html.Label(f"{total_cases:,}",className ="text-danger fs-3"),
                             html.P("Total reported cases",style = style_text)
                         ],className = card_class )
                     ],width = 2,lg=2,className = card_style,style = {"margin-right":"10px"}),
                     
                     dbc.Col([
                         dbc.CardBody([
-                            html.Label(f"{total_deaths:,}",className ="text-dark fs-5"),
+                            html.Label(f"{total_deaths:,}",className ="text-dark fs-3"),
                             html.P("Total reported deaths",style = style_text),
                        ],className = card_class)
                     ],width = 2,lg=2,className = card_style,style = {"margin-right":"10px"}),
                     
                     dbc.Col([
                         dbc.CardBody([
-                            html.Label(f"{total_recoveries:,}",className = "text-success fs-5"),
+                            html.Label(f"{total_recoveries:,}",className = "text-success fs-3"),
                             html.P("Total recoveries",style = style_text),
                        ],className = card_class)
                     ],width = 2,lg=2,className = card_style,style = {"margin-right":"10px"}),
                     
                     dbc.Col([
                         dbc.CardBody([
-                            html.Label(f"{total_tests:,}",className = "text-primary fs-5"),
+                            html.Label(f"{total_tests:,}",className = "text-primary fs-3"),
                             html.P("Tests done",style = style_text),
                        ],className = card_class)
                     ],width = 2,lg=2,className = card_style),
                     
                     dbc.Col([
                         dbc.CardBody([
-                            html.Strong(f"{overall_positivity}",className = "text-info fs-5"),html.Span(children="%",className = "text-info fs-5"), 
+                            html.Strong(f"{overall_positivity}",className = "text-info fs-3"),html.Span(children="%",className = "text-info fs-4"), 
                             html.P("Overall Positivity",style = style_text),
                         ],className = card_class)
                     ],width = 2,lg=2,className = card_style,style = {"margin-left":"10px"})
@@ -300,7 +296,7 @@ layout = html.Div([
                 
                 dbc.Row([
                     dbc.Col([
-                        html.P("Updates: Last 24hrs",className = "text-black fs-5 fw-normal ms-2"),
+                        html.P("Updates: Last 24hrs",className = "text-black fs-4 fw-normal ms-2"),
                         dbc.Card([
                             dbc.CardBody([
                                 html.H6("Cases"),html.Hr(style = {"width":"50%"}),
@@ -312,7 +308,7 @@ layout = html.Div([
                         dbc.Card([
                             dbc.CardBody([
                                 html.H6("Positivity"),html.Hr(style = {"width":"50%"}),
-                                html.Strong(f"{posity_last_24}%",className = "fs-5 fw-normal"),
+                                html.Strong(f"{posity_last_24}%",className = "fs-4 fw-normal"),
                                 html.Span(children = [pos_arrow_type,pos_fold_value],
                                           className = pos_fold_change_class,style = {"margin-left":"20px"}),
                             ]),
@@ -322,7 +318,7 @@ layout = html.Div([
                         dbc.Card([
                             dbc.CardBody([
                                html.H6("Fatalities"),html.Hr(style = {"width":"50%"}),
-                               html.Strong(fatalities_last_24 ,className = "fs-5 fw-normal"),
+                               html.Strong(fatalities_last_24 ,className = "fs-4 fw-normal"),
                                html.Span(children = [fat_arrow_type, fat_fold_value],className = fat_fold_change_class,style = {"margin-left":"20px"})
                             ]),
                         ],className = "border-0"),
@@ -330,7 +326,7 @@ layout = html.Div([
                         dbc.Card([
                             dbc.CardBody([
                                 html.H6("Recoveries"),html.Hr(style = {"width":"50%"}),
-                                html.Strong(recoveries_last_24,className = "fs-5 fw-normal"),
+                                html.Strong(recoveries_last_24,className = "fs-4 fw-normal"),
                                 html.Span(children = [rec_arrow_type, rec_fold_value],className = rec_fold_change_class,style = {"margin-left":"20px"})
                             ]),
                         ],className = "border-0"),
@@ -339,11 +335,11 @@ layout = html.Div([
                         dbc.Card([
                             dbc.CardBody([
                                 html.H6("Samples Tested"),html.Hr(style = {"width":"50%"}),
-                                html.Strong(samplesize_last_24hrs,className = "fs-5 fw-normal"),
+                                html.Strong(samplesize_last_24hrs,className = "fs-4 fw-normal"),
                             ]),
                         ],className = "border-0"),
                         
-                    ],width=2,xxl = 2,className = "bg-white"),
+                    ],width=2,lg = 2,className = "bg-white"),
                     
                     dbc.Col([
                                                
@@ -359,7 +355,7 @@ layout = html.Div([
                        html.P("Cases by Gender and age",className = col_title),
                        dcc.Graph(figure = age_gender_cases_plot,responsive = True, style = {"width":"30vw","height":"30vh"})
                        
-                    ],width=4,xxl=4,className = col_class,style = {"margin-left":"15px","margin-right":"0px"} ),
+                    ],width=4,lg=4,className = col_class,style = {"margin-left":"15px","margin-right":"0px"} ),
                     
                     dbc.Col([
                         html.P("Most affected counties",className = col_title),
@@ -375,7 +371,7 @@ layout = html.Div([
                         html.Hr(className = hr_class,style = hr_style),
                         html.P("Fatalities by Gender and age",className = col_title),
                         dcc.Graph(figure= age_gender_death_plot, responsive = True, style = {"width":"30vw","height":"30vh"})
-                    ],width = 4,xxl=4,className = col_class,style = {"margin-left":"15px","margin-right":"0px"}),
+                    ],width = 4,lg=4,className = col_class,style = {"margin-left":"15px","margin-right":"0px"}),
                     
                 ],className = classname_col,style = {"horizontal-align":"top"},justify = "center"),
          
