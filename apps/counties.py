@@ -114,7 +114,7 @@ layout = html.Div([
                         html.Br(),
                         html.P("Trends in deaths at the selected county",className = col_title),
                         dcc.Graph(id = "death_plot", figure = {},responsive=True,style={"height":"250px"})
-                    ],width=5,lg=5,className = col_class,style = {"height":"1000px"}),
+                    ],width=5,lg=5,className = col_class,style = {"height":"1100px"}),
                     
                     dbc.Col([
                         
@@ -149,7 +149,7 @@ layout = html.Div([
                         ],className = "d-grid gap-1 d-md-flex justify-content-sm-end"),
                         html.Div(id = "map-content", children = []),
                         
-                    ],width=5,lg=5,className = col_class,style={"margin-left":"7px", "height":"1000px"})
+                    ],width=5,lg=5,className = col_class,style={"margin-left":"7px", "height":"1100px"})
                     
                 ],justify = "center",className = classname_col),
         
