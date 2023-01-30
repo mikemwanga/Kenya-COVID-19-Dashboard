@@ -7,7 +7,7 @@ The datasets used in here have been shared by the Ministry of Health and others 
 ## Running the Code
 
 1. Clone repository
-2. Install dependencies and create environment by runnnig the code below.
+2. Install dependencies and create environment by runnnig the code below.<br>
         `conda env create --file environment.yml`
 3. Activate environment
         `conda activate dashboard`
