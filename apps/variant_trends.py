@@ -1,15 +1,6 @@
-import dash
-from dash import dcc, html
-import dash_bootstrap_components as dbc
-import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-import pathlib
+from utils import *
 
-from app import app
 # Reading the data
-PATH = pathlib.Path(__file__).parent
-DATA_PATH = PATH.joinpath("../data/").resolve()
 
 variant_data = pd.read_table(DATA_PATH.joinpath("variant_month_data.txt"))
 average_df_clean = pd.read_csv(DATA_PATH.joinpath("average_weekly_submission_to_gsaid.csv"), parse_dates = ["date_sampled"])
@@ -17,13 +8,13 @@ variants_kenya = pd.read_table(DATA_PATH.joinpath("variant_data_kenya.tsv"))
 variants_kenya["Month"] = pd.to_datetime(variants_kenya["Month"], format = "%Y-%m-%d")
 kenya_data = pd.read_table(DATA_PATH.joinpath("kenya.metadata_0111_120122.tsv"))
 
-gridcolor="lightgray"
-pcolor = "#FFFAFA"
-cardbody_style = {"background-color":pcolor}
-fillcolor = "#6baed6"
-markercolor = "#8B0000"
-margin = dict(l=20, r=25, t=20, b=20)
-pcolor_white = "white"
+# gridcolor="lightgray"
+# pcolor = "#FFFAFA"
+# cardbody_style = {"background-color":pcolor}
+# fillcolor = "#6baed6"
+# markercolor = "#8B0000"
+# margin = dict(l=20, r=25, t=20, b=20)
+# pcolor_white = "white"
 
 
 class Variants:
@@ -96,5 +87,8 @@ layout = html.Div([
             
             dcc.Graph(figure = fig_kenya, responsive = True, style = {"height":"400px", "width":"800px"})
         ],  width = {"size":8,"offset":1},lg=9)
-    ],justify = "center",className = "ms-5 mt-3 pt-3")
+    ],justify = "center",className = "ms-5 mt-3 pt-3"),
+    
+    hm.reference
+    
 ])

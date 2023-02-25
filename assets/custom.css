@@ -1,0 +1,11 @@
+.card_style {
+    background-color: #F9F9F9;
+    border: 1px solid #CCCCCC;
+    border-radius: 3px;
+    box-shadow: 2px 2px 5px 0px #BBBBBB;
+  }
+
+.style_text {
+    font-size: 14px;
+    text-align: center;
+  }

@@ -1,48 +1,11 @@
-import dash
-from dash import dcc, html,dash_table
-from dash.dependencies import Input, Output, State
-import dash_bootstrap_components as dbc
-from dash_bootstrap_templates import load_figure_template
-from dash_iconify import DashIconify
-import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.graph_objects import Layout
-import pathlib
-from app import app
-import datetime as datetime
-import warnings
-warnings.filterwarnings('ignore')
-
-load_figure_template("flatly")
-#cerulean,flatly,journal,litera,pulse,sandstone
-#import geopandas as gpd
-
-# Reading the data
-PATH = pathlib.Path(__file__).parent
-DATA_PATH = PATH.joinpath("../data/").resolve()
-
-pcolor = "#FFFAFA"
-plot_color = "rgba(0,0,0,0)"
-pcolor_home = "#efedf5"
-pcolor_white = "white"
-axis_color = "black"
-fillcolor = "#6baed6"
-markercolor = "#3C565B"
-style = {"height":"200px", "width":"300px"}
-margin = dict(l=20, r=20, t=20, b=20)
-layout = Layout(plot_bgcolor = pcolor,paper_bgcolor=pcolor)
-cardbody_style = {"background-color":pcolor}
-cardbody_style_home = {"background-color":pcolor_home}
-cardbody_style_vac = {"background-color":pcolor_home, "height":"200%"}
-color_patterns = ["#e41a1c","#377eb8","#4daf4a","#984ea3","#073763"]
-tickfont = 9
-titlefont = 12
+from utils import *
 #Load datasets
 daily_updates_moh =  pd.read_excel(DATA_PATH.joinpath("daily_updates_metadata.xlsx"))
 county_daily_updates = pd.read_excel(DATA_PATH.joinpath("county_daily_updates.xlsx"), parse_dates=["Date"], index_col='Date')
 #kenya_county = gpd.read_file(DATA_PATH.joinpath("kenyan-counties/County.shp"))
 data = pd.read_csv(DATA_PATH.joinpath("cases_per_county.csv"))
+data["percentage_cases"] = round(data["cases"]/data["cases"].sum() * 100,2)
+
 lati_lot = pd.read_csv(DATA_PATH.joinpath("kenya_data_latitude_longitude.csv"))
 #county_prevalence = pd.read_csv(DATA_PATH.joinpath("cases_per_county.csv"))
 
@@ -90,8 +53,8 @@ total_recoveries = daily_updates_moh["total_recoveries"].iat[-1]
 proportion_fully_vaccntd_adults = daily_updates_moh["proportion_of_fully_vaccinated_adult_population"].iat[-1]
 
 overall_positivity = round(total_cases/total_tests*100,1)
-update_date = datetime.date.today().strftime("%B %d, %Y")
-
+#update_date = datetime.date.today().strftime("%B %d, %Y")
+update_date = daily_updates_moh.iloc[-1]
 
 ##Plots
 last_7 = daily_updates_moh[["new_cases_last_24_hrs","positivity_rate_last_24_hrs"]].iloc[-7:].reset_index()
@@ -114,17 +77,21 @@ filtered_data = filtered_data.loc[:,(filtered_data != 0).any(axis=0)].T
 filtered_data = filtered_data.rename(columns = {filtered_data.columns[0]:"Cases"})
 filtered_data.sort_values("Cases", ascending=True, inplace=True)
 
-fig_county = px.bar(filtered_data, x = "Cases", text_auto=True)#, color_discrete_sequence=[markercolor])
+max_value = max(filtered_data["Cases"]) #initiate maximum value to set the range of values
+fig_county = px.bar(filtered_data, x = "Cases", text_auto=True,range_x =[0,max_value+3])#, color_discrete_sequence=[markercolor])
 fig_county.update_traces(textposition = "outside", textfont_size=10,cliponaxis=True, width=0.6)
 fig_county.update_layout(margin = margin,font_size=10,uniformtext_minsize = 3, yaxis_title = None)
-                         #plot_bgcolor = pcolor_home,, paper_bgcolor = pcolor_home)
-fig_county.update_xaxes(title = None,linecolor = "black",tickfont = dict(size=10),title_font = {"size":10})
+                            #plot_bgcolor = pcolor_home,, paper_bgcolor = pcolor_home)
+fig_county.update_xaxes(title = "Reported cases",linecolor = "black",tickfont = dict(size=10),title_font = {"size":10})
 fig_county.update_yaxes(tickfont = dict(size=10),title_font = {"size":10})
 
 #most affected counties plot
-affected_counties = px.bar(data.head(n=8).sort_values("cases",ascending=True),x = "cases",y="County",text_auto=True,orientation = "h")
+affected_counties = px.bar(data.head(n=8).sort_values("cases",ascending=True),
+                           x = "percentage_cases",y="County",text_auto=True,orientation = "h",range_x=[0,45])
 affected_counties.update_yaxes(title = None,tickfont = dict(size=tickfont))
-affected_counties.update_xaxes(nticks=8,title = None,linecolor = "black",tickfont = dict(size=tickfont))
+affected_counties.update_xaxes(nticks=8,title = "Prevalence (%)",linecolor = "black",tickfont = dict(size=tickfont),
+                               title_font = {"size":10})
+affected_counties.update_traces(textposition = "outside",textfont_size=10)
 affected_counties.update_layout(margin=margin)
 
 county_daily_updates.fillna(0, inplace = True)
@@ -149,7 +116,7 @@ def daily_plots(observation1, observation2):
         fig.add_trace(go.Scatter(x = daily_cases["Date"], y = daily_cases[observation2]))
         fig.update_layout(hovermode="x unified",showlegend=False,margin = margin)
         fig.update_xaxes(showgrid=False,showline=True,linecolor = axis_color,tickfont = dict(size=tickfont))
-        fig.update_yaxes(tickfont = dict(size=tickfont))
+        fig.update_yaxes(tickfont = dict(size=tickfont),nticks=10,title = "7-day Average", title_font = {"size":titlefont})
         return fig
 
 cases_trend = daily_plots("Reported_Cases","moving_average_cases") #plot of daily reported infections
@@ -224,156 +191,164 @@ class fold_change:
             return fat_change,self.no_change,self.no_change_fold
         else:
             return fat_change,self.down_arrow,self.down_fold
-        
-
+    
 cases_fold_value,arrow_type,fold_change_class = fold_change().case_fold_change()
 pos_fold_value,pos_arrow_type,pos_fold_change_class =fold_change().pos_change()
 rec_fold_value,rec_arrow_type,rec_fold_change_class = fold_change().recoveries_change()
 fat_fold_value,fat_arrow_type,fat_fold_change_class  =fold_change().fatality_change()
 
-card_class = "text-center"
-classname_col = "bg-light bg-opacity-20 g-1 justify-content-center p-2 m-2" 
-class_style = "shadow-sm bg-light border rounded g-1"
-card_style = "bg-light border rounded-3 shadow"
-col_title = "text-center text-black fw-normal"
-col_style  = {"margin-left":"15px","margin-right":"0px"}
-style_label={"font-size":35, "align":"center"}
-style_text ={"font-size":15,"text-align":"center"}
-classname_shadow = "shadow border rounded-2 justify-content-center"
-hr_style = {"height":"5vh", "align":"center"}
-hr_class = "bg-secondary bg-opacity-10 justify-content-center"
-col_class = "bg-white align-self-center"
+#acknowledgment section
+reference = dbc.Row([
+                dbc.Col([
+                    html.Img(src= "../assets/kwtrp_logo.png",style = {"width":"8vw","height":"7vh"})
+                ],width=1,style = {"margin-right":"10px",
+                                   "display":"flex","align-items": "center","justify-content": "center",}),
+                dbc.Col([
+                    html.Img(src= "../assets/moh_kenya.png",style = {"width":"6vw","height":"10vh"})
+                ],width=1, style = {"margin-left":"10px","display":"flex","align-items": "center","justify-content": "center",}),
+                dbc.Col([
+                    html.Img(src= "../assets/fcdo_logo.png",style = {"width":"10vw","height":"11vh"})
+                ],width=1, style = {"display":"flex","align-items": "center","justify-content": "center",}),
+
+                dbc.Col([
+
+                    html.P("Other Information",className = "fw-bolder text-decoration-underline mb-0 pb-0",style = {"font-size":14}),
+                    html.P("Developed and maintained by KEMRI-Wellcome Trust, in collaboration with National Public Health Surveillance Laboratory \
+                        at Ministry of Health, Kenya. Funding support from Foreign Commonwealth and Development Office (FCDO).",
+                        style = {"font-size":14}),
+
+                    html.P("Data Source",className = "fw-bolder text-decoration-underline mb-0 pb-0",style = {"font-size":14}),
+                    dcc.Link("Ministry of Health,Kenya (NPHL)",href="https://www.health.go.ke/",
+                             style = {"font-size":10, "margin-right":"10px"}),
+                    dcc.Link("Global Science Initiative(GISAID)",href="https://gisaid.org", 
+                             style = {"font-size":10,"margin-right":"10px"}),
+                    dcc.Link("Sero-study", href = "https://www.nature.com/articles/s41467-021-24062-3",
+                             style = {"font-size":10}),
+
+                    html.P("Contact Us",className = "fw-bolder text-decoration-underline mb-0 pb-0 mt-2",style = {"font-size":14}),
+                    dcc.Link("jmwanga@kemri-wellcome.org",title="email_me",href="mailto:jmwanga@kemri-wellcome.org",target="_blank",
+                             style = {"font-size":10,"margin-right":"10px"}),
+                    dcc.Link("ggithinji@kemri-wellcome.org",title="email_me",href="mailto:ggithinji@kemri-wellcome.org",target="_blank",
+                             style = {"font-size":10})
+
+                ], width = {"size":7,"offset":1})
+        ],className = "bg-secondary bg-opacity-10 border-top border-1 shadow justify-content-center ms-2 ps-2")
+
 
 layout = html.Div([
+        
         dbc.Row([
                     dbc.Col([
-                        html.P(f"""Last updated: {update_date}""", className = "text-end fs-6 text-primary"),
+                        html.P(f"""Last updated: January 26, 2023""", className = "text-end fs-6 text-primary"), #{update_date}
                         html.P("This dashboard allows a visualization of COVID-19 disease trends in cases, fatalities, vaccination and variant diversity. \
                         This platform intergrates data from Ministry of Health of Republic of Kenya, GISAID and other SARS-CoV-2 associated studies.",
                         className = "fs-6",style ={"text-align":"start"}),
                         html.Hr(),
                     ], width = 11, lg=10),
                 ],justify="center", className = "mb-2 ms-3 me-3 ps-3 pe-3 mt-5 pt-5"),
-        dbc.Spinner([
-                
+             
                 dbc.Row([
                     dbc.Col([
                         dbc.CardBody([
                             html.Label(f"{total_cases:,}",className ="text-danger fs-3"),
                             html.P("Total reported cases",style = style_text)
                         ],className = card_class )
-                    ],width = 2,lg=2,className = card_style,style = {"margin-right":"10px"}),
+                    ],width = 2,lg=2,className = "card_style",style = {"margin-right":"10px"}),
                     
                     dbc.Col([
                         dbc.CardBody([
                             html.Label(f"{total_deaths:,}",className ="text-dark fs-3"),
                             html.P("Total reported deaths",style = style_text),
                        ],className = card_class)
-                    ],width = 2,lg=2,className = card_style,style = {"margin-right":"10px"}),
+                    ],width = 2,lg=2,className = "card_style",style = {"margin-right":"10px"}),
                     
                     dbc.Col([
                         dbc.CardBody([
                             html.Label(f"{total_recoveries:,}",className = "text-success fs-3"),
                             html.P("Total recoveries",style = style_text),
                        ],className = card_class)
-                    ],width = 2,lg=2,className = card_style,style = {"margin-right":"10px"}),
+                    ],width = 2,lg=2,className = "card_style",style = {"margin-right":"10px"}),
                     
                     dbc.Col([
                         dbc.CardBody([
                             html.Label(f"{total_tests:,}",className = "text-primary fs-3"),
                             html.P("Tests done",style = style_text),
                        ],className = card_class)
-                    ],width = 2,lg=2,className = card_style),
+                    ],width = 2,lg=2,className = "card_style"),
                     
                     dbc.Col([
                         dbc.CardBody([
                             html.Strong(f"{overall_positivity}",className = "text-info fs-3"),html.Span(children="%",className = "text-info fs-4"), 
                             html.P("Overall Positivity",style = style_text),
                         ],className = card_class)
-                    ],width = 2,lg=2,className = card_style,style = {"margin-left":"10px"})
+                    ],width = 2,lg=2,className = "card_style",style = {"margin-left":"10px"})
                     
                 ],justify="center",className = classname_col,align = "center"),
                 
                 dbc.Row([
                     dbc.Col([
-                        html.P("Updates: Last 24hrs",className = "text-black fs-4 fw-normal ms-2"),
-                        dbc.Card([
-                            dbc.CardBody([
-                                html.H6("Cases"),html.Hr(style = {"width":"50%"}),
-                                html.Strong(new_cases_last_24hrs,className = "fs-5 fw-normal"),
-                                html.Span(children = [arrow_type,cases_fold_value],className = fold_change_class,style = {"margin-left":"20px"}),                              
-                            ]),
-                        ],className = "border-0"),
-                        html.Hr(),#html.Br(),
-                        dbc.Card([
-                            dbc.CardBody([
-                                html.H6("Positivity"),html.Hr(style = {"width":"50%"}),
-                                html.Strong(f"{posity_last_24}%",className = "fs-4 fw-normal"),
+                        html.P("Updates: Last 24hrs",className = "text-black fs-5 fw-bold ms-1"),
+                        html.Hr(className =hr_class,style=hr_style),
+                                html.H6("Cases",className=col1_class),
+                                html.Hr(className = col1_class,style = {"width":"50%"}),
+                                html.Strong(new_cases_last_24hrs,className = val_class),
+                                html.Span(children = [arrow_type,cases_fold_value],className = fold_change_class,
+                                          style = {"margin-left":"20px"}),
+                        html.Hr(className =hr_class,style=hr_style),
+                                html.H6("Positivity",className=col1_class),
+                                html.Hr(className=col1_class,style = {"width":"50%"}),
+                                html.Strong(f"{posity_last_24}%",className = val_class),
                                 html.Span(children = [pos_arrow_type,pos_fold_value],
                                           className = pos_fold_change_class,style = {"margin-left":"20px"}),
-                            ]),
-                        ],className = "border-0"),
+                        html.Hr(className =hr_class,style=hr_style),
+                               html.H6("Fatalities",className = col1_class),
+                               html.Hr(className=col1_class,style = {"width":"50%"}),
+                               html.Strong(fatalities_last_24 ,className = val_class),
+                               html.Span(children = [fat_arrow_type, fat_fold_value],className = fat_fold_change_class,
+                                         style = {"margin-left":"20px"}),
+                        html.Hr(className =hr_class,style=hr_style),
+                                html.H6("Recoveries",className = col1_class),
+                                html.Hr(className = col1_class,style = {"width":"50%"}),
+                                html.Strong(recoveries_last_24,className = val_class),
+                                html.Span(children = [rec_arrow_type, rec_fold_value],className = rec_fold_change_class,
+                                          style = {"margin-left":"20px"}),
+                        html.Hr(className =hr_class,style=hr_style),
+                                html.H6("Samples Tested",className = col1_class),
+                                html.Hr(className = col1_class,style = {"width":"50%"}),
+                                html.Strong(samplesize_last_24hrs,className = val_class),
+                        html.Hr()
                         
-                        html.Hr(),#,html.Br(),
-                        dbc.Card([
-                            dbc.CardBody([
-                               html.H6("Fatalities"),html.Hr(style = {"width":"50%"}),
-                               html.Strong(fatalities_last_24 ,className = "fs-4 fw-normal"),
-                               html.Span(children = [fat_arrow_type, fat_fold_value],className = fat_fold_change_class,style = {"margin-left":"20px"})
-                            ]),
-                        ],className = "border-0"),
-                        html.Hr(),#html.Br(),
-                        dbc.Card([
-                            dbc.CardBody([
-                                html.H6("Recoveries"),html.Hr(style = {"width":"50%"}),
-                                html.Strong(recoveries_last_24,className = "fs-4 fw-normal"),
-                                html.Span(children = [rec_arrow_type, rec_fold_value],className = rec_fold_change_class,style = {"margin-left":"20px"})
-                            ]),
-                        ],className = "border-0"),
-                        html.Hr(),#html.Br(),
-                        
-                        dbc.Card([
-                            dbc.CardBody([
-                                html.H6("Samples Tested"),html.Hr(style = {"width":"50%"}),
-                                html.Strong(samplesize_last_24hrs,className = "fs-4 fw-normal"),
-                            ]),
-                        ],className = "border-0"),
-                        
-                    ],width=2,lg = 2,className = "bg-white"),
+                    ],width=2,lg = 2,className = col_class,style = {"height":"1000px"}),
                     
                     dbc.Col([
                                                
                        html.P("Counties with reported cases in the last 24 hrs",className = col_title),
                        dcc.Graph(figure = fig_county,responsive = True, style = {"width":"30vw","height":"30vh"}),
-                       html.Hr(className = hr_class,style = hr_style),
+                       html.Hr(className = hr_class, style = hr_style),
                                
                        html.P("Trends in Cases since beginnig of pandemic",className = col_title),
                        dcc.Graph(figure=cases_trend,responsive = True, style = {"width":"30vw","height":"30vh"}),
                       
-                       html.Hr(className = hr_class,style = hr_style),
-                       
+                       html.Hr(className = hr_class, style = hr_style),
                        html.P("Cases by Gender and age",className = col_title),
                        dcc.Graph(figure = age_gender_cases_plot,responsive = True, style = {"width":"30vw","height":"30vh"})
                        
-                    ],width=4,lg=4,className = col_class,style = {"margin-left":"15px","margin-right":"0px"} ),
+                    ],width=4,lg=4,className = col_class,style = {"margin-left":"15px","margin-right":"0px","height":"1000px"} ),
                     
                     dbc.Col([
                         html.P("Most affected counties",className = col_title),
-                        dcc.Graph(figure = affected_counties, responsive = True, style = {"width":"30vw","height":"30vh"}),
-                        html.Hr(className = hr_class,style = hr_style),
-                    #    html.Div([
-                    #             #dbc.Button("7-days",id = "7_days",outline=True,color="primary",size="sm",className = "me-1 fs-6"),
-                    #             #dbc.Button("COVID-19 Positivity for last 30-days",id = "positivity_30_days",outline=True,color="primary",size="sm"),
-                    #         ],className = "d-sm-flex justify-content-sm-center"),
+                        dcc.Graph(figure = affected_counties, responsive = True, style = {"width":"32vw","height":"30vh"}),
+                        html.Hr(className = hr_class, style = hr_style),
                         html.P("Trends in fatalities since beginnig of pandemic",className = col_title),
                         dcc.Graph(figure = deaths_trends,responsive = True, style = {"width":"30vw","height":"30vh"}),
                         
-                        html.Hr(className = hr_class,style = hr_style),
+                        html.Hr(className = hr_class, style = hr_style),
                         html.P("Fatalities by Gender and age",className = col_title),
                         dcc.Graph(figure= age_gender_death_plot, responsive = True, style = {"width":"30vw","height":"30vh"})
-                    ],width = 4,lg=4,className = col_class,style = {"margin-left":"15px","margin-right":"0px"}),
+                    ],width = 4,lg=4,className = col_class,style = {"margin-left":"15px","margin-right":"0px","height":"1000px"}),
                     
-                ],className = classname_col,style = {"horizontal-align":"top"},justify = "center"),
-         
-    ])
+                ],className = classname_col,style = {},justify = "center"),
+    
+    reference
+   
 ])
