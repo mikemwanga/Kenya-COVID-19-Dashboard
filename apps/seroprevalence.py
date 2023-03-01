@@ -1,10 +1,15 @@
 from utils import *
 from plotly.subplots import make_subplots
+from apps import home as hm
+
 
 sero_data = pd.read_excel(DATA_PATH.joinpath("KWTRP_serosurveillance_data_Dashboard_09Sep2022.xlsx"))
 daily_cases = pd.read_csv(DATA_PATH.joinpath("covid_daily_data.csv"))
+daily_cases["Date"] = pd.to_datetime(daily_cases["Date"],format = "%d/%m/%Y")
 
 
+legend = dict(orientation = "h",title=None,yanchor  = "top", xanchor = "left",y=1.2,
+                                                    font = dict(size=10))
 class sero_prevalence:
         def __init__(self):
                 sero_data["Period"] = sero_data[["Month(s)", "Year"]].astype(str).agg(" ".join, axis=1)
@@ -19,16 +24,21 @@ class sero_prevalence:
                 line_fig = px.timeline(self.data_period, x_start="start", x_end = "finish", y = "Anti-spike_perc", color = "Population", 
                                         hover_name="Population", range_y = [0,1], hover_data={"Population":False, "Anti-spike_perc":":0%"}, 
                                         color_discrete_sequence= color_patterns )
-                line_fig.update_traces(width=0.01, type = "bar", textposition = "outside")
+                line_fig.update_traces(width=0.02, type = "bar", textposition = "outside")
                 cum_fig = px.line(daily_cases, x = "Date",  y = "Cum_Cases", color_discrete_sequence=[markercolor]) 
                 cum_fig.update_traces(yaxis="y2")
                 fig.add_traces(cum_fig.data + line_fig.data)
-                fig.update_yaxes(title_font = {"size":titlefont},title_text = "Cumulative Cases",ticks="outside", secondary_y = True, linecolor = "black")
-                fig.update_yaxes(title_font = {"size":titlefont},title_text = "Average % Anti IgG seroprevalence",linecolor = "black",ticks="outside",col=1,nticks=20,
-                                 secondary_y = False,range = [0,1],gridcolor = gridcolor)
-                fig.update_xaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,dtick="M1",tickformat="%b\n%Y",linecolor = "black",ticks="outside",nticks=5)#tickformat="%b\n%Y"
-                fig.update_layout(plot_bgcolor = pcolor,paper_bgcolor = pcolor,
-                                legend = dict(yanchor  = "top",y=1,x=0.01,xanchor="left"),legend_orientation ="h")
+                fig.update_yaxes(title_font = {"size":titlefont},title_text = "Cumulative Cases",ticks="outside", 
+                                 secondary_y = True, tickfont = tickfont_dict,
+                                 linecolor = "black")
+                fig.update_yaxes(title_font = {"size":titlefont},title_text = "Average % Anti IgG seroprevalence",
+                                 linecolor = "black",ticks="outside",col=1,nticks=20,
+                                 secondary_y = False,range = [0,1],tickfont =tickfont_dict )#,gridcolor = gridcolor
+                fig.update_xaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,dtick="M1",tickformat="%b\n%Y",
+                                 linecolor = "black",ticks="outside",nticks=5)#tickformat="%b\n%Y"
+                fig.update_layout(margin=margin,
+                                  legend = dict(orientation = "h",yanchor  = "bottom", xanchor = "left",y=-0.25))#y=1.02,x=0.01,xanchor="left"))
+                #fig.update_layout(legend = dict(yanchor  = "top",y=1,x=0.01,xanchor="left"),legend_orientation ="h",margin = margin) #plot_bgcolor = pcolor,paper_bgcolor = pcolor,
                 
                 return fig
 
@@ -39,77 +49,52 @@ class sero_prevalence:
                 line_fig = px.timeline(pop_data, x_start="start", x_end = "finish", y = "Anti-spike_perc", color = "Population", 
                     hover_name="Population", range_y = [0,1], hover_data={"Population":False, "Anti-spike_perc":":0%"}, 
                     color_discrete_sequence= color_patterns)
-                line_fig.update_traces(width=0.01, type = "bar", textposition = "outside")
-                cum_fig = px.line(daily_cases, x = "Date",  y = "Cum_Cases", color_discrete_sequence=['black',"red"]) 
+                line_fig.update_traces(width=0.02, type = "bar", textposition = "outside")
+                cum_fig = px.line(daily_cases, x = "Date",  y = "Cum_Cases",color_discrete_sequence=[markercolor])# color_discrete_sequence=['black',"red"]) 
                 cum_fig.update_traces(yaxis="y2")
                 fig.add_traces(cum_fig.data + line_fig.data)
-                fig.update_yaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,title_text = "cumulative cases", linecolor = "black", secondary_y = True, range = [0,400000])
-                fig.update_yaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,title_text = "seroprevalence",linecolor = "black",ticks="outside",col=1,
-                                 nticks=10,secondary_y = False,range = [0,1],gridcolor = gridcolor)
-                fig.update_xaxes(tickfont = tickfont_dict,dtick="M1",tickformat="%b\n%Y",linecolor = "black",ticks="outside",nticks = 1)
-                fig.update_layout(plot_bgcolor = pcolor,paper_bgcolor = pcolor,showlegend=False)#legend_orientation ="h")
+                fig.update_yaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,title_text = "cumulative cases", 
+                                 linecolor = "black", secondary_y = True, range = [0,400000],nticks=10)
+                fig.update_yaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,title_text = "seroprevalence",
+                                 linecolor = "black",ticks="outside",col=1,
+                                 nticks=10,secondary_y = False,range = [0,1]) #,gridcolor = gridcolor
+                fig.update_xaxes(tickfont = tickfont_dict,dtick="M1",tickformat="%b\n%Y",linecolor = "black",ticks="outside")#,nticks = 20)
+                fig.update_layout(margin = margin,showlegend=False)#legend_orientation ="h")
                 return fig
-sero_class = sero_prevalence()
+sero_class = sero_prevalence()           
 subfig = sero_class.seroplot()
 
+
 layout = html.Div([
-        dbc.Row([
-                    dbc.Col([
-                        html.H5("Visualization of Seroprevalence across the country", style ={"text-align":"start"}),
-                        html.Hr(),
-                    ], width = 11, xxl=10),
-                    
-                    
-                    #html.H5("Countrywide Summary"),
-        ],justify="center", className = "mb-2 ms-4 me-4 ps-4 pe-4 mt-5 pt-5"),
-    
-        #html.H4("Summary of the average anti-IgG seroprevalence by population",className = "text-dark, text-center"),
-        dbc.Row([
-            dbc.Col([
-                dcc.Graph(figure = subfig,responsive = True,className = "ms-3",style = {"width":"800px","height":"500px"})
-            ],width = {"size":8,"offset":1},lg=9,className = col_class)
-        ],justify="center",className = classname_col,align = "center"),
+    dbc.Spinner([
+    dbc.Row([
+        dbc.Col([
+            html.H5("Visualization of Seroprevalence across the country", style ={"text-align":"start"}),
+        ], width = 6, lg=7),
+        dbc.Col([
+            html.Div([
+                html.P("Select Population",className="text-primary mb-0 pb-0", style= {"font-size":14}),
+                dcc.Dropdown(
+                    id = "population",
+                    options = ["Overall","Blood Donors","Health Workers"],#"ANC Attendees","HDSS Residents"],
+                    value = "Overall",
+                    #style= {"font-size":14}
+                    #maxHeight = 20
+                    #placeholder = "Select Population",   
+                )
+            ],style={"width":"100%","font-size":14})
+        ],width=4, lg=3),
         
-        
-        
-        dbc.Row([
-            dbc.Row([
-                dbc.Col([
-                    html.P('Select Population',className ="fs-6 text-primary mb-1 pb-1"),
-                    dcc.RadioItems(
-                        id = "sero_pop",
-                        options = ["Blood donors","Health workers"],
-                        value = "Blood donors",
-                        labelStyle = {"display":"inline-block"},
-                        style = {"width":300},
-                        #inputStyle = {"margin-top":"1px"}
-                    ),
-                ],width=4,className="me-2 mb-2")
-            ],justify="end"),
-            dbc.Col([
-                html.Br(),
-                html.P("Overall Seroprevalence",className = col_title),
-                dcc.Graph(id = "graph",responsive = True, style ={"height":"350px"}),
-                html.Hr(),
-                html.P("Seroprevalence by gender",className = col_title),
-                dcc.Graph(id = "graph3",responsive = True, style={"height":"350px"})
-                
-            ],width = 5,className = col_class,style = {"margin-right":"10px"}),
-            
-            dbc.Col([
-                html.Br(),
-                html.P("Seroprevalence by age",className = col_title),
-                dcc.Graph(id = "graph2",responsive = True, style={"height":"350px"}),
-                html.Hr(),
-                html.P("Seroprevalence in by region",className = col_title),
-                dcc.Graph(id = "graph4",responsive = True, style={"height":"350px"})
-            ],width = 5,className = col_class),
-                
-        ],justify="center",className = classname_col,align = "center"),
-        
-        hm.reference
-        
-])
+        html.Hr(),
+    ],justify="center",className ="mt-5 pt-5 ms-5 me-5"),# className = "mb-2 ms-4 me-1 ps-4 pe-1 mt-5 pt-5"),
+    #returning content here
+    html.Div(id = "content"),
+    hm.reference
+],color="primary",type="grow")
+],className =  "bg-light bg-opacity-20"),
+
+
+
 
 class blood_donor_strat:
         """
@@ -123,29 +108,36 @@ class blood_donor_strat:
         def age_plot(self):
                 age_data = self.data[self.data["Age in years"].isin(["15 - 24","25 - 34", "35 - 44","45 - 54","55 - 64"])]
                 age_fig = px.timeline(age_data, x_start="start", x_end = "finish", y = "Anti-spike_perc", color = "Age in years", 
-                                        color_discrete_sequence= color_patterns,hover_name="Age in years", range_y = [0,.6], hover_data={"Anti-spike_perc":":0%"})
-                age_fig.update_layout(title = None,plot_bgcolor = pcolor, paper_bgcolor = pcolor)
-                age_fig.update_xaxes(title_font = {"size":titlefont},tickfont = tickfont_dict, dtick="M1",tickformat="%b\n%Y",linecolor = "black",ticks="outside")
-                age_fig.update_yaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,gridcolor = gridcolor,title_text = "seroprevalence",linecolor = "black",ticks="outside")
+                                        color_discrete_sequence= color_patterns,hover_name="Age in years", range_y = [0,.6], 
+                                        hover_data={"Anti-spike_perc":":0%"})
+                age_fig.update_layout(title = None,margin=margin,
+                                      legend = legend)
+                age_fig.update_xaxes(title_font = {"size":titlefont},tickfont = tickfont_dict, dtick="M1",tickformat="%b\n%Y",
+                                     linecolor = "black",ticks="outside")
+                age_fig.update_yaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,gridcolor = gridcolor,
+                                     title_text = "seroprevalence",linecolor = "black",ticks="outside")
                 return age_fig
         
         def gender_plot(self):
                 gender_data = self.data[self.data["Sex"].isin(["Female","Male"])]
                 gender_fig = px.timeline(gender_data, x_start="start", x_end = "finish", y = "Anti-spike_perc", color = "Sex", 
                                         hover_name="Sex", range_y = [0,.6], hover_data={"Anti-spike_perc":":0%"})
-                gender_fig.update_layout(title = None,plot_bgcolor = pcolor, paper_bgcolor = pcolor)
-                gender_fig.update_xaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,dtick="M1",tickformat="%b\n%Y",linecolor = "black",ticks="outside")
-                gender_fig.update_yaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,gridcolor = gridcolor,title_text = "seroprevalence",linecolor = "black",ticks="outside")
+                gender_fig.update_layout(title = None,margin=margin,legend=legend)
+                gender_fig.update_xaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,dtick="M1",tickformat="%b\n%Y",
+                                        linecolor = "black",ticks="outside")
+                gender_fig.update_yaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,gridcolor = gridcolor,
+                                        title_text = "seroprevalence",linecolor = "black",ticks="outside")
                 return gender_fig
         def region_plot(self):
                 region_data = self.data.loc[(self.data["Age in years"] == "15 - 64") & (self.data["Sex"]=="All")]
                 region_fig = px.timeline(region_data, x_start="start", x_end = "finish", y = "Anti-spike_perc", color = "Region", 
                                         hover_name="Region", range_y = [0,0.3], hover_data={"Anti-spike_perc":":0%"})
-                region_fig.update_layout(title = None
-                                         ,plot_bgcolor = pcolor, paper_bgcolor = pcolor)
+                region_fig.update_layout(title = None,margin=margin,legend=legend)
                 region_fig.update_traces(width = 0.003)
-                region_fig.update_xaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,dtick="M1",tickformat="%b\n%Y",linecolor = "black",ticks="outside")
-                region_fig.update_yaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,gridcolor = gridcolor,title_text = "seroprevalence",linecolor = "black",ticks="outside")
+                region_fig.update_xaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,dtick="M1",tickformat="%b\n%Y",
+                                        linecolor = "black",ticks="outside")
+                region_fig.update_yaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,gridcolor = gridcolor,
+                                        title_text = "seroprevalence",linecolor = "black",ticks="outside")
                 return region_fig
 
 class health_workers_strat:
@@ -163,8 +155,7 @@ class health_workers_strat:
                                                 hover_name="Age in years",range_x = ["2020-06-01", "2021-07-01"], 
                                                 range_y = [0,.3], hover_data={"Anti-spike_perc":":0%"})
         fig.update_traces(width=0.01)
-        fig.update_layout(title = None,plot_bgcolor = pcolor, paper_bgcolor = pcolor,
-                          legend = dict(itemsizing="constant",title = None,orientation = "h", font=dict(size=10)))
+        fig.update_layout(title = None,margin=margin, legend = legend)
         fig.update_xaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,dtick="M1",tickformat="%b\n%Y",linecolor = "black",ticks="outside")
         fig.update_yaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,gridcolor = gridcolor,title_text = "seroprevalence",linecolor = "black",ticks="outside")
         return fig
@@ -174,7 +165,7 @@ class health_workers_strat:
                                                 hover_name="Sex",range_x = ["2020-06-01", "2021-07-01"], 
                                                 range_y = [0,.3], hover_data={"Anti-spike_perc":":0%"})
         fig.update_traces(width=0.01)
-        fig.update_layout(title = None,plot_bgcolor = pcolor, paper_bgcolor = pcolor)
+        fig.update_layout(title = None,margin=margin,legend = legend)
         fig.update_xaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,dtick="M1",tickformat="%b\n%Y",linecolor = "black",ticks="outside")
         fig.update_yaxes(title_font = {"size":titlefont},gridcolor = gridcolor,tickfont = tickfont_dict,title_text = "seroprevalence",linecolor = "black",ticks="outside")
         return fig
@@ -184,34 +175,84 @@ class health_workers_strat:
                                                 hover_name="Region",range_x = ["2020-06-01", "2021-02-01"], 
                                                 range_y = [0,.6], hover_data={"Anti-spike_perc":":0%"})
         fig.update_traces(width=0.01)
-        fig.update_layout(title = None,plot_bgcolor = pcolor, paper_bgcolor = pcolor,legend = dict(orientation = "h"))
+        fig.update_layout(title = None,margin=margin,legend=legend)
         fig.update_xaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,dtick="M1",tickformat="%b\n%Y",linecolor = "black",ticks="outside")
         fig.update_yaxes(title_font = {"size":titlefont},gridcolor = gridcolor,title_text = "seroprevalence",linecolor = "black",ticks="outside")
 
         return fig
-    
 
+overall_image = html.Div([
+    dbc.Row([
+        #dbc.Col([],width=2),
+        dbc.Col([
+            dcc.Graph(figure = subfig,responsive = True,className = "ms-3",style = {"width":"800px","height":"400px"})
+            
+        ],width = 8, lg = 7, style = {"margin-right":"30px"}),
+        #dbc.Col([],width=2),
+    ],justify = "center")
+])
 
-@app.callback([Output("graph", "figure"),
-               Output("graph2", "figure"),
-               Output("graph3", "figure"),
-               Output("graph4", "figure")],
-              [Input("sero_pop", "value")])
+blood_donors_plot = html.Div([
+            dbc.Row([
+                
+                dbc.Col([
+                    html.Br(),
+                    html.P("Overall Seroprevalence",className = col_title),
+                    dcc.Graph(figure = sero_class.population_plot("Blood donors"),responsive = True, style ={"height":"40vh"}),
+                    html.Hr(),
+                    html.P("Seroprevalence by gender",className = col_title),
+                    dcc.Graph(figure = blood_donor_strat().gender_plot(),responsive = True, style={"height":"40vh"})
+                
+                ],width = 5,lg=4,className = col_class,style = {"margin-right":"10px"}),
+            
+                dbc.Col([
+                    html.Br(),
+                    html.P("Seroprevalence by age",className = col_title),
+                    dcc.Graph(figure = blood_donor_strat().age_plot(),responsive = True, style={"height":"40vh"}),
+                    html.Hr(),
+                    html.P("Seroprevalence in by region",className = col_title),
+                    dcc.Graph(figure = blood_donor_strat().region_plot(),responsive = True, style={"height":"40vh"})
+                ],width = 5,lg=4,className = col_class)
+                
+            ],justify = "center",className = classname_col)
+        ])
 
-def render(population):
-        if population == "Blood donors":
-               
-                fig1 = sero_class.population_plot(population)
-                fig2 = blood_donor_strat().age_plot()
-                fig3 = blood_donor_strat().gender_plot()
-                fig4 = blood_donor_strat().region_plot()
-                return fig1, fig2, fig3, fig4
+health_care_workers = html.Div([
+            dbc.Row([
+                
+                dbc.Col([
+                    html.Br(),
+                    html.P("Overall Seroprevalence",className = col_title),
+                    dcc.Graph(figure = sero_class.population_plot("Health workers"),responsive = True, style ={"height":"40vh"}),
+                    html.Hr(),
+                    html.P("Seroprevalence by gender",className = col_title),
+                    dcc.Graph(figure = health_workers_strat().gender_plot(),responsive = True, style={"height":"40vh"})
+                
+                ],width = 5,lg=4,className = col_class,style = {"margin-right":"10px"}),
+            
+                dbc.Col([
+                    html.Br(),
+                    html.P("Seroprevalence by age",className = col_title),
+                    dcc.Graph(figure = health_workers_strat().age_plot(),responsive = True, style={"height":"40vh"}),
+                    html.Hr(),
+                    html.P("Seroprevalence in by region",className = col_title),
+                    dcc.Graph(figure = health_workers_strat().region_plot(),responsive = True, style={"height":"40vh"})
+                ],width = 5,lg=4,className = col_class)
+                
+            ],justify = "center",className = classname_col)
+        ]),
 
-        elif population == "Health workers":
-                fig1 = sero_class.population_plot(population)
-                fig2 = health_workers_strat().age_plot()
-                fig3 = health_workers_strat().gender_plot()
-                fig4 = health_workers_strat().region_plot()
-                return fig1, fig2, fig3, fig4
+@app.callback(
+    Output("content", "children"), 
+    Input("population","value")
+)
 
-
+def render_content(value):
+    if value == "Overall":
+        return overall_image
+    elif value == "Blood Donors":
+        return blood_donors_plot
+    elif value == "Health Workers":
+        return health_care_workers
+    else:
+        return overall_image

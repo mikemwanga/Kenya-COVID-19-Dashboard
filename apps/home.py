@@ -6,29 +6,30 @@ county_daily_updates = pd.read_excel(DATA_PATH.joinpath("county_daily_updates.xl
 data = pd.read_csv(DATA_PATH.joinpath("cases_per_county.csv"))
 data["percentage_cases"] = round(data["cases"]/data["cases"].sum() * 100,2)
 
-lati_lot = pd.read_csv(DATA_PATH.joinpath("kenya_data_latitude_longitude.csv"))
-#county_prevalence = pd.read_csv(DATA_PATH.joinpath("cases_per_county.csv"))
+#lati_lot = pd.read_csv(DATA_PATH.joinpath("kenya_data_latitude_longitude.csv"))
 
 #vaccinated proportion-----------------------------------------------------------------------------------------------------------------------------------------
-county_vaccination = pd.read_csv(DATA_PATH.joinpath("county_vaccination.csv"))
-vaccination_updates = pd.read_csv(DATA_PATH.joinpath("vaccination_metadata_october.csv"), index_col="Group")
+
 county_prevalence = pd.read_csv(DATA_PATH.joinpath("cases_per_county.csv"))
-lati_lot = pd.read_csv(DATA_PATH.joinpath("kenya_data_latitude_longitude.csv"))
+#lati_lot = pd.read_csv(DATA_PATH.joinpath("kenya_data_latitude_longitude.csv"))
+
 daily_cases = pd.read_csv(DATA_PATH.joinpath("covid_daily_data.csv"))
+daily_cases["Date"] = pd.to_datetime(daily_cases["Date"],format = "%d/%m/%Y")
+
 age_gender_cases = pd.read_csv(DATA_PATH.joinpath("age_gender_cases_data.csv"))
 age_gender_deaths = pd.read_csv(DATA_PATH.joinpath("age_gender_death_cases_data.csv"))
 
 
 #processing the datasets
 daily_updates_moh.set_index("Date", inplace=True)
-new_cases_last_24hrs = daily_updates_moh["new_cases_last_24_hrs"].iat[-1]
-previous_case = daily_updates_moh["new_cases_last_24_hrs"].iat[-2]
+new_cases_last_24hrs = daily_updates_moh["new_cases_last_24_hrs"].dropna().iat[-1]
+previous_case = daily_updates_moh["new_cases_last_24_hrs"].dropna().iat[-2]
 case_fold_change = (new_cases_last_24hrs/previous_case) - 1
 
-total_cases_last_7  = daily_updates_moh["new_cases_last_24_hrs"].iloc[-7:].sum()
+total_cases_last_7  = daily_updates_moh["new_cases_last_24_hrs"].dropna().iloc[-7:].sum()
 
-samplesize_last_24hrs = daily_updates_moh["sample_size_last_24_hrs"].iat[-1]
-samplesize_previous = daily_updates_moh["sample_size_last_24_hrs"].iat[-2]
+samplesize_last_24hrs = daily_updates_moh["sample_size_last_24_hrs"].dropna().iat[-1]
+samplesize_previous = daily_updates_moh["sample_size_last_24_hrs"].dropna().iat[-2]
 
 total_samples_last_7 = daily_updates_moh["sample_size_last_24_hrs"].iloc[-7:].sum()
 posity_last_24 = round((new_cases_last_24hrs/samplesize_last_24hrs)*100,1)
@@ -41,20 +42,20 @@ fatalities_last_7 = daily_updates_moh["recorded_deaths_last_24_hrs"].iloc[-7:].s
 fatalities_previous = daily_updates_moh["recorded_deaths_last_24_hrs"].iat[-2]
 
 
-recoveries_last_24 = daily_updates_moh["recoveries_last_24_hrs"].iat[-1]
-recoveries_previous = daily_updates_moh["recoveries_last_24_hrs"].iat[-2]
+recoveries_last_24 = daily_updates_moh["recoveries_last_24_hrs"].dropna().iat[-1]
+recoveries_previous = daily_updates_moh["recoveries_last_24_hrs"].dropna().iat[-2]
 
-recoveries_last_7 = daily_updates_moh["recoveries_last_24_hrs"].iloc[-7:].sum()
+recoveries_last_7 = daily_updates_moh["recoveries_last_24_hrs"].dropna().iloc[-7:].sum()
 
-total_cases = daily_updates_moh["total_confirmed_cases"].iat[-1]
-total_tests =  daily_updates_moh["cumulative_tests"].iat[-1]
-total_deaths = daily_updates_moh["cumulative_fatalities"].iat[-1]
-total_recoveries = daily_updates_moh["total_recoveries"].iat[-1]
-proportion_fully_vaccntd_adults = daily_updates_moh["proportion_of_fully_vaccinated_adult_population"].iat[-1]
+total_cases = daily_updates_moh["total_confirmed_cases"].dropna().iat[-1]
+total_tests =  daily_updates_moh["cumulative_tests"].dropna().iat[-1]
+total_deaths = daily_updates_moh["cumulative_fatalities"].dropna().iat[-1]
+total_recoveries = daily_updates_moh["total_recoveries"].dropna().iat[-1]
+proportion_fully_vaccntd_adults = daily_updates_moh["proportion_of_fully_vaccinated_adult_population"].dropna().iat[-1]
 
 overall_positivity = round(total_cases/total_tests*100,1)
 #update_date = datetime.date.today().strftime("%B %d, %Y")
-update_date = daily_updates_moh.iloc[-1]
+update_date = daily_updates_moh.index[-1].strftime("%B %d, %Y")
 
 ##Plots
 last_7 = daily_updates_moh[["new_cases_last_24_hrs","positivity_rate_last_24_hrs"]].iloc[-7:].reset_index()
@@ -81,7 +82,6 @@ max_value = max(filtered_data["Cases"]) #initiate maximum value to set the range
 fig_county = px.bar(filtered_data, x = "Cases", text_auto=True,range_x =[0,max_value+3])#, color_discrete_sequence=[markercolor])
 fig_county.update_traces(textposition = "outside", textfont_size=10,cliponaxis=True, width=0.6)
 fig_county.update_layout(margin = margin,font_size=10,uniformtext_minsize = 3, yaxis_title = None)
-                            #plot_bgcolor = pcolor_home,, paper_bgcolor = pcolor_home)
 fig_county.update_xaxes(title = "Reported cases",linecolor = "black",tickfont = dict(size=10),title_font = {"size":10})
 fig_county.update_yaxes(tickfont = dict(size=10),title_font = {"size":10})
 
@@ -91,7 +91,7 @@ affected_counties = px.bar(data.head(n=8).sort_values("cases",ascending=True),
 affected_counties.update_yaxes(title = None,tickfont = dict(size=tickfont))
 affected_counties.update_xaxes(nticks=8,title = "Prevalence (%)",linecolor = "black",tickfont = dict(size=tickfont),
                                title_font = {"size":10})
-affected_counties.update_traces(textposition = "outside",textfont_size=10)
+affected_counties.update_traces(textposition = "outside",textfont_size=10,width=0.6)
 affected_counties.update_layout(margin=margin)
 
 county_daily_updates.fillna(0, inplace = True)
@@ -232,14 +232,14 @@ reference = dbc.Row([
                              style = {"font-size":10})
 
                 ], width = {"size":7,"offset":1})
-        ],className = "bg-secondary bg-opacity-10 border-top border-1 shadow justify-content-center ms-2 ps-2")
+        ],className = "bg-secondary bg-opacity-10 border-top border-1 shadow justify-content-center ms-2 ps-2 mt-4 pt-4")
 
 
 layout = html.Div([
-        
+        dbc.Spinner([
         dbc.Row([
                     dbc.Col([
-                        html.P(f"""Last updated: January 26, 2023""", className = "text-end fs-6 text-primary"), #{update_date}
+                        html.P(f"""Last updated: {update_date}""", className = "text-end text-primary", style = {"font-size":12}), #{update_date}
                         html.P("This dashboard allows a visualization of COVID-19 disease trends in cases, fatalities, vaccination and variant diversity. \
                         This platform intergrates data from Ministry of Health of Republic of Kenya, GISAID and other SARS-CoV-2 associated studies.",
                         className = "fs-6",style ={"text-align":"start"}),
@@ -250,28 +250,28 @@ layout = html.Div([
                 dbc.Row([
                     dbc.Col([
                         dbc.CardBody([
-                            html.Label(f"{total_cases:,}",className ="text-danger fs-3"),
+                            html.Label(f"{int(total_cases):,}",className ="text-danger fs-3"),
                             html.P("Total reported cases",style = style_text)
                         ],className = card_class )
                     ],width = 2,lg=2,className = "card_style",style = {"margin-right":"10px"}),
                     
                     dbc.Col([
                         dbc.CardBody([
-                            html.Label(f"{total_deaths:,}",className ="text-dark fs-3"),
+                            html.Label(f"{int(total_deaths):,}",className ="text-dark fs-3"),
                             html.P("Total reported deaths",style = style_text),
                        ],className = card_class)
                     ],width = 2,lg=2,className = "card_style",style = {"margin-right":"10px"}),
                     
                     dbc.Col([
                         dbc.CardBody([
-                            html.Label(f"{total_recoveries:,}",className = "text-success fs-3"),
+                            html.Label(f"{int(total_recoveries):,}",className = "text-success fs-3"),
                             html.P("Total recoveries",style = style_text),
                        ],className = card_class)
                     ],width = 2,lg=2,className = "card_style",style = {"margin-right":"10px"}),
                     
                     dbc.Col([
                         dbc.CardBody([
-                            html.Label(f"{total_tests:,}",className = "text-primary fs-3"),
+                            html.Label(f"{int(total_tests):,}",className = "text-primary fs-3"),
                             html.P("Tests done",style = style_text),
                        ],className = card_class)
                     ],width = 2,lg=2,className = "card_style"),
@@ -322,12 +322,12 @@ layout = html.Div([
                     
                     dbc.Col([
                                                
-                       html.P("Counties with reported cases in the last 24 hrs",className = col_title),
-                       dcc.Graph(figure = fig_county,responsive = True, style = {"width":"30vw","height":"30vh"}),
+                       html.P("Counties with recently reported cases",className = col_title),
+                       dcc.Graph(figure = fig_county,responsive = True, style = {"width":"30vw","height":"25vh"}),
                        html.Hr(className = hr_class, style = hr_style),
                                
                        html.P("Trends in Cases since beginnig of pandemic",className = col_title),
-                       dcc.Graph(figure=cases_trend,responsive = True, style = {"width":"30vw","height":"30vh"}),
+                       dcc.Graph(figure=cases_trend,responsive = True, style = {"width":"30vw","height":"25vh"}),
                       
                        html.Hr(className = hr_class, style = hr_style),
                        html.P("Cases by Gender and age",className = col_title),
@@ -337,10 +337,10 @@ layout = html.Div([
                     
                     dbc.Col([
                         html.P("Most affected counties",className = col_title),
-                        dcc.Graph(figure = affected_counties, responsive = True, style = {"width":"32vw","height":"30vh"}),
+                        dcc.Graph(figure = affected_counties, responsive = True, style = {"width":"32vw","height":"25vh"}),
                         html.Hr(className = hr_class, style = hr_style),
                         html.P("Trends in fatalities since beginnig of pandemic",className = col_title),
-                        dcc.Graph(figure = deaths_trends,responsive = True, style = {"width":"30vw","height":"30vh"}),
+                        dcc.Graph(figure = deaths_trends,responsive = True, style = {"width":"30vw","height":"25vh"}),
                         
                         html.Hr(className = hr_class, style = hr_style),
                         html.P("Fatalities by Gender and age",className = col_title),
@@ -349,6 +349,7 @@ layout = html.Div([
                     
                 ],className = classname_col,style = {},justify = "center"),
     
-    reference
+    reference,
+        ],type="border",color="info")
    
 ])

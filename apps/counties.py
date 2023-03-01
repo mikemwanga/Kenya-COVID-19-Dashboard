@@ -11,6 +11,7 @@ county_daily_data["Date"] = county_daily_data["date_of_lab_confirmation"]#.dt.da
 county_daily_data.set_index("Date", inplace = True)
 
 layout = html.Div([
+            dbc.Spinner([
                 dbc.Row([
                     dbc.Col([
                         html.H5("Visualization of trends at County level", style ={"text-align":"start"}),
@@ -95,9 +96,10 @@ layout = html.Div([
                         
                     ],width=5,lg=5,className = col_class,style={"margin-left":"15px", "height":"700px"})
                     
-                ],justify = "center",className = hm.classname_col),
+                ],justify = "center",className = classname_col),
             
-            hm.reference
+            hm.reference,
+            ],type="border",color="info")
 ])
 
 # def map_plot(observation,value):
@@ -195,13 +197,6 @@ def update_graph_card(county):
         fig_death.update_xaxes(title = None, showline=True,showgrid=False,linecolor = "black",)
         fig_death.update_layout(hovermode="x unified",uniformtext_minsize = 3, bargap =0.05,margin =margin,
                           legend = dict(orientation = "h"))
-        
-        #cases_value = data[data["County"].isin(county)]["cases"]
-        #death_value = data[data["County"]== county]["Death_cases"]
-        #prevalence = round(cases_value/data[data["County"] == county]["Population"]*100,1)
-        # data_table = data_county.to_dict('rows')
-        # columns =  [{"name": i, "id": i,} for i in (data_county.columns)]
-        # table = dt.DataTable(data_table, columns = columns)
         
         data_county = data[data["County"].isin(county)]
         data_county["Proportion_affected"] = round(data_county["cases"]/data_county["Population"]*100,2)

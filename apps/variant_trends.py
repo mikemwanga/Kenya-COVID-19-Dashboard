@@ -1,21 +1,14 @@
 from utils import *
 
 # Reading the data
+legend = dict(orientation = "h",title=None,yanchor  = "top", xanchor = "left",y=1.2,
+                                                    font = dict(size=10))
 
 variant_data = pd.read_table(DATA_PATH.joinpath("variant_month_data.txt"))
 average_df_clean = pd.read_csv(DATA_PATH.joinpath("average_weekly_submission_to_gsaid.csv"), parse_dates = ["date_sampled"])
 variants_kenya = pd.read_table(DATA_PATH.joinpath("variant_data_kenya.tsv"))
 variants_kenya["Month"] = pd.to_datetime(variants_kenya["Month"], format = "%Y-%m-%d")
 kenya_data = pd.read_table(DATA_PATH.joinpath("kenya.metadata_0111_120122.tsv"))
-
-# gridcolor="lightgray"
-# pcolor = "#FFFAFA"
-# cardbody_style = {"background-color":pcolor}
-# fillcolor = "#6baed6"
-# markercolor = "#8B0000"
-# margin = dict(l=20, r=25, t=20, b=20)
-# pcolor_white = "white"
-
 
 class Variants:
         def __init__(self, percentage):
@@ -38,8 +31,7 @@ fig_var = px.bar(variants_kenya, x = "Month", y = "percentage", color="variant",
 #fig_var.update_traces(textfont_size=10,textposition="outside", text = variant_values["Frequency"])
 fig_var.update_xaxes(nticks = 10,linecolor = "black",ticks="outside",tickfont = dict(size=10),title = None)
 fig_var.update_yaxes(linecolor = "black",ticks="outside",tickfont = dict(size=12),title ="Proportion", title_font = {"size":12})
-fig_var.update_layout(legend=dict(itemsizing="constant",title = None,orientation = "h", font=dict(size=10)),plot_bgcolor = pcolor,
-                      margin = margin,paper_bgcolor = pcolor,)
+fig_var.update_layout(legend=legend,margin = margin,)
 
 
 kenya_data = kenya_data[["date","pangolin_lineage"]].groupby(["date","pangolin_lineage"])[["pangolin_lineage"]].count().\

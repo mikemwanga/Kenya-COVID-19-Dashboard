@@ -8,17 +8,19 @@ from app import server
 app.title = "Kenya COVID-19 Dashboard"
 
 #connect to your app pages
-from apps import home, counties,vaccination,seroprevalence,variant_trends#,phylogeny#summary_report #cases,deaths,home
+from apps import home, counties,vaccination,variant_trends,phylogeny,seroprevalence,summary_report#,download#cases,deaths,home
 #Navbar
 navbar =  html.Div([
                     dbc.NavbarSimple([
                         dbc.NavItem(dbc.NavLink("Home", href="/apps/home")),
                         dbc.NavItem(dbc.NavLink("County", href="/apps/counties")),
                         dbc.NavItem(dbc.NavLink("Vaccination",href = "/apps/vaccination")),
+                        #dbc.NavItem(dbc.NavLink("Seroprevalence",href = "/apps/seroprevalence")),
                         dbc.NavItem(dbc.NavLink("Seroprevalence",href = "/apps/seroprevalence")),
-                        dbc.NavItem(dbc.NavLink("Variant Trends", href="/apps/variant_trends")),
+                        dbc.NavItem(dbc.NavLink("Variants", href="/apps/variant_trends")),
                         dbc.NavItem(dbc.NavLink("Phylogeny", href="/apps/phylogeny")),
-                        #dbc.NavItem(dbc.NavLink("Summary Report", href="/apps/summaryreport"))
+                        dbc.NavItem(dbc.NavLink("Summary", href="/apps/summaryreport")),
+                        #dbc.NavItem(dbc.NavLink("Download", href="/apps/download"))
             
                     ],             brand_href="/apps/home", 
                                     brand="Kenya COVID-19 Dashboard",
@@ -48,8 +50,10 @@ def display_page(pathname):
          return seroprevalence.layout
     elif pathname == "/apps/variant_trends":
          return variant_trends.layout
-    # elif pathname == "/apps/phylogeny":
-    #     return dbc.Spinner(phylogeny.layout)
+    elif pathname == "/apps/phylogeny":
+         return phylogeny.layout
+    elif pathname == "/apps/summaryreport":
+        return summary_report.layout
     else:
         return home.layout
 

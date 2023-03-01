@@ -32,17 +32,18 @@ pcolor_home = "#efedf5"
 pcolor_white = "white"
 axis_color = "black"
 fillcolor = "#6baed6"
-markercolor = "#3C565B"
+markercolor = "#bdbdbd"#cccccc"#"#3C565B"
 style = {"height":"200px", "width":"300px"}
 margin = dict(l=10, r=10, t=5, b=5)
 layout = Layout(plot_bgcolor = pcolor,paper_bgcolor=pcolor)
 cardbody_style = {"background-color":pcolor}
 cardbody_style_home = {"background-color":pcolor_home}
 cardbody_style_vac = {"background-color":pcolor_home, "height":"200%"}
-color_patterns = ["#e41a1c","#377eb8","#4daf4a","#984ea3","#073763"]
+color_patterns = ["#d95f02","#377eb8","#4daf4a","#984ea3","#073763"]  #e41a1c
 tickfont = 9
 titlefont = 12
-tickfont_dict = dict(size=10)
+
+tickfont_dict = dict(size=9)
 
 card_class = "text-center"
 classname_col = "bg-light bg-opacity-20 g-1 justify-content-center p-2 m-2" 
@@ -60,4 +61,4 @@ val_class = "fs-4 fw-normal ms-3"
 pcolor_vaccination = "#5D6D7E"
 bg_color = "rgba(0,0,0,0)"
 gridcolor = "#e0e0e0"
-#margin_size = "1px"
+#margin_size = "1px
