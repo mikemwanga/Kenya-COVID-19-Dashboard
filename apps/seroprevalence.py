@@ -9,7 +9,7 @@ daily_cases["Date"] = pd.to_datetime(daily_cases["Date"],format = "%d/%m/%Y")
 
 
 legend = dict(orientation = "h",title=None,yanchor  = "top", xanchor = "left",y=1.2,
-                                                    font = dict(size=10))
+                                                    font = dict(size=9))
 class sero_prevalence:
         def __init__(self):
                 sero_data["Period"] = sero_data[["Month(s)", "Year"]].astype(str).agg(" ".join, axis=1)
@@ -66,7 +66,6 @@ subfig = sero_class.seroplot()
 
 
 layout = html.Div([
-    dbc.Spinner([
     dbc.Row([
         dbc.Col([
             html.H5("Visualization of Seroprevalence across the country", style ={"text-align":"start"}),
@@ -90,7 +89,6 @@ layout = html.Div([
     #returning content here
     html.Div(id = "content"),
     hm.reference
-],color="primary",type="grow")
 ],className =  "bg-light bg-opacity-20"),
 
 

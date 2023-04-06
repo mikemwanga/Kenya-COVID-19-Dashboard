@@ -1,10 +1,7 @@
 #layout for counties tab
 from utils import *
 #load dataset
-# Reading the data
-#kenya_county = gpd.read_file(DATA_PATH.joinpath("kenyan-counties/County.shp"))
 data = pd.read_csv(DATA_PATH.joinpath("cases_per_county.csv"))
-lati_lot = pd.read_csv(DATA_PATH.joinpath("kenya_data_latitude_longitude.csv"))
 county_daily_data = pd.read_csv(DATA_PATH.joinpath("county_daily_data.csv"),dtype='unicode', low_memory=False)
 county_daily_data["date_of_lab_confirmation"] = pd.to_datetime(county_daily_data["date_of_lab_confirmation"])
 county_daily_data["Date"] = county_daily_data["date_of_lab_confirmation"]#.dt.date
@@ -63,36 +60,7 @@ layout = html.Div([
                         html.Br(),
                         html.P("Trends in deaths at the selected county",className = col_title),
                         dcc.Graph(id = "death_plot", figure = {},responsive=True,style={"height":"250px"})
-                        # dbc.Row([
-                            
-                        #     html.P("Summary of cases, deaths and proportion of infected within the selected county.", 
-                        #            className="fw-bold fs-6 mt-4 text-center"),
-                        #     dbc.Col([dbc.CardBody([
-                        #         html.H4(id="cases_value",className ="text-danger fs-3"),
-                        #         html.P("Total cases",style = style_text)
-                        #         ],className = card_class ),
-                        #     ]),
-                        #     dbc.Col([
-                        #         dbc.CardBody([
-                        #         html.H4(id="death_value",className ="text-black fs-3"),
-                        #         html.P("Total deaths",style = style_text)
-                        #         ],className = card_class ),
-                        #     ]),
-                        #     dbc.Col([
-                        #         dbc.CardBody([
-                        #         html.H4(id="prevalence",className ="text-info fs-3"),
-                        #         html.P("Proportion infected",style = style_text)
-                        #         ],className = card_class ),
-                        #     ]),
                         
-                        # ]),
-                        #html.Hr(),
-                        
-                       # html.Div([
-                            #dbc.Button("Cases",id="cases_button",n_clicks=0,size="sm",color = "primary",outline=True,style = {"font-size":10}),
-                            #dbc.Button("Deaths",id="deaths_button",n_clicks=0,size="sm",color = "primary",outline=True,className="me-2",style = {"font-size":10}),
-                        #],className = "d-grid gap-1 d-md-flex justify-content-sm-end"),
-                        #html.Div(id = "map-content", children = []),
                         
                     ],width=5,lg=5,className = col_class,style={"margin-left":"15px", "height":"700px"})
                     
@@ -102,46 +70,6 @@ layout = html.Div([
             ],type="border",color="info")
 ])
 
-# def map_plot(observation,value):
-#     fig = px.choropleth(kenya_data, geojson=kenya_data.geometry, locations=kenya_data.index,hover_data = {observation:True, "random":False},
-#                         color_continuous_scale="cividis",color="random", range_color=(0.4,1),width=700,height=650)
-#     fig.update_geos(fitbounds = "locations", visible=False,scope="africa")
-#     fig2 = go.Figure(go.Scattergeo(
-#             lat = kenya_data.latitude, lon = kenya_data.longitude,text = kenya_data.index,textposition="middle center",
-#             marker = dict(size=kenya_data[observation]*value,sizemode="area",color = kenya_data.random,line_color="#f0f0f0",line_width=1)
-#             ))
-#     fig.add_trace(fig2.data[0])
-#     fig.update_layout(#paper_bgcolor = pcolor,plot_bgcolor=pcolor,bgcolor = pcolor
-#                     geo = dict(projection_scale=6,center = dict(lat = 0.25,lon=38.09),landcolor ='rgb(217, 217, 217)'),
-#                     coloraxis_showscale=False, height = 600,width=800,margin = margin)
-#     return fig
-# cases_fig = map_plot("cases",0.02)
-# fatality_fig = map_plot("Death_cases",0.5)
-
-# @app.callback(Output("map-content","children"),
-#               [Input("cases_button", "n_clicks"),
-#                 Input("deaths_button","n_clicks")])
-
-# def render_map_content(click1,click2):
-#         size = {"width":"37vw","height":"70vh"}
-#         cases = html.Div([
-#                     html.P("County distribution of COVID-19 cases",className="fs-6 text-center fw-bold"),
-#                     dcc.Graph(figure = cases_fig,responsive=True, style = size ),
-#                     ])
-#         deaths = html.Div([
-#                     html.P("County distribution of COVID-19 fatalities",className="fs-6 text-center fw-bold"),
-#                     dcc.Graph(figure = fatality_fig,responsive=True,style = size)
-#                     ]),
-        
-#         ctx = dash.callback_context #used to determine which button is triggered
-        
-#         button_id = ctx.triggered[0]['prop_id'].split('.')[0] #grab id of button triggered
-#         if button_id == "cases_button":
-#             return cases
-#         elif button_id == "deaths_button":
-#              return deaths
-#         else:
-#              return cases
                 
 #function for 7-day moving average
 def seven_day_average(data,column):
@@ -198,14 +126,16 @@ def update_graph_card(county):
         fig_death.update_layout(hovermode="x unified",uniformtext_minsize = 3, bargap =0.05,margin =margin,
                           legend = dict(orientation = "h"))
         
+        
         data_county = data[data["County"].isin(county)]
         data_county["Proportion_affected"] = round(data_county["cases"]/data_county["Population"]*100,2)
         data_county.drop(["Unnamed: 0","Population","Discharged"],axis=1,inplace = True)
         data_county.rename(columns={"cases":"Cases","Death_cases":"Deaths",
-                                    "Proportion_affected":"Affected(%)"},
+                                    "Proportion_affected":"Affected(%)","Proportion_vaccinated":"Vaccinated(%)" },
                            inplace=True)
+        
         data_table = data_county.to_dict('rows')
-        columns =  [{"name": i, "id": i,} for i in (data_county.columns)]
+        columns =  [{"name": i, "id": i,} for i in (data_county[["County","Cases","Deaths","Affected(%)","Vaccinated(%)"]])] #data_county.columns
         table = dt.DataTable(data_table, columns = columns, page_size=5,#fixed_rows={'headers': True},
                              style_table={'height': '150px', 'overflowY': 'hidden','textOverflow': 'ellipsis'},
                              style_cell = {'font_family': 'helvetica','font_size': '14px','text_align': 'center'},
@@ -224,6 +154,6 @@ def update_graph_card(county):
                             
                 )
        
-        return fig,fig2,fig_death,table#cases_value,death_value, prevalence,#table #fig, fig2,
+        return fig,fig2,fig_death,table
 
 #

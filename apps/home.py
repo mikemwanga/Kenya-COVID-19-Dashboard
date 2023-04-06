@@ -2,24 +2,16 @@ from utils import *
 #Load datasets
 daily_updates_moh =  pd.read_excel(DATA_PATH.joinpath("daily_updates_metadata.xlsx"))
 county_daily_updates = pd.read_excel(DATA_PATH.joinpath("county_daily_updates.xlsx"), parse_dates=["Date"], index_col='Date')
-#kenya_county = gpd.read_file(DATA_PATH.joinpath("kenyan-counties/County.shp"))
 data = pd.read_csv(DATA_PATH.joinpath("cases_per_county.csv"))
 data["percentage_cases"] = round(data["cases"]/data["cases"].sum() * 100,2)
-
-#lati_lot = pd.read_csv(DATA_PATH.joinpath("kenya_data_latitude_longitude.csv"))
 
 #vaccinated proportion-----------------------------------------------------------------------------------------------------------------------------------------
 
 county_prevalence = pd.read_csv(DATA_PATH.joinpath("cases_per_county.csv"))
-#lati_lot = pd.read_csv(DATA_PATH.joinpath("kenya_data_latitude_longitude.csv"))
-
 daily_cases = pd.read_csv(DATA_PATH.joinpath("covid_daily_data.csv"))
 daily_cases["Date"] = pd.to_datetime(daily_cases["Date"],format = "%d/%m/%Y")
 
-age_gender_cases = pd.read_csv(DATA_PATH.joinpath("age_gender_cases_data.csv"))
-age_gender_deaths = pd.read_csv(DATA_PATH.joinpath("age_gender_death_cases_data.csv"))
-
-
+age_gender_data = pd.read_table(DATA_PATH.joinpath("age_gender_data.txt"),sep = "\t")
 #processing the datasets
 daily_updates_moh.set_index("Date", inplace=True)
 new_cases_last_24hrs = daily_updates_moh["new_cases_last_24_hrs"].dropna().iat[-1]
@@ -86,13 +78,14 @@ fig_county.update_xaxes(title = "Reported cases",linecolor = "black",tickfont = 
 fig_county.update_yaxes(tickfont = dict(size=10),title_font = {"size":10})
 
 #most affected counties plot
-affected_counties = px.bar(data.head(n=8).sort_values("cases",ascending=True),
-                           x = "percentage_cases",y="County",text_auto=True,orientation = "h",range_x=[0,45])
-affected_counties.update_yaxes(title = None,tickfont = dict(size=tickfont))
+affected_counties = px.bar(data.sort_values("cases",ascending=False).head(n=8),
+                           x = "percentage_cases",y="County",text_auto=True,orientation = "h") #range_x=[0,45]
+affected_counties.update_yaxes(title = None,tickfont = dict(size=tickfont), autorange = "reversed")
 affected_counties.update_xaxes(nticks=8,title = "Prevalence (%)",linecolor = "black",tickfont = dict(size=tickfont),
                                title_font = {"size":10})
 affected_counties.update_traces(textposition = "outside",textfont_size=10,width=0.6)
 affected_counties.update_layout(margin=margin)
+
 
 county_daily_updates.fillna(0, inplace = True)
 county_total_cases =  pd.DataFrame(county_daily_updates.sum(axis=0).reset_index()).rename(columns = {"index":"county",0:"Freq"})
@@ -123,23 +116,58 @@ cases_trend = daily_plots("Reported_Cases","moving_average_cases") #plot of dail
 deaths_trends = daily_plots("death_cases","moving_average_deaths")
 
 #age gender plots
-def age_gender_plots(data):
-        total_female = data["Female"].sum()
-        total_male = data["Male"].sum()
-        perc_female = total_female/(total_male+total_female)
-        perc_male = total_male/(total_male+total_female)
-        fig = px.bar(data, x = "age_groups", y = ["Female","Male"], barmode="group")#, color_discrete_sequence = ["#998ec3","#f1a340"])
-        fig.update_layout(uniformtext_minsize = 3, bargap =0.2, 
-                     legend_title = None,margin = margin,
-                    legend = dict(orientation = "h",yanchor = "top",y = 1,xanchor = "right",x = 1))
-        fig.update_yaxes(title = None,showline=True, linewidth = 0.2, linecolor = "gray",
-                         tickfont = dict(size=tickfont))
-        fig.update_xaxes(title = None,showgrid=False,tickfont = dict(size=tickfont))
-        return fig, total_female, total_male, perc_female,perc_male
-
-age_gender_cases_plot, total_female_cases, total_male_cases, perc_female_cases,perc_male_cases = age_gender_plots(age_gender_cases)
-age_gender_death_plot, total_female_death,total_male_death,perc_female_deaths,perc_male_deaths = age_gender_plots(age_gender_deaths)
-
+def age_gender_plots2(data):
+    #plot for cases based on gender and age
+    age_gender_cases_plot = go.Figure()
+    
+    age_gender_cases_plot.add_trace(go.Bar(y = data["age_groups"], x = data["Female_cases"]*-1, orientation="h",name = "Female",
+                               text = data["Female_cases"],hoverinfo = "text", textfont = dict(size=1,color ="#2C3E50")))#,marker=dict(color="#2C3E50"))), #marker=dict(color='#18BC9C')
+    
+    age_gender_cases_plot.add_trace(go.Bar(y = data["age_groups"], x = data["Male_cases"], orientation="h",name = "Male",
+                               hoverinfo = "x")),
+                         
+    age_gender_cases_plot.update_layout(barmode = "relative",bargap = 0.0,bargroupgap=0,
+                  xaxis =  dict(tickvals = [-50000,-40000,-30000,-20000,-10000,0,10000,20000,30000,40000,50000],
+                                ticktext = ["50k","40k","30k","20k","10k","0","10k","20k","30k","40k","50k"]),
+                  margin=margin,
+                  legend = dict(orientation = "h",title=None,font = dict(size=9)))
+    
+    age_gender_cases_plot.update_yaxes(tickfont = dict(size=tickfont),title = "Age group",title_font = {"size":titlefont})
+    age_gender_cases_plot.update_xaxes(tickfont = dict(size=tickfont),title = None,title_font = {"size":titlefont} )
+    age_gender_cases_plot.update_traces(width=0.6)
+    
+    #--------------------------------------------------------------------------------------------------------------------
+    #plot for deaths based on gender and age
+    age_gender_death_plot = go.Figure()
+    age_gender_death_plot.add_trace(go.Bar(y = data["age_groups"], x = data["Female_deaths"]*-1, orientation="h",name = "Female",
+                                text = data["Female_deaths"],hoverinfo = "text", textfont = dict(color ="#2C3E50",size=1)))
+    age_gender_death_plot.add_trace(go.Bar(y = data["age_groups"], x = data["Male_deaths"], orientation="h",name = "Male",
+                                hoverinfo = "x" ))
+    age_gender_death_plot.update_layout(barmode = "relative",bargroupgap=0,bargap = 0,
+                  xaxis =  dict(tickvals = [-800,-600,-400,-200,-100,0,100,200,400,600,800],
+                                ticktext = ["800","600","400","200","100","0","100","200","400","600","800"]),#bargap = 0.0
+                  margin=margin,
+                  legend = dict(orientation = "h",font = dict(size=9)))
+    age_gender_death_plot.update_yaxes(tickfont = dict(size=tickfont),title = "Age group",title_font = {"size":titlefont})
+    age_gender_death_plot.update_xaxes(tickfont = dict(size=tickfont),title = None,title_font = {"size":titlefont})
+    age_gender_death_plot.update_traces(width=0.6)
+    
+    total_female_cases = data["Female_cases"].sum()
+    total_male_cases = data["Male_cases"].sum()
+    perc_female_cases = total_female_cases/(total_female_cases + total_male_cases)
+    perc_male_cases = total_male_cases/(total_female_cases + total_male_cases)
+    
+    total_female_death = data["Female_deaths"].sum()
+    total_male_death = data["Male_deaths"].sum()
+    perc_female_deaths = total_female_death/(total_female_death+total_male_death )
+    perc_male_deaths = total_male_death/(total_female_death+total_male_death )
+    
+    return age_gender_cases_plot,age_gender_death_plot,total_female_cases, total_male_cases, perc_female_cases,\
+        perc_male_cases,total_female_death,total_male_death,perc_female_deaths,perc_male_deaths
+        
+age_gender_cases_plot,age_gender_death_plot,total_female_cases, total_male_cases, perc_female_cases,perc_male_cases,total_female_death,\
+    total_male_death,perc_female_deaths,perc_male_deaths  = age_gender_plots2(age_gender_data)
+   
 #function to caculate fold change
 class fold_change:
     def __init__(self):
@@ -212,12 +240,14 @@ reference = dbc.Row([
 
                 dbc.Col([
 
-                    html.P("Other Information",className = "fw-bolder text-decoration-underline mb-0 pb-0",style = {"font-size":14}),
-                    html.P("Developed and maintained by KEMRI-Wellcome Trust, in collaboration with National Public Health Surveillance Laboratory \
-                        at Ministry of Health, Kenya. Funding support from Foreign Commonwealth and Development Office (FCDO).",
-                        style = {"font-size":14}),
+                    html.P("Other Information",className = "fw-bolder text-decoration-underline mb-0 pb-0",style = {"font-size":12}),
+                    html.Label(["Developed and maintained by KEMRI-Wellcome Trust, in collaboration with National Public Health Surveillance Laboratory \
+                        at Ministry of Health, Kenya. Bayesian Model for Early Warning estimation was developed by ", \
+                            html.A("Laura et al.,2022", href="https://doi.org/10.1101/2022.01.01.21268131")," \
+                            Funding support from Foreign Commonwealth and Development Office (FCDO)."],
+                        style = {"font-size":10}),
 
-                    html.P("Data Source",className = "fw-bolder text-decoration-underline mb-0 pb-0",style = {"font-size":14}),
+                    html.P("Data Source",className = "fw-bolder text-decoration-underline mb-0 pb-0",style = {"font-size":12}),
                     dcc.Link("Ministry of Health,Kenya (NPHL)",href="https://www.health.go.ke/",
                              style = {"font-size":10, "margin-right":"10px"}),
                     dcc.Link("Global Science Initiative(GISAID)",href="https://gisaid.org", 
@@ -225,7 +255,7 @@ reference = dbc.Row([
                     dcc.Link("Sero-study", href = "https://www.nature.com/articles/s41467-021-24062-3",
                              style = {"font-size":10}),
 
-                    html.P("Contact Us",className = "fw-bolder text-decoration-underline mb-0 pb-0 mt-2",style = {"font-size":14}),
+                    html.P("Contact Us",className = "fw-bolder text-decoration-underline mb-0 pb-0 mt-2",style = {"font-size":12}),
                     dcc.Link("jmwanga@kemri-wellcome.org",title="email_me",href="mailto:jmwanga@kemri-wellcome.org",target="_blank",
                              style = {"font-size":10,"margin-right":"10px"}),
                     dcc.Link("ggithinji@kemri-wellcome.org",title="email_me",href="mailto:ggithinji@kemri-wellcome.org",target="_blank",
@@ -326,12 +356,13 @@ layout = html.Div([
                        dcc.Graph(figure = fig_county,responsive = True, style = {"width":"30vw","height":"25vh"}),
                        html.Hr(className = hr_class, style = hr_style),
                                
-                       html.P("Trends in Cases since beginnig of pandemic",className = col_title),
+                       html.P("Trends in Cases since beginning of pandemic",className = col_title),
                        dcc.Graph(figure=cases_trend,responsive = True, style = {"width":"30vw","height":"25vh"}),
                       
                        html.Hr(className = hr_class, style = hr_style),
                        html.P("Cases by Gender and age",className = col_title),
-                       dcc.Graph(figure = age_gender_cases_plot,responsive = True, style = {"width":"30vw","height":"30vh"})
+                       #dcc.Graph(figure = age_gender_cases_plot,responsive = True, style = {"width":"30vw","height":"30vh"}),
+                       dcc.Graph(figure = age_gender_cases_plot,responsive = True,style = {"width":"25hw","height":"30vh"})#,style = {"width":"30hw","height":"35vh"})
                        
                     ],width=4,lg=4,className = col_class,style = {"margin-left":"15px","margin-right":"0px","height":"1000px"} ),
                     
@@ -339,12 +370,14 @@ layout = html.Div([
                         html.P("Most affected counties",className = col_title),
                         dcc.Graph(figure = affected_counties, responsive = True, style = {"width":"32vw","height":"25vh"}),
                         html.Hr(className = hr_class, style = hr_style),
-                        html.P("Trends in fatalities since beginnig of pandemic",className = col_title),
-                        dcc.Graph(figure = deaths_trends,responsive = True, style = {"width":"30vw","height":"25vh"}),
+                        html.P("Trends in fatalities since beginning of pandemic",className = col_title),
+                        dcc.Graph(figure = deaths_trends,responsive = True, style = {"width":"30w","height":"25vh"}),
                         
                         html.Hr(className = hr_class, style = hr_style),
                         html.P("Fatalities by Gender and age",className = col_title),
-                        dcc.Graph(figure= age_gender_death_plot, responsive = True, style = {"width":"30vw","height":"30vh"})
+                        #dcc.Graph(figure= age_gender_death_plot, responsive = True, style = {"width":"30vw","height":"30vh"}),
+                        
+                        dcc.Graph(figure= age_gender_death_plot, responsive = True, style = {"width":"25hw","height":"30vh"}),# style = {"width":"30vw","height":"30vh"})
                     ],width = 4,lg=4,className = col_class,style = {"margin-left":"15px","margin-right":"0px","height":"1000px"}),
                     
                 ],className = classname_col,style = {},justify = "center"),

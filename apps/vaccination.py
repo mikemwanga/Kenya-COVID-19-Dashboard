@@ -153,10 +153,10 @@ vaccination_by_count = html.Div([
 vaccination_by_age = html.Div([
     
                 dbc.Row([
-                    dbc.Col([],width=2),
+                    #dbc.Col([],width=2),
                     dbc.Col([
                     dcc.Graph(figure = vac_age_fig,responsive = True, style = {"width":"700px","height":"350px"} )
-                    ],width=5,lg=4,className = col_class),
+                    ],width=6,lg=5,className = col_class),
                     dbc.Col([],width=2)
                 ],className = classname_col,justify = "center")
     

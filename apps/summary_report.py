@@ -27,7 +27,7 @@ vaccine_table = dt.DataTable(vaccination_data_dict, columns=columns)
 
 
 variant_data = pd.read_table(hm.DATA_PATH.joinpath("variant_month_data.txt"))
-average_df_clean = pd.read_csv(hm.DATA_PATH.joinpath("average_weekly_submission_to_gsaid.csv"), parse_dates = ["date_sampled"])
+#average_df_clean = pd.read_csv(hm.DATA_PATH.joinpath("average_weekly_submission_to_gsaid.csv"), parse_dates = ["date_sampled"])
 variants_kenya = pd.read_table(hm.DATA_PATH.joinpath("variant_data_kenya.tsv"))
 variants_kenya["Month"] = pd.to_datetime(variants_kenya["Month"], format = "%Y-%m-%d")
 
@@ -46,13 +46,13 @@ content = html.Div([
     dbc.Row([
         
         dbc.Col([
-            html.H3("Kenya COVID-19 Report", className = "text-center fw-bold text-decoration-underline"),
+            html.H3("Kenya COVID-19 Report", className = "text-center fw-bold text-decoration-underline"),#{hm.update_date}
             html.H5("1. Summary",className = "fw-bold"),
-            html.P(f"COVID-19 was first reported in Kenya on March 13, 2020. As of January 16, 2023 {hm.total_cases:,} infections and {hm.total_deaths:,} \
+            html.P([f"COVID-19 was first reported in Kenya on March 13, 2020. As of {hm.total_cases:,}  infections and {hm.total_deaths:,} \
                 have been reported. The overall positivity stands at {hm.overall_positivity}%. {hm.total_recoveries:,} have so far recovered.\
                 Nairobi is the highest hit county with 41.3%, Kiambu 6.2% Mombasa 5.3% Nakuru 5.2% and Uasin Gishu 3.2% of all total reported cases \
                 across the country.\
-                ",
+                "],
                 className = "fs-6 mt-2"),
             
             dbc.Row([
@@ -154,13 +154,13 @@ content = html.Div([
                     className = "fs-6 mt-1 pt-1"),
                     
                     html.P("Figure 5: SARS-CoV-2 variants", className = "fst-italic fs-6 fw-normal mb-1"),
-                    dcc.Graph(figure = vt.fig_var,responsive = True,style = {"height":"50vh", "width":"130vh"})
+                    dcc.Graph(figure = vt.fig_var,responsive = True,style = {"height":"50vh", "width":"100vh"})
                 ],width={"size":12,"offset":1}, xl=8),
                 
             ])
             
         
-        ],width=10,lg=9),
+        ],width=8,lg=9),
     
     
     ],justify = "center",className = "pt-5 mt-5")
