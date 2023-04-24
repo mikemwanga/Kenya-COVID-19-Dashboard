@@ -5,12 +5,15 @@ from dash.dependencies import Input,Output
 from app import app
 from app import server
 
+
 app.title = "Kenya COVID-19 Dashboard"
 
 #connect to your app pages
-from apps import home, counties,vaccination,variant_trends,phylogeny,seroprevalence,summary_report,countysummary#,markdown#,download#cases,deaths,home
+from apps import home, counties,vaccination,variant_trends,phylogeny,seroprevalence#,summary_report#,countysummary#,markdown#,download#cases,deaths,home
+
 #Navbar
-navbar =  html.Div([
+navbar =   html.Div([
+                    
                     dbc.NavbarSimple([
                         dbc.NavItem(dbc.NavLink("Home", href="/apps/home")),
                         dbc.NavItem(dbc.NavLink("County", href="/apps/counties")),
@@ -22,31 +25,33 @@ navbar =  html.Div([
                             dbc.DropdownMenuItem("Countrywide",href="/apps/summaryreport"),
                             dbc.DropdownMenuItem("County",href="/apps/countysummary")
                         ],nav=True,in_navbar=True,label="Summary"),
-                        
-                        #dbc.NavItem(dbc.NavLink("Summary", href="/apps/summaryreport")),
-            
+
                     ],             brand_href="/apps/home", 
                                     brand="Kenya COVID-19 Dashboard",
                                     style={"margin-bottom":5},
                                     color="#333972",dark=True,light=True,
                                     fixed ="top",#className = "text-light font-weight-bold"
-                                    )          
+                     ),     
 ])                   
 
+#app.layout = serve_layout
+
 app.layout = html.Div([
-    
-    dcc.Location(id='url', refresh=False),
+    dcc.Location(id='url', refresh=True),
     navbar,
-    html.Div(id='page-content', children=[])
+    html.Div(id='page-content', children=[]),
+    
 ])
 
 @app.callback(Output('page-content', 'children'),
-              [Input('url', 'pathname')], prevent_initial_callback=True)
+            Input('url', 'pathname')) #,prevent_initial_callback=True
+
 def display_page(pathname):
+    
     if pathname == "/apps/home":
         return dbc.Spinner(home.layout,type="border",color="info")
     elif pathname == '/apps/counties':
-          return counties.layout
+           return counties.layout
     elif pathname == "/apps/vaccination":
           return dbc.Spinner(vaccination.layout,type="border",color="info")
     elif pathname == "/apps/seroprevalence":
@@ -60,7 +65,7 @@ def display_page(pathname):
     elif pathname == "/apps/countysummary":
         return dbc.Spinner(countysummary.layout,type="border",color="info")
     else:
-        return home.layout
+        return dbc.Spinner(home.layout,type="border",color="info")
 
 if __name__ == '__main__':
     app.run_server(debug=True,host="0.0.0.0", port = "3042", threaded=True)

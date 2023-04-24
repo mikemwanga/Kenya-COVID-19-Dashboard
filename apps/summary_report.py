@@ -19,7 +19,7 @@ values = [["Total Vaccines received",total_vaccines],
 vaccination_data = pd.DataFrame(values,columns=["Vaccine","Doses Administered"])
 vaccination_data["Doses Administered"] = vaccination_data["Doses Administered"].astype(int)
 
-vaccination_data_dict = vaccination_data.to_dict('rows')
+vaccination_data_dict = vaccination_data.to_dict("records")#('rows')
 columns =  [{"name": i, "id": i,} for i in (vaccination_data.columns)]
 
 vaccine_table = dt.DataTable(vaccination_data_dict, columns=columns)

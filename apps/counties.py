@@ -3,7 +3,7 @@ from utils import *
 #load dataset
 data = pd.read_csv(DATA_PATH.joinpath("cases_per_county.csv"))
 county_daily_data = pd.read_csv(DATA_PATH.joinpath("county_daily_data.csv"),dtype='unicode', low_memory=False)
-county_daily_data["date_of_lab_confirmation"] = pd.to_datetime(county_daily_data["date_of_lab_confirmation"])
+county_daily_data["date_of_lab_confirmation"] = pd.to_datetime(county_daily_data["date_of_lab_confirmation"], format = "%d/%m/%Y")
 county_daily_data["Date"] = county_daily_data["date_of_lab_confirmation"]#.dt.date
 county_daily_data.set_index("Date", inplace = True)
 
@@ -33,7 +33,7 @@ layout = html.Div([
                                  clearable=False,
                                  style = {"width":300},
                             ),
-                        ],width=4,className="me-2 mb-2"),
+                        ],width=4,lg=3,className="me-5 mb-2"),
                     ],justify="end"),
                     
                     dbc.Col([
@@ -45,24 +45,24 @@ layout = html.Div([
                         html.Br(),html.Br(),html.Br(),
                         html.Hr(),
                         html.P("Cumulative cases at the selected county",className = col_title),
-                        dcc.Graph(id = "cumulative_plot", figure = {},responsive=True,style={"height":"250px"}),
+                        dcc.Graph(id = "cumulative_plot", figure = {},responsive=True,style={"width":"25hw","height":"30vh"}),
                         
                         
-                    ],width=5,lg=5,className = col_class,style = {"height":"700px"}),
+                    ],width=5,lg=4,sm=8,className = col_class,style = {"height":"800px"}),
                     
                     dbc.Col([
                         html.Br(),
                         html.P("Trends in cases at the selected county (14-days average)",
                                className="fw-bold fs-6 mt-4 text-center"),
-                        dcc.Graph(id = "trends_plot", figure = {}, responsive=True,style={"height":"250px"}),
+                        dcc.Graph(id = "trends_plot", figure = {}, responsive=True,style={"width":"25hw","height":"30vh"}),
                         html.Hr(),
                         
                         html.Br(),
                         html.P("Trends in deaths at the selected county",className = col_title),
-                        dcc.Graph(id = "death_plot", figure = {},responsive=True,style={"height":"250px"})
+                        dcc.Graph(id = "death_plot", figure = {},responsive=True,style={"width":"25hw","height":"30vh"})
                         
                         
-                    ],width=5,lg=5,className = col_class,style={"margin-left":"15px", "height":"700px"})
+                    ],width=5,lg=4,sm=8,className = col_class,style={"margin-left":"15px", "height":"800px"})
                     
                 ],justify = "center",className = classname_col),
             
@@ -87,12 +87,8 @@ def seven_day_average(data,column):
 @app.callback( [Output("trends_plot", "figure"),
                 Output("cumulative_plot", "figure"),
                 Output("death_plot","figure"),
-                #Output("cases_value","children"),
-                #Output("death_value","children"),
-                #Output("prevalence","children"),
                 Output("table","children")],
                 [Input("county_selected", "value"),
-                #Input("my-date-picker" , "start_date"),Input("my-date-picker" , "end_date"
                 ])
 
 def update_graph_card(county):
@@ -134,7 +130,7 @@ def update_graph_card(county):
                                     "Proportion_affected":"Affected(%)","Proportion_vaccinated":"Vaccinated(%)" },
                            inplace=True)
         
-        data_table = data_county.to_dict('rows')
+        data_table = data_county.to_dict("records")#('rows')
         columns =  [{"name": i, "id": i,} for i in (data_county[["County","Cases","Deaths","Affected(%)","Vaccinated(%)"]])] #data_county.columns
         table = dt.DataTable(data_table, columns = columns, page_size=5,#fixed_rows={'headers': True},
                              style_table={'height': '150px', 'overflowY': 'hidden','textOverflow': 'ellipsis'},

@@ -2,7 +2,6 @@ from utils import *
 from plotly.subplots import make_subplots
 from apps import home as hm
 
-
 sero_data = pd.read_excel(DATA_PATH.joinpath("KWTRP_serosurveillance_data_Dashboard_09Sep2022.xlsx"))
 daily_cases = pd.read_csv(DATA_PATH.joinpath("covid_daily_data.csv"))
 daily_cases["Date"] = pd.to_datetime(daily_cases["Date"],format = "%d/%m/%Y")
@@ -75,15 +74,11 @@ layout = html.Div([
                 html.P("Select Population",className="text-primary mb-0 pb-0", style= {"font-size":14}),
                 dcc.Dropdown(
                     id = "population",
-                    options = ["Overall","Blood Donors","Health Workers"],#"ANC Attendees","HDSS Residents"],
-                    value = "Overall",
-                    #style= {"font-size":14}
-                    #maxHeight = 20
-                    #placeholder = "Select Population",   
+                    options = ["Overall","Blood Donors","Health Workers","HDSS Residents"],#"ANC Attendees"],
+                    value = "Overall", 
                 )
             ],style={"width":"100%","font-size":14})
-        ],width=4, lg=3),
-        
+        ],width=4, lg=3,className = "me-5 pe-5"),
         html.Hr(),
     ],justify="center",className ="mt-5 pt-5 ms-5 me-5"),# className = "mb-2 ms-4 me-1 ps-4 pe-1 mt-5 pt-5"),
     #returning content here
@@ -91,7 +86,51 @@ layout = html.Div([
     hm.reference
 ],className =  "bg-light bg-opacity-20"),
 
+class hdss_residents_strat:
+        """
+        Returns population-based plots relative to Age of the studied group, gender (Male/Female) and regions.
 
+        """
+        def __init__(self):
+                
+                self.data = sero_data[sero_data["Population"] == "HDSS residents"]
+                
+                self.hdss_region =  self.data.loc[(self.data["Age in years"] == "16 - 65") & (self.data["Sex"] == "All")]
+
+        def age_plot(self):
+                age_data = self.data[self.data["Age in years"].isin(["<16","16 - 24","25 - 34", "35 - 44","45 - 54","55 - 64","≥65"])]
+                age_fig = px.timeline(age_data, x_start="start", x_end = "finish", y = "Anti-spike_perc", color = "Age in years", 
+                                        color_discrete_sequence= color_patterns,hover_name="Age in years", range_y = [0,.6], 
+                                        hover_data={"Anti-spike_perc":":0%"})
+                age_fig.update_layout(title = None,margin=margin,
+                                      legend = legend)
+                age_fig.update_xaxes(title_font = {"size":titlefont},tickfont = tickfont_dict, dtick="M1",tickformat="%b\n%Y",
+                                     linecolor = "black",ticks="outside")
+                age_fig.update_yaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,gridcolor = gridcolor,
+                                     title_text = "seroprevalence",linecolor = "black",ticks="outside")
+                return age_fig
+        def gender_plot(self):
+                gender_data = self.data[self.data["Sex"].isin(["Female","Male"])]
+                gender_fig = px.timeline(gender_data, x_start="start", x_end = "finish", y = "Anti-spike_perc", color = "Sex", 
+                                        hover_name="Sex", range_y = [0,.6], hover_data={"Anti-spike_perc":":0%"})
+                gender_fig.update_layout(title = None,margin=margin,legend=legend)
+                gender_fig.update_xaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,dtick="M1",tickformat="%b\n%Y",
+                                        linecolor = "black",ticks="outside")
+                gender_fig.update_yaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,gridcolor = gridcolor,
+                                        title_text = "seroprevalence",linecolor = "black",ticks="outside")
+                return gender_fig
+        
+        def region_plot(self):
+                #region_data = self.data.loc[(self.data["Age in years"] == "16 - 65")] # & (self.data["Sex"]=="All")
+                region_fig = px.timeline(self.hdss_region, x_start="start", x_end = "finish", y = "Anti-spike_perc", color = "Region", 
+                                        hover_name="Region",range_y = [0,.9],  hover_data={"Anti-spike_perc":":0%"}) #range_y = [0,0.3],
+                region_fig.update_layout(title = None,margin=margin,legend=legend)
+                region_fig.update_traces(width = 0.003)
+                region_fig.update_xaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,dtick="M1",tickformat="%b\n%Y",
+                                        linecolor = "black",ticks="outside")
+                region_fig.update_yaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,gridcolor = gridcolor,
+                                        title_text = "seroprevalence",linecolor = "black",ticks="outside")
+                return region_fig
 
 
 class blood_donor_strat:
@@ -179,6 +218,7 @@ class health_workers_strat:
 
         return fig
 
+
 overall_image = html.Div([
     dbc.Row([
         #dbc.Col([],width=2),
@@ -201,7 +241,7 @@ blood_donors_plot = html.Div([
                     html.P("Seroprevalence by gender",className = col_title),
                     dcc.Graph(figure = blood_donor_strat().gender_plot(),responsive = True, style={"height":"40vh"})
                 
-                ],width = 5,lg=4,className = col_class,style = {"margin-right":"10px"}),
+                ],xs=8,md=5,xl=4,className = col_class,style = {"margin-right":"10px"}),
             
                 dbc.Col([
                     html.Br(),
@@ -210,7 +250,7 @@ blood_donors_plot = html.Div([
                     html.Hr(),
                     html.P("Seroprevalence in by region",className = col_title),
                     dcc.Graph(figure = blood_donor_strat().region_plot(),responsive = True, style={"height":"40vh"})
-                ],width = 5,lg=4,className = col_class)
+                ],xs=8,md=5,xl=4,className = col_class)
                 
             ],justify = "center",className = classname_col)
         ])
@@ -226,7 +266,7 @@ health_care_workers = html.Div([
                     html.P("Seroprevalence by gender",className = col_title),
                     dcc.Graph(figure = health_workers_strat().gender_plot(),responsive = True, style={"height":"40vh"})
                 
-                ],width = 5,lg=4,className = col_class,style = {"margin-right":"10px"}),
+                ],xs=8,md=5,xl=4,className = col_class,style = {"margin-right":"10px"}),
             
                 dbc.Col([
                     html.Br(),
@@ -235,10 +275,36 @@ health_care_workers = html.Div([
                     html.Hr(),
                     html.P("Seroprevalence in by region",className = col_title),
                     dcc.Graph(figure = health_workers_strat().region_plot(),responsive = True, style={"height":"40vh"})
-                ],width = 5,lg=4,className = col_class)
+                ],xs=8,md=5,xl=4,className = col_class)
                 
             ],justify = "center",className = classname_col)
         ]),
+
+
+hdss_residents = html.Div([
+        dbc.Row([
+            
+            dbc.Col([
+                    html.Br(),
+                    html.P("Overall Seroprevalence",className = col_title),
+                    dcc.Graph(figure = sero_class.population_plot("HDSS residents"),responsive = True, style ={"height":"40vh"}),
+                    html.Hr(),
+                    html.P("Seroprevalence by gender",className = col_title),
+                    dcc.Graph(figure = hdss_residents_strat().gender_plot(),responsive = True, style={"height":"40vh"})
+                
+                ],xs=8,md=5,xl=4,className = col_class,style = {"margin-right":"10px"}),
+            
+            dbc.Col([
+                html.Br(),
+                    html.P("Seroprevalence by age",className = col_title),
+                    dcc.Graph(figure = hdss_residents_strat().age_plot(),responsive = True, style={"height":"40vh"}),
+                    html.Hr(),
+                    html.P("Seroprevalence in by region",className = col_title),
+                    dcc.Graph(figure = hdss_residents_strat().region_plot(),responsive = True, style={"height":"40vh"})
+                    
+            ],xs=8,md=5,xl=4,className = col_class)        
+        ],justify = "center",className = classname_col)
+])
 
 @app.callback(
     Output("content", "children"), 
@@ -252,5 +318,7 @@ def render_content(value):
         return blood_donors_plot
     elif value == "Health Workers":
         return health_care_workers
+    elif value == "HDSS Residents":
+        return hdss_residents
     else:
         return overall_image

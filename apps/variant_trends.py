@@ -2,14 +2,13 @@ import dash
 from utils import *
 
 # Reading the data
-legend = dict(orientation = "h",title=None,yanchor  = "bottom", xanchor = "left",y=-0.3,
-                                                    font = dict(size=8))
+
 
 variant_data = pd.read_table(DATA_PATH.joinpath("variant_month_data.txt"))
 variants_kenya = pd.read_table(DATA_PATH.joinpath("variant_data_kenya.tsv"))
 variants_kenya["Month"] = pd.to_datetime(variants_kenya["Month"], format = "%Y-%m-%d")
 kenya_data = pd.read_table(DATA_PATH.joinpath("kenya.metadata_0111_120122.tsv"))
-variants_data = pd.read_table(DATA_PATH.joinpath("kenya_lineages_until130323.tsv"))
+variants_data = pd.read_table(DATA_PATH.joinpath("kenya_lineages_until130423.tsv"))
 variant_map = pd.read_table(DATA_PATH.joinpath("map_lineages.tsv"))
 
 class Variants:
@@ -28,7 +27,11 @@ variant_plot = plots.variants_prevalence()
 
 #variants plot
 #variant plot
-fig_var = px.bar(variants_kenya, x = "Month", y = "percentage", color="variant",range_x=["2020-01-01","2023-03-01"],
+
+legend = dict(orientation = "h",title=None,yanchor  = "bottom", xanchor = "left",y=-0.4,
+                                                    font = dict(size=8))
+
+fig_var = px.bar(variants_kenya, x = "Month", y = "percentage", color="variant",range_x=["2020-01-01","2023-04-01"],
                  color_discrete_sequence = ["#1b9e77","#d95f02","#7570b3","#e7298a","#8111A5","#e6ab02","#a6761d"])
 #fig_var.update_traces(textfont_size=10,textposition="outside", text = variant_values["Frequency"])
 fig_var.update_xaxes(nticks = 10,linecolor = "black",ticks="outside",tickfont = dict(size=10),title = None)
@@ -51,7 +54,7 @@ fig_kenya.update_layout(margin=margin, showlegend = False)
 #plots for observed lineages
 #process data
 lineages = variants_data[["date","pangolin_lineage"]].set_index("date")#.head()
-lineages.index = pd.to_datetime(lineages.index)
+lineages.index = pd.to_datetime(lineages.index, format='%d/%m/%Y')
 recent_lineages = lineages[lineages.index >= "2022-11-01"].reset_index()
 lineage_map = dict(zip(variant_map.lineage, variant_map.lineage_group))
 recent_lineages["lineage_group"] = recent_lineages["pangolin_lineage"].map(lineage_map)
@@ -60,7 +63,7 @@ recent_lineages = recent_lineages.groupby(["date","lineage_group"])[["lineage_gr
 
 #do the plot
 sars_lineages = px.scatter(recent_lineages, x = "date",y = "lineage_group",size= "Frequency", color = "lineage_group",\
-                    range_x=["2022-10-15","2023-03-01"])
+                    range_x=["2022-10-15","2023-04-01"])
 sars_lineages.update_layout(margin=margin, showlegend = False)
 sars_lineages.update_xaxes(title = None,linecolor = "black",tickfont = dict(size=10), nticks=6)
 sars_lineages.update_yaxes(title = None, linecolor = "black",tickfont = dict(size=10),gridcolor = gridcolor)
@@ -75,14 +78,16 @@ layout = html.Div([
                     id = "variant_view",
                     options = [
                         {"label":"Trends in SARS-CoV-2 Variants", "value":"variants"},
-                        {"label":"Varint by Region","value":"region"}
+                        #{"label":"Varint by Region","value":"region"}
                     ],
                     value = "variants"
                 )
             ],style={"width":"100%","font-size":12})
             ],width=3)
     ],justify="end", className = "mt-5 pt-5 me-5 pe-5"),
+    
     html.Div(id = "variants_lineages" ),
+    
     hm.reference
 ])
 
@@ -92,16 +97,16 @@ variants_figure = html.Div([
                     html.Label("Temporal prevalence of SARS-COV-2 variants in Kenya", 
                     style = {"text-align":"start","font-size":14},className = "fw-bold text-dark ms-4"),
             
-                    dcc.Graph(figure = fig_var,responsive = True,style = {"height":"330px", "width":"550px"}),
+                    dcc.Graph(figure = fig_var,responsive = True,style = {"width":"50hw","height":"40vh"}),
                 
                     
-                ],width = 6,lg=5, className = "border-end"),
+                ],width=6,xl=5,lg=6,xs=10, className = "border-end"),
                 dbc.Col([
-                    html.Label("SARS-COV-2 lineages since November 2022", 
+                    html.Label("SARS-COV-2 lineages between November 2022 to April 2023", 
                     style = {"text-align":"start","font-size":14},className = "fw-bold text-dark ms-4"),
                     html.Br(),html.Br(),
-                    dcc.Graph(figure = sars_lineages,responsive = True,style = {"height":"250px", "width":"500px"}),
-                ], width=5,lg=4),
+                    dcc.Graph(figure = sars_lineages,responsive = True,style = {"width":"40hw","height":"30vh"}),
+                ],width=5,xl=4,lg=5,xs=9),
                 
                 #html.Hr(),
                 
@@ -143,22 +148,12 @@ variants_figure = html.Div([
             dbc.Row([
                 dbc.Col([
                     html.Div(id = "range_lineage")#,style = {"height":"400px", "width":"400px"})
-                ], width=6,lg=5,style = {"margin-right":"0px"},className = "border-end mt-2 pt-2", align="center"),
+                ],width=6,xl=5,lg=6,xs=10,style = {"margin-right":"0px"},className = "border-end mt-2 pt-2", align="center"),
                 dbc.Col([
                     html.Div(id = "summary_lineage")
-                ],width=5,lg=4,style = {"margin-right":"0px"},className = "mt-2 pt-2", align="center"),
+                ],width=5,xl=4,lg=5,xs=9,style = {"margin-right":"0px"},className = "mt-2 pt-2", align="center"),
             ],justify = "center", className = "mt-0 pt-0"),
             
-            # dbc.Row([
-                
-            #     dbc.Col([
-            #         html.Img(src = dash.get_asset_url("../assets/plots/range_lineage.png"),style = {"height":"400px", "width":"400px"})
-            #     ], width=6,lg=5, style = {"margin-right":"0px"},className = "border-end mt-2 pt-2", align="center"),
-            #     dbc.Col([
-            #         html.Img(src = dash.get_asset_url("../assets/plots/summary_lineage.png"),style = {"height":"400px", "width":"400px"} )
-                
-            #     ], width=5, lg=4,style = {"margin-left":"0px"},className = "border-start mt-2 pt-2",align="center"),
-            # ],justify = "center", className = "mt-0 pt-0")     
         ])
 
 lineages_figure = html.Div([

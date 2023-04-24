@@ -9,7 +9,6 @@ kenya_county.loc[(kenya_county["COUNTY"] == "Tharaka"),"COUNTY"] = "Tharaka Nith
 kenya_data = pd.merge(kenya_county, metadata,left_on="COUNTY",right_on = "County",how="inner" ).drop(columns = ["COUNTY"])
 kenya_data.sort_values("Proportion_vaccinated", ascending=True,inplace=True)
 kenya_data =  kenya_data.set_index("County")
-
 vac_by_age = pd.read_table(DATA_PATH.joinpath("vaccination_by_age.txt"))
 
 
@@ -87,32 +86,32 @@ layout = html.Div([
                             html.Label(f"{int(total_doses_administered):,}",style = {"color":marker_text},className ="fs-4"),
                             html.P("Administered Doses",style = style_text)
                         ],className = card_class )
-                    ],width = 2,lg=2,className = "card_style ms-5",style = {"margin-right":margin_size}),
+                    ],width = 2,xs=5,md=3,lg=2,className = "card_style ms-5",style = {"margin-right":margin_size}),
                 
                 dbc.Col([
                         dbc.CardBody([
                             html.Label(f"{int(fully_vaccinated_adults):,}",style = {"color":marker_text},className ="fs-4"),
                             html.P("Fully vaccinated adults",style = style_text)
                         ],className = card_class )
-                    ],width = 2,lg=2,className = "card_style",style = {"margin-right":margin_size}),
+                    ],width = 2,xs=5,md=3,lg=2,className = "card_style",style = {"margin-right":margin_size}),
                 dbc.Col([
                         dbc.CardBody([
                             html.Label(f"{int(partially_vaccinated_adults):,}",style = {"color":marker_text},className ="fs-4"),
                             html.P("Partially vaccinated adults",style = style_text)
                         ],className = card_class )
-                    ],width = 2,lg=2,className = "card_style",style = {"margin-right":margin_size}),
+                    ],width = 2,xs=5,md=3,lg=2,className = "card_style",style = {"margin-right":margin_size}),
                 dbc.Col([
                         dbc.CardBody([
                             html.Label(f"{int(booster_doses):,}",style = {"color":marker_text},className ="fs-4"),
                             html.P("Booster doses received",style = style_text)
                         ],className = card_class )
-                    ],width = 2,lg=2,className = "card_style",style = {"margin-right":margin_size}),
+                    ],width = 2,xs=5,md=3,lg=2,className = "card_style",style = {"margin-right":margin_size}),
                 dbc.Col([
                         dbc.CardBody([
                             html.Label(f"{round(perc_vaccinated,1):,}%",style = {"color":marker_text},className ="fs-4"),
                             html.P("Fully vaccinated population",style = style_text)
                         ],className = card_class )
-                    ],width = 2,lg=2,className = "card_style me-5"),
+                    ],width = 2,xs=6,md=3,lg=2,className = "card_style me-5"),
                 
             ],className = hm.classname_col,justify = "center"),
             dbc.Row([
@@ -136,16 +135,18 @@ layout = html.Div([
 vaccination_by_count = html.Div([
         dbc.Row([
                 dbc.Col([
-                    html.Br(),
+                    #html.Br(),
                     html.Label("Proportion of fully vaccinated Adults", className = "text-dark ms-5 fw-normal",style = {"font-size":"14"}),
-                    dcc.Graph(figure = vac_fig,responsive = True, style = {"width":"400px","height":"550px"})
-                ],width=5,lg=4,className = col_class,style = {"margin-right":"7px"}),
+                
+                    dcc.Graph(figure = vac_fig,responsive = True, style = {"width":"25hw","height":"120vh"})# {"width":"400px","height":"550px"})
+                
+                ],width=5,xs=8,md=4,className = col_class,style = {"margin-right":"7px"}),
                 
                 dbc.Col([
                     html.Br(),
                     html.Label("Layout map showing level of vaccination across the country",className = "text-dark ms-5 fw-normal",style = {"font-size":"14"}),
-                    dcc.Graph(figure = cases_fig,responsive = True, style = {"width":"550px","height":"550px"})
-                ],width=6,lg=5,className = col_class,style = {"margin-left":"10px"})
+                    dcc.Graph(figure = cases_fig,responsive = True, style =  {"width":"25hw","height":"120vh"})# {"width":"550px","height":"550px"})
+                ],width=6,xs=8,md=4,className = col_class,style = {"margin-left":"10px"})
                 
             ],className = classname_col,justify = "center"),
         ]),
@@ -153,10 +154,10 @@ vaccination_by_count = html.Div([
 vaccination_by_age = html.Div([
     
                 dbc.Row([
-                    #dbc.Col([],width=2),
+                    
                     dbc.Col([
-                    dcc.Graph(figure = vac_age_fig,responsive = True, style = {"width":"700px","height":"350px"} )
-                    ],width=6,lg=5,className = col_class),
+                    dcc.Graph(figure = vac_age_fig,responsive = True, style = {"width":"50hw","height":"40vh"} )
+                    ],width=6,xs=10,md=8,lg=5,className = col_class),
                     dbc.Col([],width=2)
                 ],className = classname_col,justify = "center")
     
