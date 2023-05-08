@@ -3,12 +3,11 @@ from utils import *
 
 # Reading the data
 
-
 variant_data = pd.read_table(DATA_PATH.joinpath("variant_month_data.txt"))
 variants_kenya = pd.read_table(DATA_PATH.joinpath("variant_data_kenya.tsv"))
 variants_kenya["Month"] = pd.to_datetime(variants_kenya["Month"], format = "%Y-%m-%d")
 kenya_data = pd.read_table(DATA_PATH.joinpath("kenya.metadata_0111_120122.tsv"))
-variants_data = pd.read_table(DATA_PATH.joinpath("kenya_lineages_until130423.tsv"))
+variants_data = pd.read_table(DATA_PATH.joinpath("kenya_lineages_until020523.tsv"))
 variant_map = pd.read_table(DATA_PATH.joinpath("map_lineages.tsv"))
 
 class Variants:
@@ -31,7 +30,7 @@ variant_plot = plots.variants_prevalence()
 legend = dict(orientation = "h",title=None,yanchor  = "bottom", xanchor = "left",y=-0.4,
                                                     font = dict(size=8))
 
-fig_var = px.bar(variants_kenya, x = "Month", y = "percentage", color="variant",range_x=["2020-01-01","2023-04-01"],
+fig_var = px.bar(variants_kenya, x = "Month", y = "percentage", color="variant",range_x=["2020-01-01","2023-05-01"],
                  color_discrete_sequence = ["#1b9e77","#d95f02","#7570b3","#e7298a","#8111A5","#e6ab02","#a6761d"])
 #fig_var.update_traces(textfont_size=10,textposition="outside", text = variant_values["Frequency"])
 fig_var.update_xaxes(nticks = 10,linecolor = "black",ticks="outside",tickfont = dict(size=10),title = None)
@@ -55,7 +54,7 @@ fig_kenya.update_layout(margin=margin, showlegend = False)
 #process data
 lineages = variants_data[["date","pangolin_lineage"]].set_index("date")#.head()
 lineages.index = pd.to_datetime(lineages.index, format='%d/%m/%Y')
-recent_lineages = lineages[lineages.index >= "2022-11-01"].reset_index()
+recent_lineages = lineages[lineages.index >= "2023-01-01"].reset_index()
 lineage_map = dict(zip(variant_map.lineage, variant_map.lineage_group))
 recent_lineages["lineage_group"] = recent_lineages["pangolin_lineage"].map(lineage_map)
 recent_lineages = recent_lineages[recent_lineages["lineage_group"] != "Unassigned"] #drop columns with unassigned annotations
@@ -63,125 +62,128 @@ recent_lineages = recent_lineages.groupby(["date","lineage_group"])[["lineage_gr
 
 #do the plot
 sars_lineages = px.scatter(recent_lineages, x = "date",y = "lineage_group",size= "Frequency", color = "lineage_group",\
-                    range_x=["2022-10-15","2023-04-01"])
+                    range_x=["2023-01-01","2023-05-01"])
 sars_lineages.update_layout(margin=margin, showlegend = False)
 sars_lineages.update_xaxes(title = None,linecolor = "black",tickfont = dict(size=10), nticks=6)
 sars_lineages.update_yaxes(title = None, linecolor = "black",tickfont = dict(size=10),gridcolor = gridcolor)
 
+
 layout = html.Div([
-    
-    dbc.Row([
-            dbc.Col([
-            html.Div([
-                html.Label("Select Metrics", style = {"font-size":12},className = "text-primary mb-0 pb-0"),
-                dcc.Dropdown(
-                    id = "variant_view",
-                    options = [
-                        {"label":"Trends in SARS-CoV-2 Variants", "value":"variants"},
-                        #{"label":"Varint by Region","value":"region"}
-                    ],
-                    value = "variants"
-                )
-            ],style={"width":"100%","font-size":12})
-            ],width=3)
-    ],justify="end", className = "mt-5 pt-5 me-5 pe-5"),
-    
-    html.Div(id = "variants_lineages" ),
-    
-    hm.reference
+        dbc.Row([
+                dbc.Col([
+                    html.H5("SARS-CoV-2 Variant Epidemiology ",className = col_title, style ={"text-align":"start"}),
+                    html.Hr(),
+                ], width = 11, lg=10),
+            ],justify="center", className = "mb-2 ms-4 me-4 ps-4 pe-4 mt-5 pt-5"),
+            
+        html.Div(id = "variant-content"),
+        interval,
+        
+        reference
 ])
 
-variants_figure = html.Div([
-            dbc.Row([
-                dbc.Col([
-                    html.Label("Temporal prevalence of SARS-COV-2 variants in Kenya", 
-                    style = {"text-align":"start","font-size":14},className = "fw-bold text-dark ms-4"),
-            
-                    dcc.Graph(figure = fig_var,responsive = True,style = {"width":"50hw","height":"40vh"}),
-                
-                    
-                ],width=6,xl=5,lg=6,xs=10, className = "border-end"),
-                dbc.Col([
-                    html.Label("SARS-COV-2 lineages between November 2022 to April 2023", 
-                    style = {"text-align":"start","font-size":14},className = "fw-bold text-dark ms-4"),
-                    html.Br(),html.Br(),
-                    dcc.Graph(figure = sars_lineages,responsive = True,style = {"width":"40hw","height":"30vh"}),
-                ],width=5,xl=4,lg=5,xs=9),
-                
-                #html.Hr(),
-                
-            ],justify = "center", className = "mt-2 pt-2"), 
-            
-            
-            dbc.Row([
-                dbc.Col([
-                    html.Label("SARS-CoV-2 Lineages Growth Rate Estimation", 
-                    style = {"text-align":"center","font-size":14},className = "fw-bold text-dark"),
-
-                    html.Label(["This section shows Bayesian estimate of growth rate for selected SARS-CoV-2 lineages recently observed in Kenya and globally. Data \
-                        used are frequency of grouped lineages that are categorized based on region of isolation"], 
-                    style = {"text-align":"start","font-size":14},className = "fw-normal text-dark"),
-                ],width = 11,lg=9)
-            ],justify = "center", className = "mt-2 pt-2"),
-            
-            #set a dropdown to select 
-            dbc.Row([
-                dbc.Col([
-                    html.Div([
-                        html.Label("Select analyzed lineage-groups", style = {"font-size":12},className = "text-primary mb-0 pb-0"),
-                        dcc.Dropdown(
-                            
-                            id = "lineage_warning",
-                            options = [
-                                {"label":"BA.1-like/BN-like/BA.2-like", "value":"BA.1_BN_BA.2"},
-                                {"label":"BA.4-like/BA.5-like/BF-like","value":"BA.4_BA.5_BF"},
-                                {"label":"BQ.1-like/XBB-like/AY-like","value":"BQ.1_XBB_AY"},
-                                {"label":"B.1-like/CH.1-like","value":"B.1_CH.1"},
-                                
-                            ],
-                            value = "BQ.1_XBB_AY",
-                        )       
-                    ],style={"width":"100%","font-size":12})
-                ],width=3)
-            ],justify="end", className = "mt-1 pt-1 me-5 pe-5"),
-            
-            dbc.Row([
-                dbc.Col([
-                    html.Div(id = "range_lineage")#,style = {"height":"400px", "width":"400px"})
-                ],width=6,xl=5,lg=6,xs=10,style = {"margin-right":"0px"},className = "border-end mt-2 pt-2", align="center"),
-                dbc.Col([
-                    html.Div(id = "summary_lineage")
-                ],width=5,xl=4,lg=5,xs=9,style = {"margin-right":"0px"},className = "mt-2 pt-2", align="center"),
-            ],justify = "center", className = "mt-0 pt-0"),
-            
-        ])
-
-lineages_figure = html.Div([
-            dbc.Row([
-                html.Label(f"SARS-CoV-2 lineages observed in Kenya in the last two months (November - December 2022)",
-                     style = {"text-align":"center","font-size":14},className = "fw-bold text-dark ms-4"),
-                dcc.Graph(figure = fig_kenya,responsive = True,style = {"height":"400px", "width":"800px"})
-            ],justify = "center", className = "ms-5 mt-2 pt-2"),       
-        ])
-
-
 @app.callback(
-    Output("variants_lineages", "children"),
-    Input("variant_view","value")
+    Output("variant-content","children"), Input("interval-component", "n_intervals")
 )
 
-def render_plots(value):
-    if value == "variants":
-        return variants_figure
+def update_content(n_intervals):
     
+    dev = html.Div([
+        dbc.Row([
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardBody([
+                        html.Label("Temporal prevalence of SARS-COV-2 variants in Kenya", 
+                            style = {"text-align":"start","font-size":14},className = "fw-bold text-dark ms-4"),
 
+                        dcc.Graph(figure = fig_var,responsive = True,style = {"width":"50hw","height":"40vh"}),
+                    ])
+                ], className = "border-0 text-center rounded-0")
+            ],xs = 10,md=6),
+            
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardBody([
+                        html.Label("SARS-COV-2 lineages between January to April 2023", 
+                            style = {"text-align":"start","font-size":14},className = "fw-bold text-dark ms-4"),
+                        html.Br(),html.Br(),
+                        dcc.Graph(figure = sars_lineages,responsive = True,style = {"width":"40hw","height":"30vh"}),
+                    ]),
+                ],className = "h-100 border-0 text-center rounded-0")
+                
+            ],xs=10, md=4),
+        ],justify = "center",className = classname_col),
+        
+        dbc.Row([
+            dbc.Col([
+                html.Label("SARS-CoV-2 Lineages Growth Rate Estimation", 
+                style = {"text-align":"center","font-size":14},className = "fw-bold text-dark"),
+                html.Label(["This section shows Bayesian estimate of growth rate for selected SARS-CoV-2 lineages recently observed in Kenya and globally. Data \
+                    used are frequency of grouped lineages that are categorized based on region of isolation"], 
+                style = {"text-align":"start","font-size":14},className = "fw-normal text-dark"),
+            ],xs = 10,md=10),
+            
+            dbc.Row([
+                html.Div([
+                    html.Label("Select analyzed lineage-groups", style = {"font-size":12},className = "text-primary mb-0 pb-0"),
+                    dcc.Dropdown(
+                        id = "lineage_warning",
+                        options = [
+                            {"label":"BA.1-like/BN-like/BA.2-like", "value":"BA.1_BN_BA.2"},
+                            {"label":"BA.4-like/BA.5-like/BF-like","value":"BA.4_BA.5_BF"},
+                            {"label":"BQ.1-like/XBB-like/AY-like","value":"BQ.1_XBB_AY"},
+                            {"label":"B.1-like/CH.1-like","value":"B.1_CH.1"},
+                        ],
+                        value = "BQ.1_XBB_AY",
+                    )       
+                ],style={"width":"20%","font-size":12,"margin-right":"55px", "margin-bottom":"5px"})
+            ],justify="end"),
+            
+            dbc.Row([
+                dbc.Col([
+                    dbc.Card([
+                        
+                        dbc.Row([
+                            dbc.Col([
+                                dbc.CardBody([                                  
+                                    
+                                    html.P("Flag per Country/Region",className = col_title),
+                                    html.Br(),
+                                    html.Div(id = "range_lineage")
+                                ])
+
+                            ], xs=10,md=6, style={}),
+                            dbc.Col([
+                                dbc.CardBody([                                    
+                                    html.P("Flag per Variant",className = col_title),
+                                    html.Br(),
+                                    html.Div(id = "summary_lineage")
+                                ])
+
+                            ], xs=10,md=4)
+                        ])
+                    ],className = "border-0 rounded-0")
+                ],xs=11, md=11)
+           
+            ],justify = "center"),
+            
+        ],justify = "center",className = classname_col)
+        
+    ]),           
+
+    return dev
+    
 @app.callback(
-    [Output("range_lineage", "children"),
-    Output("summary_lineage","children")],
-    Input("lineage_warning","value")
+        [Output("range_lineage", "children"),
+        Output("summary_lineage","children")],
+        Input("lineage_warning","value")
 )
-
 def load_images(value):
     if value in ["BQ.1_XBB_AY","BA.4_BA.5_BF","BA.1_BN_BA.2","B.1_CH.1"]:
-        return [html.Img(src = dash.get_asset_url("../assets/plots/" + value + "_range_lineage.png"),style = {"height":"400px", "width":"550px"}),
-                html.Img(src = dash.get_asset_url("../assets/plots/" + value + "_summary_lineage.png"),style = {"height":"230px", "width":"500px"})]
+        return [
+            html.Img(src = dash.get_asset_url("../assets/plots/" + value + "_range_lineage.png"),\
+                #style = {"width":"80hw","height":"30vh"}),
+                style = {"height":"360px", "width":"500px"}),
+            html.Img(src = dash.get_asset_url("../assets/plots/" + value + "_summary_lineage.png"),\
+                style = {"height":"200px", "width":"450px"})]
+    

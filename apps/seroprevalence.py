@@ -36,7 +36,7 @@ class sero_prevalence:
                 fig.update_xaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,dtick="M1",tickformat="%b\n%Y",
                                  linecolor = "black",ticks="outside",nticks=5)#tickformat="%b\n%Y"
                 fig.update_layout(margin=margin,
-                                  legend = dict(orientation = "h",yanchor  = "bottom", xanchor = "left",y=-0.25))#y=1.02,x=0.01,xanchor="left"))
+                                  legend = dict(orientation = "h",yanchor  = "bottom", xanchor = "left",y=-0.5))#y=1.02,x=0.01,xanchor="left"))
                 #fig.update_layout(legend = dict(yanchor  = "top",y=1,x=0.01,xanchor="left"),legend_orientation ="h",margin = margin) #plot_bgcolor = pcolor,paper_bgcolor = pcolor,
                 
                 return fig
@@ -67,8 +67,13 @@ subfig = sero_class.seroplot()
 layout = html.Div([
     dbc.Row([
         dbc.Col([
-            html.H5("Visualization of Seroprevalence across the country", style ={"text-align":"start"}),
-        ], width = 6, lg=7),
+            html.H5("Visualization of Seroprevalence across the country",className =col_title, style ={"text-align":"start"}),
+            html.Hr(),
+        ], xs=10,md=10,className ="mt-5 pt-5 ms-5 me-5"),
+        
+    ]),
+    
+    dbc.Row([
         dbc.Col([
             html.Div([
                 html.P("Select Population",className="text-primary mb-0 pb-0", style= {"font-size":14}),
@@ -78,13 +83,18 @@ layout = html.Div([
                     value = "Overall", 
                 )
             ],style={"width":"100%","font-size":14})
-        ],width=4, lg=3,className = "me-5 pe-5"),
-        html.Hr(),
-    ],justify="center",className ="mt-5 pt-5 ms-5 me-5"),# className = "mb-2 ms-4 me-1 ps-4 pe-1 mt-5 pt-5"),
-    #returning content here
-    html.Div(id = "content"),
-    hm.reference
-],className =  "bg-light bg-opacity-20"),
+        ],width=4,xs=6,lg=3,className = "me-5 pe-5")
+    ],justify="end", className = ""),
+    
+    
+    dbc.Row([
+        #returning content here
+        html.Div(id = "content"),
+        reference
+    ],justify="center",className = classname_col),
+     
+]),
+
 
 class hdss_residents_strat:
         """
@@ -112,7 +122,7 @@ class hdss_residents_strat:
         def gender_plot(self):
                 gender_data = self.data[self.data["Sex"].isin(["Female","Male"])]
                 gender_fig = px.timeline(gender_data, x_start="start", x_end = "finish", y = "Anti-spike_perc", color = "Sex", 
-                                        hover_name="Sex", range_y = [0,.6], hover_data={"Anti-spike_perc":":0%"})
+                                        hover_name="Sex", range_y = [0,1], hover_data={"Anti-spike_perc":":0%"})
                 gender_fig.update_layout(title = None,margin=margin,legend=legend)
                 gender_fig.update_xaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,dtick="M1",tickformat="%b\n%Y",
                                         linecolor = "black",ticks="outside")
@@ -123,9 +133,9 @@ class hdss_residents_strat:
         def region_plot(self):
                 #region_data = self.data.loc[(self.data["Age in years"] == "16 - 65")] # & (self.data["Sex"]=="All")
                 region_fig = px.timeline(self.hdss_region, x_start="start", x_end = "finish", y = "Anti-spike_perc", color = "Region", 
-                                        hover_name="Region",range_y = [0,.9],  hover_data={"Anti-spike_perc":":0%"}) #range_y = [0,0.3],
+                                        hover_name="Region",range_y = [0,1],  hover_data={"Anti-spike_perc":":0%"}) #range_y = [0,0.3],
                 region_fig.update_layout(title = None,margin=margin,legend=legend)
-                region_fig.update_traces(width = 0.003)
+                region_fig.update_traces(width = 0.03)
                 region_fig.update_xaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,dtick="M1",tickformat="%b\n%Y",
                                         linecolor = "black",ticks="outside")
                 region_fig.update_yaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,gridcolor = gridcolor,
@@ -221,12 +231,15 @@ class health_workers_strat:
 
 overall_image = html.Div([
     dbc.Row([
-        #dbc.Col([],width=2),
         dbc.Col([
-            dcc.Graph(figure = subfig,responsive = True,className = "ms-3",style = {"width":"800px","height":"400px"})
-            
-        ],width = 8, lg = 7, style = {"margin-right":"30px"}),
-        #dbc.Col([],width=2),
+            dbc.Card([
+                html.P("Overall Seroprevalence in selected study populations",className = col_title),
+                dbc.CardBody([
+                    dcc.Graph(figure = subfig,responsive = True,style = {"width":"40hw","height":"50vh"})
+                ])
+            ],className='text-center border-0 rounded-0'),
+        ],xs=10,md=8,lg=7, style = {}),
+        
     ],justify = "center")
 ])
 
@@ -252,7 +265,7 @@ blood_donors_plot = html.Div([
                     dcc.Graph(figure = blood_donor_strat().region_plot(),responsive = True, style={"height":"40vh"})
                 ],xs=8,md=5,xl=4,className = col_class)
                 
-            ],justify = "center",className = classname_col)
+            ],justify = "center")
         ])
 
 health_care_workers = html.Div([
@@ -263,10 +276,10 @@ health_care_workers = html.Div([
                     html.P("Overall Seroprevalence",className = col_title),
                     dcc.Graph(figure = sero_class.population_plot("Health workers"),responsive = True, style ={"height":"40vh"}),
                     html.Hr(),
-                    html.P("Seroprevalence by gender",className = col_title),
+                    html.P("Seroprevalence by Gender",className = col_title),
                     dcc.Graph(figure = health_workers_strat().gender_plot(),responsive = True, style={"height":"40vh"})
                 
-                ],xs=8,md=5,xl=4,className = col_class,style = {"margin-right":"10px"}),
+                ],xs=8,md=5,xl=4,className = "bg-white align-self-center",style = {"margin-right":"10px", "height":"100%"}),
             
                 dbc.Col([
                     html.Br(),
@@ -277,8 +290,8 @@ health_care_workers = html.Div([
                     dcc.Graph(figure = health_workers_strat().region_plot(),responsive = True, style={"height":"40vh"})
                 ],xs=8,md=5,xl=4,className = col_class)
                 
-            ],justify = "center",className = classname_col)
-        ]),
+            ],justify = "center",className = "")
+        ], style = {"height":"100vh"}),
 
 
 hdss_residents = html.Div([
@@ -289,7 +302,7 @@ hdss_residents = html.Div([
                     html.P("Overall Seroprevalence",className = col_title),
                     dcc.Graph(figure = sero_class.population_plot("HDSS residents"),responsive = True, style ={"height":"40vh"}),
                     html.Hr(),
-                    html.P("Seroprevalence by gender",className = col_title),
+                    html.P("Seroprevalence by Gender",className = col_title),
                     dcc.Graph(figure = hdss_residents_strat().gender_plot(),responsive = True, style={"height":"40vh"})
                 
                 ],xs=8,md=5,xl=4,className = col_class,style = {"margin-right":"10px"}),
@@ -303,7 +316,7 @@ hdss_residents = html.Div([
                     dcc.Graph(figure = hdss_residents_strat().region_plot(),responsive = True, style={"height":"40vh"})
                     
             ],xs=8,md=5,xl=4,className = col_class)        
-        ],justify = "center",className = classname_col)
+        ],justify = "center")
 ])
 
 @app.callback(

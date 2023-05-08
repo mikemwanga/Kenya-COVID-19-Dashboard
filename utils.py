@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html,dash_table
+from dash import dcc, html,dash_table,callback
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 from dash_bootstrap_templates import load_figure_template
@@ -15,7 +15,7 @@ import numpy as np
 from dash import dash_table as dt
 from apps import home as hm
 warnings.filterwarnings('ignore')
-load_figure_template("flatly") #cerulean,flatly,journal,litera,pulse,sandstone
+load_figure_template("sandstone") #cerulean,flatly,journal,litera,pulse,sandstone,minty
 from app import app
 import geopandas as gpd
 from plotly.subplots import make_subplots
@@ -46,12 +46,13 @@ titlefont = 12
 tickfont_dict = dict(size=9)
 
 card_class = "text-center"
-classname_col = "bg-light bg-opacity-20 g-1 justify-content-center p-2 m-2" 
+classname_col = "bg-secondary bg-opacity-10 g-1 justify-content-center p-2 m-2" 
 class_style = "shadow-sm bg-light border rounded g-1"
-col_title = "text-center text-black fw-normal"
+col_title = "text-center text-secondary fw-bold mb-0"
+
 col_style  = {"margin-left":"15px","margin-right":"0px"}
 style_label={"font-size":35, "align":"center"}
-style_text ={"font-size":15,"text-align":"center"}
+style_text ={"font-size":14,"text-align":"center","color" :"#566573" }
 classname_shadow = "shadow border rounded-2 justify-content-center"
 col_class = "bg-white align-self-center"
 hr_style = {"height":"3vh", "align":"center"}
@@ -63,7 +64,13 @@ bg_color = "rgba(0,0,0,0)"
 gridcolor = "#e0e0e0"
 margin_size = "1px"
 
-#acknoledggement
+div = "bg-secondary bg-opacity-10"
+#margin = dict(l=5, r=5, t=5, b=5)
+
+marker_text = "#67001f"
+
+#intervals
+interval = dcc.Interval(id = "interval-component", interval = 3600 * 24 *1000, n_intervals = 0)
 
 #acknowledgment section
 reference = dbc.Row([

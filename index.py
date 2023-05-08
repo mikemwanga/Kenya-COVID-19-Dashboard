@@ -5,11 +5,10 @@ from dash.dependencies import Input,Output
 from app import app
 from app import server
 
-
 app.title = "Kenya COVID-19 Dashboard"
 
 #connect to your app pages
-from apps import home, counties,vaccination,variant_trends,phylogeny,seroprevalence#,summary_report#,countysummary#,markdown#,download#cases,deaths,home
+from apps import home,counties,vaccination,seroprevalence,variant_trends,phylogeny#,summary_report#,countysummary#,markdown#,download#cases,deaths,home
 
 #Navbar
 navbar =   html.Div([
