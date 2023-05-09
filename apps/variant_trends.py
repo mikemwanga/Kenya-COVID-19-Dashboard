@@ -99,7 +99,7 @@ def update_content(n_intervals):
                         dcc.Graph(figure = fig_var,responsive = True,style = {"width":"50hw","height":"40vh"}),
                     ])
                 ], className = "border-0 text-center rounded-0")
-            ],xs = 10,md=6),
+            ],xs = 10,md=6, lg=5),
             
             dbc.Col([
                 dbc.Card([
@@ -111,7 +111,7 @@ def update_content(n_intervals):
                     ]),
                 ],className = "h-100 border-0 text-center rounded-0")
                 
-            ],xs=10, md=4),
+            ],xs=10, md=4,lg=3),
         ],justify = "center",className = classname_col),
         
         dbc.Row([
@@ -121,7 +121,7 @@ def update_content(n_intervals):
                 html.Label(["This section shows Bayesian estimate of growth rate for selected SARS-CoV-2 lineages recently observed in Kenya and globally. Data \
                     used are frequency of grouped lineages that are categorized based on region of isolation"], 
                 style = {"text-align":"start","font-size":14},className = "fw-normal text-dark"),
-            ],xs = 10,md=10),
+            ],xs = 10,md=10,lg=9),
             
             dbc.Row([
                 html.Div([
@@ -152,7 +152,7 @@ def update_content(n_intervals):
                                     html.Div(id = "range_lineage")
                                 ])
 
-                            ], xs=10,md=6, style={}),
+                            ], xs=10,md=6,lg=5, style={}),
                             dbc.Col([
                                 dbc.CardBody([                                    
                                     html.P("Flag per Variant",className = col_title),
@@ -160,10 +160,10 @@ def update_content(n_intervals):
                                     html.Div(id = "summary_lineage")
                                 ])
 
-                            ], xs=10,md=4)
+                            ], xs=10,md=4,lg=4)
                         ])
                     ],className = "border-0 rounded-0")
-                ],xs=11, md=11)
+                ],xs=11, md=11,lg=9)
            
             ],justify = "center"),
             

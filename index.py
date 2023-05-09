@@ -8,28 +8,31 @@ from app import server
 app.title = "Kenya COVID-19 Dashboard"
 
 #connect to your app pages
-from apps import home,counties,vaccination,seroprevalence,variant_trends,phylogeny#,summary_report#,countysummary#,markdown#,download#cases,deaths,home
+from apps import home,counties,vaccination,seroprevalence,variant_trends,phylogeny#,summary_report,countysummary#,markdown#,download#cases,deaths,home
+
+tab_nav = "text-light fw-light"
+style = {"text-decoration": "none"}
 
 #Navbar
 navbar =   html.Div([
                     
                     dbc.NavbarSimple([
-                        dbc.NavItem(dbc.NavLink("Home", href="/apps/home")),
-                        dbc.NavItem(dbc.NavLink("County", href="/apps/counties")),
-                        dbc.NavItem(dbc.NavLink("Vaccination",href = "/apps/vaccination")),
-                        dbc.NavItem(dbc.NavLink("Seroprevalence",href = "/apps/seroprevalence")),
-                        dbc.NavItem(dbc.NavLink("Variants", href="/apps/variant_trends")),
-                        dbc.NavItem(dbc.NavLink("Phylogeny", href="/apps/phylogeny")),
-                        dbc.DropdownMenu([
-                            dbc.DropdownMenuItem("Countrywide",href="/apps/summaryreport"),
-                            dbc.DropdownMenuItem("County",href="/apps/countysummary")
-                        ],nav=True,in_navbar=True,label="Summary"),
+                        dbc.NavItem(dbc.NavLink(html.A("Home", href="/apps/home.html/", className= tab_nav,style=style))),
+                        dbc.NavItem(dbc.NavLink(html.A("County", href="/apps/counties.html/", className= tab_nav,style=style))),
+                        dbc.NavItem(dbc.NavLink(html.A("Vaccination",href = "/apps/vaccination.html/",className= tab_nav,style=style))),
+                        dbc.NavItem(dbc.NavLink(html.A("Seroprevalence",href = "/apps/seroprevalence.html/",className= tab_nav,style=style))),
+                        dbc.NavItem(dbc.NavLink(html.A("Variants", href="/apps/variant_trends.html/",className= tab_nav,style=style))),
+                        dbc.NavItem(dbc.NavLink(html.A("Phylogeny", href="/apps/phylogeny.html/",className= tab_nav,style=style))),
+                        #dbc.DropdownMenu([
+                         #   dbc.DropdownMenuItem("Countrywide",href="/apps/summaryreport"),
+                          #  dbc.DropdownMenuItem("County",href="/apps/countysummary")
+                        #],nav=True,in_navbar=True,label="Summary"),
 
                     ],             brand_href="/apps/home", 
                                     brand="Kenya COVID-19 Dashboard",
                                     style={"margin-bottom":5},
-                                    color="#333972",dark=True,light=True,
-                                    fixed ="top",#className = "text-light font-weight-bold"
+                                    color="#333972",light=True,dark=True,#, # #333972 #1DA1F2
+                                    fixed ="top",className = "text-light fw-light"
                      ),     
 ])                   
 
@@ -47,21 +50,21 @@ app.layout = html.Div([
 
 def display_page(pathname):
     
-    if pathname == "/apps/home":
+    if pathname == "/apps/home.html/":
         return dbc.Spinner(home.layout,type="border",color="info")
-    elif pathname == '/apps/counties':
+    elif pathname == '/apps/counties.html/':
            return counties.layout
-    elif pathname == "/apps/vaccination":
+    elif pathname == "/apps/vaccination.html/":
           return dbc.Spinner(vaccination.layout,type="border",color="info")
-    elif pathname == "/apps/seroprevalence":
+    elif pathname == "/apps/seroprevalence.html/":
          return dbc.Spinner(seroprevalence.layout,type="border",color="info")
-    elif pathname == "/apps/variant_trends":
+    elif pathname == "/apps/variant_trends.html/":
          return dbc.Spinner(variant_trends.layout,type="border",color="info")
-    elif pathname == "/apps/phylogeny":
+    elif pathname == "/apps/phylogeny.html/":
          return phylogeny.layout
-    elif pathname == "/apps/summaryreport":
+    elif pathname == "/apps/summaryreport.html/":
         return dbc.Spinner(summary_report.layout,type="border",color="info")
-    elif pathname == "/apps/countysummary":
+    elif pathname == "/apps/countysummary.html/":
         return dbc.Spinner(countysummary.layout,type="border",color="info")
     else:
         return dbc.Spinner(home.layout,type="border",color="info")

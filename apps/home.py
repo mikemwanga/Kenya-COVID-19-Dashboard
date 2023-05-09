@@ -248,7 +248,9 @@ def update_content(n_intervals):
                     ],justify="center", className = "mb-2 ms-3 me-3 ps-3 pe-3 mt-5 pt-5"),
                 
                     dbc.Row([
-                        html.B("KEY METRICES",className = "text-secondary fs-6 ms-5 ps-5"),
+                        dbc.Row([
+                            html.B("KEY METRICES",className = "text-secondary fs-6 ms-5 ps-5"),
+                        ],className = ""),
                         dbc.Col([
                             dbc.CardBody([
                                 html.Label(f"{int(total_cases):,}",className ="text-danger fs-3"),
@@ -319,22 +321,22 @@ def update_content(n_intervals):
                                     html.Strong(samplesize_last_24hrs,className = val_class),
                             html.Hr()
                             
-                        ],xs=10,md=1,lg=2,className = col_class,style = {"height":"1000px"}),
-                        
+                        ],xs=10,md=1,lg=2,xl=2,className = col_class,style = {"height":"1000px"}),
+                    
                         dbc.Col([
                                                 
-                        html.P("COUNTIES WITH REPORTED CASES",className = col_title),
-                        dcc.Graph(figure = fig_county,responsive = True, style = {"width":"30hw","height":"25vh"}),
-                        html.Hr(className = hr_class, style = hr_style),
-                                
-                        html.P("TRENDS IN CASES",className = col_title),
-                        dcc.Graph(figure=cases_trend,responsive = True, style = {"width":"30hw","height":"25vh"}),
+                            html.P("COUNTIES WITH REPORTED CASES",className = col_title),
+                            dcc.Graph(figure = fig_county,responsive = True, style = {"width":"30hw","height":"25vh"}),
+                            html.Hr(className = hr_class, style = hr_style),
+                                    
+                            html.P("TRENDS IN CASES",className = col_title),
+                            dcc.Graph(figure=cases_trend,responsive = True, style = {"width":"30hw","height":"25vh"}),
+                            
+                            html.Hr(className = hr_class, style = hr_style),
+                            html.P("CASES BY AGE AND GENDER",className = col_title),
+                            dcc.Graph(figure = age_gender_cases_plot,responsive = True,style = {"width":"25hw","height":"30vh"})#,style = {"width":"30hw","height":"35vh"})
                         
-                        html.Hr(className = hr_class, style = hr_style),
-                        html.P("CASES BY AGE AND GENDER",className = col_title),
-                        dcc.Graph(figure = age_gender_cases_plot,responsive = True,style = {"width":"25hw","height":"30vh"})#,style = {"width":"30hw","height":"35vh"})
-                        
-                        ],xs=10,md=4,lg=4,className = col_class,style = {"margin-left":"15px","margin-right":"0px","height":"1000px"} ),
+                        ],xs=10,md=4,lg=4,xl=3,className = col_class,style = {"margin-left":"15px","margin-right":"0px","height":"1000px"} ),
                         
                         dbc.Col([
                             html.P("MOST AFFECTED COUNTIES",className = col_title),
@@ -346,7 +348,7 @@ def update_content(n_intervals):
                             html.Hr(className = hr_class, style = hr_style),
                             html.P("FATALITIES BY AGE AND GENDER",className = col_title),
                             dcc.Graph(figure= age_gender_death_plot, responsive = True, style = {"width":"25hw","height":"30vh"}),# style = {"width":"30vw","height":"30vh"})
-                        ],xs=10,md=4,lg=4,className = col_class,style = {"margin-left":"15px","margin-right":"0px","height":"1000px"}),
+                        ],xs=10,md=4,lg=4,xl=3,className = col_class,style = {"margin-left":"15px","margin-right":"0px","height":"1000px"}),
                         
                     ],style = {},justify = "center",className = classname_col),
 
