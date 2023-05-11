@@ -121,7 +121,7 @@ def update_content(n_intervals):
                 html.Label(["This section shows Bayesian estimate of growth rate for selected SARS-CoV-2 lineages recently observed in Kenya and globally. Data \
                     used are frequency of grouped lineages that are categorized based on region of isolation"], 
                 style = {"text-align":"start","font-size":14},className = "fw-normal text-dark"),
-            ],xs = 10,md=10,lg=9),
+            ],xs = 10,md=9,lg=8),
             
             dbc.Row([
                 html.Div([
@@ -136,7 +136,7 @@ def update_content(n_intervals):
                         ],
                         value = "BQ.1_XBB_AY",
                     )       
-                ],style={"width":"20%","font-size":12,"margin-right":"55px", "margin-bottom":"5px"})
+                ],style={"width":"20%","font-size":12,"margin-right":"170px", "margin-bottom":"5px"})
             ],justify="end"),
             
             dbc.Row([
@@ -152,7 +152,7 @@ def update_content(n_intervals):
                                     html.Div(id = "range_lineage")
                                 ])
 
-                            ], xs=10,md=6,lg=5, style={}),
+                            ], xs=10,md=6,lg=6, style={}),
                             dbc.Col([
                                 dbc.CardBody([                                    
                                     html.P("Flag per Variant",className = col_title),
@@ -160,7 +160,7 @@ def update_content(n_intervals):
                                     html.Div(id = "summary_lineage")
                                 ])
 
-                            ], xs=10,md=4,lg=4)
+                            ], xs=10,md=5,lg=5)
                         ])
                     ],className = "border-0 rounded-0")
                 ],xs=11, md=11,lg=9)

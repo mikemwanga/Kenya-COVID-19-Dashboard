@@ -244,40 +244,38 @@ def update_content(n_intervals):
                             This platform intergrates data from Ministry of Health of Republic of Kenya, GISAID and other SARS-CoV-2 associated studies.",
                             className = "fs-6",style ={"text-align":"start"}),
                             html.Hr(),
-                        ], width = 11, lg=10),
+                        ], xs=8,md=10, lg=8),
                     ],justify="center", className = "mb-2 ms-3 me-3 ps-3 pe-3 mt-5 pt-5"),
                 
                     dbc.Row([
-                        dbc.Row([
-                            html.B("KEY METRICES",className = "text-secondary fs-6 ms-5 ps-5"),
-                        ],className = ""),
+                        
                         dbc.Col([
                             dbc.CardBody([
                                 html.Label(f"{int(total_cases):,}",className ="text-danger fs-3"),
                                 html.P("Total reported cases",style = style_text)
                             ],className = card_class )
-                        ],xs=5,md=3,lg=2,className = "card_style",style = {"margin-right":"10px"}),
+                        ],xs=5,md=3,lg=2,className = "card_style",style = {"margin-right":"5px"}),
                         
                         dbc.Col([
                             dbc.CardBody([
                                 html.Label(f"{int(total_deaths):,}",className ="text-dark fs-3"),
                                 html.P("Total reported deaths",style = style_text),
                         ],className = card_class)
-                        ],xs=5,md=3,lg=2,className = "card_style",style = {"margin-right":"10px"}),
+                        ],xs=5,md=3,lg=2,className = "card_style",style = {"margin-right":"5px"}),
                         
                         dbc.Col([
                             dbc.CardBody([
                                 html.Label(f"{int(total_recoveries):,}",className = "text-success fs-3"),
                                 html.P("Total recoveries",style = style_text),
                         ],className = card_class)
-                        ],xs=5,md=3,lg=2,className = "card_style",style = {"margin-right":"10px"}),
+                        ],xs=5,md=3,lg=2,className = "card_style",style = {"margin-right":"5px"}),
                         
-                        dbc.Col([
-                            dbc.CardBody([
-                                html.Label(f"{int(total_tests):,}",className = "text-primary fs-3"),
-                                html.P("Tests done",style = style_text),
-                        ],className = card_class)
-                        ],xs=5,md=3,lg=2,className = "card_style"),
+                        # dbc.Col([
+                        #     dbc.CardBody([
+                        #         html.Label(f"{int(total_tests):,}",className = "text-primary fs-3"),
+                        #         html.P("Tests done",style = style_text),
+                        #     ],className = card_class)
+                        # ],xs=5,md=3,lg=2,className = "card_style"),
                         
                         dbc.Col([
                             dbc.CardBody([

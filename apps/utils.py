@@ -62,3 +62,6 @@ pcolor_vaccination = "#5D6D7E"
 bg_color = "rgba(0,0,0,0)"
 gridcolor = "#e0e0e0"
 #margin_size = "1px
+
+
+

@@ -80,14 +80,6 @@ def update_content(n_intervals):
     
 
     dev = html.Div([
-                # dbc.Row([
-                #         dbc.Col([
-                #             html.H5("Visualization of vaccination across the country",className = col_title, style ={"text-align":"start"}),
-                #             html.Hr(),
-                #         ], width = 11, lg=10),
-                #         #html.H5("Countrywide Summary"),
-                # ],justify="center", className = "mb-2 ms-4 me-4 ps-4 pe-4 mt-5 pt-5"),
-
                 dbc.Row([
                     dbc.Col([
                         dbc.Card([
