@@ -4,18 +4,20 @@ from dash import html, dcc
 from dash.dependencies import Input,Output
 from app import app
 from app import server
+import dash_mantine_components as dmc
+#from utils import dmc
 
 app.title = "Kenya COVID-19 Dashboard"
 
 #connect to your app pages
-from apps import home,counties,vaccination,seroprevalence,variant_trends,phylogeny#,summary_report,countysummary#,markdown#,download#cases,deaths,home
+from apps import home, counties,vaccination,seroprevalence,variant_trends,phylogeny#,summary_report,countysummary#,markdown#home,
 
 tab_nav = "text-light fw-light"
 style = {"text-decoration": "none"}
 
 #Navbar
 navbar =   html.Div([
-                    
+                    #barSimple
                     dbc.NavbarSimple([
                         dbc.NavItem(dbc.NavLink(html.A("Home", href="/apps/home.html/", className= tab_nav,style=style))),
                         dbc.NavItem(dbc.NavLink(html.A("County", href="/apps/counties.html/", className= tab_nav,style=style))),
@@ -28,15 +30,17 @@ navbar =   html.Div([
                           #  dbc.DropdownMenuItem("County",href="/apps/countysummary")
                         #],nav=True,in_navbar=True,label="Summary"),
 
-                    ],             brand_href="/apps/home", 
+                    ],             brand_href="/apps/home.html",
+                                    
+                                      
                                     brand="Kenya COVID-19 Dashboard",
                                     style={"margin-bottom":5},
-                                    color="#333972",light=True,dark=True,#, # #333972 #1DA1F2
-                                    fixed ="top",className = "text-light fw-light"
+                                    color="#1DA1F2",light=True,dark=True,#, # #333972 
+                                    fixed ="top",className = "text-light fw-light",
+                                    
                      ),     
 ])                   
-
-#app.layout = serve_layout
+#app.layout = serve_lay
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=True),
@@ -46,20 +50,22 @@ app.layout = html.Div([
 ])
 
 @app.callback(Output('page-content', 'children'),
-            Input('url', 'pathname')) #,prevent_initial_callback=True
+            Input('url', 'pathname'),prevent_initial_callback=True)
 
 def display_page(pathname):
     
     if pathname == "/apps/home.html/":
         return dbc.Spinner(home.layout,type="border",color="info")
+    #elif pathname == "/apps/home2.html/":
+     #   return dbc.Spinner(home2.layout,type="border",color="info")
     elif pathname == '/apps/counties.html/':
-           return counties.layout
+            return dbc.Spinner(counties.layout,type="border",color="info")
     elif pathname == "/apps/vaccination.html/":
           return dbc.Spinner(vaccination.layout,type="border",color="info")
     elif pathname == "/apps/seroprevalence.html/":
          return dbc.Spinner(seroprevalence.layout,type="border",color="info")
     elif pathname == "/apps/variant_trends.html/":
-         return dbc.Spinner(variant_trends.layout,type="border",color="info")
+         return dbc.Spinner(variant_trends.layout,color="info")
     elif pathname == "/apps/phylogeny.html/":
          return phylogeny.layout
     elif pathname == "/apps/summaryreport.html/":

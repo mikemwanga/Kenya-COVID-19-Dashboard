@@ -3,6 +3,7 @@ from dash import dcc, html,dash_table,callback
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 from dash_bootstrap_templates import load_figure_template
+import dash_mantine_components as dmc
 from dash_iconify import DashIconify
 import pandas as pd
 import plotly.express as px
@@ -17,8 +18,10 @@ from apps import home as hm
 warnings.filterwarnings('ignore')
 load_figure_template("sandstone") #cerulean,flatly,journal,litera,pulse,sandstone,minty
 from app import app
-import geopandas as gpd
+#import geopandas as gpd
 from plotly.subplots import make_subplots
+from datetime import datetime,date,timedelta
+import time
 
 
 #Set path
@@ -49,6 +52,7 @@ card_class = "text-center"
 classname_col = "bg-secondary bg-opacity-10 g-1 justify-content-center p-2 m-2" 
 class_style = "shadow-sm bg-light border rounded g-1"
 col_title = "text-center text-secondary fw-bold mb-0"
+style_title = {"font-size":12}
 
 col_style  = {"margin-left":"15px","margin-right":"0px"}
 style_label={"font-size":35, "align":"center"}
@@ -72,17 +76,36 @@ marker_text = "#67001f"
 #intervals
 interval = dcc.Interval(id = "interval-component", interval = 3600 * 24 *1000, n_intervals = 0)
 
+#sero content
+
+sero_content_modal = "This is a summary of several serological studies conducted among different populations since the beginning of the pandemic.\
+                    This serves to inform the level of COVID-19 infection across the country in \
+                        different study populations. Check referenced seroprevalence studies in the footer notes. Use the dropdown menu to view seroprevalence in \
+                        specific groups"
+                        
+vaccination_content = "This page provides overview of reported vaccination metrics of the number of persons vaccinated countrywide and percentage per county. \
+                        Data for this section is exrtracted from the Kenya Ministry of Health platform and Ourworld in data. \
+                        Reference links: (https://www.health.go.ke/#1621663315215-d6245403-4901 and https://ourworldindata.org/coronavirus/country/kenya). "
+
+county_content = "This is a summary of cases, fatalities and disease budden at county levels. The section allows realtime comparison between selected counties \
+                    . Use the dropdown menu to achieve this."
+                    
+home_content = "The home page provides a summary of COVID-19 prevalence across the country. The top boxes show total metrices on cases, deaths, recoveries and \
+                overall positivity.  The testing updates section provides information on last tests results reported by MOH. This includes reported cases, sample size\
+                positivity, reported fatalities and reported recoveries. A summary of cases at counties, epidemic waves on cases and fatalities and disease prevalence \
+                based on gender and sex is displayed."
 #acknowledgment section
 reference = dbc.Row([
+                dbc.Col(width=1),
                 dbc.Col([
-                    html.Img(src= "../assets/kwtrp_logo.png",style = {"width":"8vw","height":"7vh"})
+                    html.Img(src=dash.get_asset_url("../assets/kwtrp_logo.png"),style = {"width":"8vw","height":"7vh"})
                 ],width=1,style = {"margin-right":"10px",
                                    "display":"flex","align-items": "center","justify-content": "center",}),
                 dbc.Col([
-                    html.Img(src= "../assets/moh_kenya.png",style = {"width":"6vw","height":"10vh"})
+                    html.Img(src=dash.get_asset_url("../assets/moh_kenya.png"),style = {"width":"6vw","height":"10vh"})
                 ],width=1, style = {"margin-left":"10px","display":"flex","align-items": "center","justify-content": "center",}),
                 dbc.Col([
-                    html.Img(src= "../assets/fcdo_logo.png",style = {"width":"10vw","height":"11vh"})
+                    html.Img(src=dash.get_asset_url("../assets/fcdo_logo.png"),style = {"width":"10vw","height":"11vh"})
                 ],width=1, style = {"display":"flex","align-items": "center","justify-content": "center",}),
 
                 dbc.Col([
@@ -108,5 +131,7 @@ reference = dbc.Row([
                     dcc.Link("ggithinji@kemri-wellcome.org",title="email_me",href="mailto:ggithinji@kemri-wellcome.org",target="_blank",
                              style = {"font-size":10})
 
-                ], width = {"size":7,"offset":1})
-        ],className = "bg-secondary bg-opacity-10 border-top border-1 shadow justify-content-center ms-2 ps-2 mt-4 pt-4")
+                ], width = {"size":6,"offset":1},xxl=4, className = "mb-3"),
+                dbc.Col(width=1),
+        ],className = "bg-secondary bg-opacity-10 border-top border-1 shadow justify-content-center ms-2 ps-2 mt-3 pt-3 mb-4")
+

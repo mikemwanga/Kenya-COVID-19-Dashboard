@@ -1,8 +1,10 @@
 from utils import *
 from plotly.subplots import make_subplots
-from apps import home as hm
+#from apps import home as hm
 
 sero_data = pd.read_excel(DATA_PATH.joinpath("KWTRP_serosurveillance_data_Dashboard_09Sep2022.xlsx"))
+sero_data["start"] = pd.to_datetime(sero_data["start"],format = "%d/%m/%Y")
+sero_data["finish"] = pd.to_datetime(sero_data["finish"],format = "%d/%m/%Y")
 daily_cases = pd.read_csv(DATA_PATH.joinpath("covid_daily_data.csv"))
 daily_cases["Date"] = pd.to_datetime(daily_cases["Date"],format = "%d/%m/%Y")
 
@@ -15,8 +17,8 @@ class sero_prevalence:
                 data = sero_data[["Population","Region", "start","finish", "Anti-spike_perc"]]
                 self.data_period = data.groupby(["start","finish","Population",])["Anti-spike_perc"].mean()
                 self.data_period = self.data_period.to_frame().reset_index()
-                self.data_period["start"] = pd.to_datetime(self.data_period["start"])
-                self.data_period["finish"] = pd.to_datetime(self.data_period["finish"])
+                self.data_period["start"] = pd.to_datetime(self.data_period["start"],format = "%d/%m/%Y")
+                self.data_period["finish"] = pd.to_datetime(self.data_period["finish"],format = "%d/%m/%Y")
 
         def seroplot(self):
                 fig = make_subplots(specs = [[{"secondary_y":True}]], shared_xaxes=True)
@@ -36,7 +38,7 @@ class sero_prevalence:
                 fig.update_xaxes(title_font = {"size":titlefont},tickfont = tickfont_dict,dtick="M1",tickformat="%b\n%Y",
                                  linecolor = "black",ticks="outside",nticks=5)#tickformat="%b\n%Y"
                 fig.update_layout(margin=margin,
-                                  legend = dict(orientation = "h",yanchor  = "bottom", xanchor = "left",y=-0.5))#y=1.02,x=0.01,xanchor="left"))
+                                  legend = dict(orientation = "h",yanchor  = "bottom", xanchor = "left",y=-0.3))#y=1.02,x=0.01,xanchor="left"))
                 #fig.update_layout(legend = dict(yanchor  = "top",y=1,x=0.01,xanchor="left"),legend_orientation ="h",margin = margin) #plot_bgcolor = pcolor,paper_bgcolor = pcolor,
                 
                 return fig
@@ -63,38 +65,47 @@ class sero_prevalence:
 sero_class = sero_prevalence()           
 subfig = sero_class.seroplot()
 
-
 layout = html.Div([
     dbc.Row([
         dbc.Col([
             html.H5("Visualization of Seroprevalence across the country",className =col_title, style ={"text-align":"start"}),
             html.Hr(),
         ], xs=10,md=10,className ="mt-5 pt-5 ms-5 me-5"),
-        
     ]),
     
     dbc.Row([
+        
         dbc.Col([
-            html.Div([
-                html.P("Select Population",className="text-primary mb-0 pb-0", style= {"font-size":14}),
-                dcc.Dropdown(
-                    id = "population",
-                    options = ["Overall","Blood Donors","Health Workers","HDSS Residents"],#"ANC Attendees"],
-                    value = "Overall", 
-                )
-            ],style={"width":"100%","font-size":14})
-        ],width=4,xs=6,lg=3,className = "me-5 pe-5")
-    ],justify="end", className = ""),
+                dbc.Row([
+                    dbc.Col([
+                        html.Div([
+                            html.P("Select Population",className="text-primary mb-0 pb-0", style= {"font-size":14}),
+                            dcc.Dropdown(
+                                id = "population",
+                                options = ["Overall","Blood Donors","Health Workers","HDSS Residents"],#"ANC Attendees"],
+                                value = "Overall", 
+                            )
+                        ],style={"font-size":12,"margin-end":"200px" ,"margin-bottom":"5px","width":"70%"}),
+
+
+                    ],xs=6,md=3, className = "me-3" ),
+                    
+                    dbc.Col([],xs=6,md=2)
+
+                ],justify="end"),
+
+
+                dbc.Row([
+                    html.Div(id = "content"),
+                ]),
     
-    
-    dbc.Row([
-        #returning content here
-        html.Div(id = "content"),
+        ],xs=12),
+        
         reference
+        
     ],justify="center",className = classname_col),
      
 ]),
-
 
 class hdss_residents_strat:
         """
@@ -233,12 +244,35 @@ overall_image = html.Div([
     dbc.Row([
         dbc.Col([
             dbc.Card([
-                html.P("Overall Seroprevalence in selected study populations",className = col_title),
+                
+                html.P("OVERALL SEROPREVALENCE IN SELECTED STUDY POPULATIONS",className = col_title),
+                html.Br(),
                 dbc.CardBody([
                     dcc.Graph(figure = subfig,responsive = True,style = {"width":"40hw","height":"50vh"})
-                ])
+                ]),
+                
+                dbc.Row([
+                    dbc.Col([
+                        html.Div([
+                            dmc.Button("more info",id="button",variant="outline",color = "gray",
+                                       leftIcon=DashIconify(icon="bi:info-square-fill")),
+                            dbc.Modal([
+                                #dbc.ModalHeader(dbc.ModalTitle("Header")),
+                                
+                                dbc.ModalBody(sero_content_modal),
+                                dbc.ModalFooter(
+                                    dbc.Button( "Close", id="close", className="ms-auto", n_clicks=0)
+                                )
+                            ],id="sero_modal",size="xs",is_open=False,scrollable=True,centered = True)
+                        ])
+                    ],width=2,className = "me-5")
+                ],justify="end",className = "mb-2"),
+                
             ],className='text-center border-0 rounded-0'),
-        ],xs=10,md=8,lg=7, style = {}),
+            
+            
+            
+        ],xs=10,md=8,lg=7),
         
     ],justify = "center")
 ])
@@ -254,7 +288,7 @@ blood_donors_plot = html.Div([
                     html.P("Seroprevalence by gender",className = col_title),
                     dcc.Graph(figure = blood_donor_strat().gender_plot(),responsive = True, style={"height":"40vh"})
                 
-                ],xs=8,md=5,xl=4,className = col_class,style = {"margin-right":"10px"}),
+                ],xs=8,md=5,xxl=4,className = col_class,style = {"margin-right":"10px"}),
             
                 dbc.Col([
                     html.Br(),
@@ -263,7 +297,7 @@ blood_donors_plot = html.Div([
                     html.Hr(),
                     html.P("Seroprevalence in by region",className = col_title),
                     dcc.Graph(figure = blood_donor_strat().region_plot(),responsive = True, style={"height":"40vh"})
-                ],xs=8,md=5,xl=4,className = col_class)
+                ],xs=8,md=5,xxl=4,className = col_class)
                 
             ],justify = "center")
         ])
@@ -279,7 +313,7 @@ health_care_workers = html.Div([
                     html.P("Seroprevalence by Gender",className = col_title),
                     dcc.Graph(figure = health_workers_strat().gender_plot(),responsive = True, style={"height":"40vh"})
                 
-                ],xs=8,md=5,xl=4,className = "bg-white align-self-center",style = {"margin-right":"10px", "height":"100%"}),
+                ],xs=8,md=5,xxl=4,className = "bg-white align-self-center",style = {"margin-right":"10px", "height":"100%"}),
             
                 dbc.Col([
                     html.Br(),
@@ -288,7 +322,7 @@ health_care_workers = html.Div([
                     html.Hr(),
                     html.P("Seroprevalence in by region",className = col_title),
                     dcc.Graph(figure = health_workers_strat().region_plot(),responsive = True, style={"height":"40vh"})
-                ],xs=8,md=5,xl=4,className = col_class)
+                ],xs=8,md=5,xxl=4,className = col_class)
                 
             ],justify = "center",className = "")
         ], style = {"height":"100vh"}),
@@ -305,7 +339,7 @@ hdss_residents = html.Div([
                     html.P("Seroprevalence by Gender",className = col_title),
                     dcc.Graph(figure = hdss_residents_strat().gender_plot(),responsive = True, style={"height":"40vh"})
                 
-                ],xs=8,md=5,xl=4,className = col_class,style = {"margin-right":"10px"}),
+                ],xs=8,md=5,xxl=4,className = col_class,style = {"margin-right":"10px"}),
             
             dbc.Col([
                 html.Br(),
@@ -315,12 +349,12 @@ hdss_residents = html.Div([
                     html.P("Seroprevalence in by region",className = col_title),
                     dcc.Graph(figure = hdss_residents_strat().region_plot(),responsive = True, style={"height":"40vh"})
                     
-            ],xs=8,md=5,xl=4,className = col_class)        
+            ],xs=8,md=5,xxl=4,className = col_class)        
         ],justify = "center")
 ])
 
 @app.callback(
-    Output("content", "children"), 
+    Output("content", "children"),
     Input("population","value")
 )
 
@@ -335,3 +369,14 @@ def render_content(value):
         return hdss_residents
     else:
         return overall_image
+
+@app.callback(
+    Output("sero_modal", "is_open"),
+    [Input("button", "n_clicks"),
+    Input("close", "n_clicks")],
+    [State("sero_modal", "is_open")]
+)
+def toggle_modal(n1, n2, is_open):
+    if n1 or n2:
+        return not is_open
+    return is_open

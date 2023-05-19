@@ -42,7 +42,7 @@ layout = html.Div([
                         dbc.Col([
                             html.H5("Visualization of trends at County level",className = col_title,style ={"text-align":"start"}),
                             html.Hr(),
-                        ], width = 11, xxl=10),
+                        ],xs=9, xxl=8),
                     ],justify="center", className = "mb-2 ms-4 me-4 ps-4 pe-4 mt-5 pt-5"),
                 
                     
@@ -62,7 +62,8 @@ layout = html.Div([
             
                                     ),
                                 ],style={"width":"100%","font-size":14}),
-                            ],width=4,md=3,className="me-5 pe-5 mb-1"),
+                            ],xs=8,md=3,xxl=2,className="mb-1"),
+                            dbc.Col([],xs=4,md=2,xxl=2)
                             
                         ],justify="end"),
                         
@@ -78,7 +79,7 @@ layout = html.Div([
                             dcc.Graph(id = "cumulative_plot", figure = {},responsive=True,style={"width":"25hw","height":"30vh"}),
                             
                             
-                        ],width=5,lg=5,sm=8,className = col_class,style = {"height":"800px"}),
+                        ],xs=10,md=5,xxl=5,className = col_class,style = {"height":"800px"}),
                         
                         dbc.Col([
                             html.Br(),
@@ -92,7 +93,23 @@ layout = html.Div([
                             dcc.Graph(id = "death_plots", figure = {},responsive=True,style={"width":"25hw","height":"30vh"})
                             
                             
-                        ],width=5,lg=5,sm=8,className = col_class,style={"margin-left":"10px", "height":"800px"})
+                        ],xs=10,md=5,xxl=5,className = col_class,style={"margin-left":"10px", "height":"800px"}),
+                        
+                        dbc.Row([
+                            dbc.Col([
+                                html.Div([
+                                    dmc.Button("more info",id="county_button",variant="outline",color = "gray",
+                                       leftIcon=DashIconify(icon="bi:info-square-fill")),
+                                    dbc.Modal([
+                                    dbc.ModalBody(county_content),
+                                        dbc.ModalFooter(
+                                    dbc.Button( "Close", id="close", className="ms-auto", n_clicks=0)
+                                )
+                                ],id="county_modal",size="xs",is_open=False,scrollable=True,centered = True)
+                                ])
+                            ],width=2,className = "me-2 mt-3 mb-3"),
+                            dbc.Col(width=1)
+                        ],justify="end" ),
                         
                     ],justify = "center",className = classname_col),
                 
@@ -168,3 +185,14 @@ def update_graph_card(county):
         
         return fig,fig2,fig_death,table
 
+
+@app.callback(
+    Output("county_modal", "is_open"),
+    [Input("county_button", "n_clicks"),
+    Input("close", "n_clicks")],
+    [State("county_modal", "is_open")]
+)
+def toggle_modal(n1, n2, is_open):
+    if n1 or n2:
+        return not is_open
+    return is_open

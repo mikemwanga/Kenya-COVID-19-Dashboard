@@ -7,7 +7,7 @@ variant_data = pd.read_table(DATA_PATH.joinpath("variant_month_data.txt"))
 variants_kenya = pd.read_table(DATA_PATH.joinpath("variant_data_kenya.tsv"))
 variants_kenya["Month"] = pd.to_datetime(variants_kenya["Month"], format = "%Y-%m-%d")
 kenya_data = pd.read_table(DATA_PATH.joinpath("kenya.metadata_0111_120122.tsv"))
-variants_data = pd.read_table(DATA_PATH.joinpath("kenya_lineages_until020523.tsv"))
+variants_data = pd.read_table(DATA_PATH.joinpath("kenya_lineages_until180523.tsv"))
 variant_map = pd.read_table(DATA_PATH.joinpath("map_lineages.tsv"))
 
 class Variants:
@@ -62,7 +62,7 @@ recent_lineages = recent_lineages.groupby(["date","lineage_group"])[["lineage_gr
 
 #do the plot
 sars_lineages = px.scatter(recent_lineages, x = "date",y = "lineage_group",size= "Frequency", color = "lineage_group",\
-                    range_x=["2023-01-01","2023-05-01"])
+                    range_x=["2023-01-01","2023-06-01"])
 sars_lineages.update_layout(margin=margin, showlegend = False)
 sars_lineages.update_xaxes(title = None,linecolor = "black",tickfont = dict(size=10), nticks=6)
 sars_lineages.update_yaxes(title = None, linecolor = "black",tickfont = dict(size=10),gridcolor = gridcolor)
@@ -111,7 +111,7 @@ def update_content(n_intervals):
                     ]),
                 ],className = "h-100 border-0 text-center rounded-0")
                 
-            ],xs=10, md=4,lg=3),
+            ],xs=10, md=5,lg=4),
         ],justify = "center",className = classname_col),
         
         dbc.Row([
@@ -123,25 +123,49 @@ def update_content(n_intervals):
                 style = {"text-align":"start","font-size":14},className = "fw-normal text-dark"),
             ],xs = 10,md=9,lg=8),
             
-            dbc.Row([
-                html.Div([
-                    html.Label("Select analyzed lineage-groups", style = {"font-size":12},className = "text-primary mb-0 pb-0"),
-                    dcc.Dropdown(
-                        id = "lineage_warning",
-                        options = [
-                            {"label":"BA.1-like/BN-like/BA.2-like", "value":"BA.1_BN_BA.2"},
-                            {"label":"BA.4-like/BA.5-like/BF-like","value":"BA.4_BA.5_BF"},
-                            {"label":"BQ.1-like/XBB-like/AY-like","value":"BQ.1_XBB_AY"},
-                            {"label":"B.1-like/CH.1-like","value":"B.1_CH.1"},
-                        ],
-                        value = "BQ.1_XBB_AY",
-                    )       
-                ],style={"width":"20%","font-size":12,"margin-right":"170px", "margin-bottom":"5px"})
-            ],justify="end"),
+            # dbc.Row([
+            #     dbc.Col([
+            #         # html.Div([
+            #         #     html.Label("Select analyzed lineage-groups", style = {"font-size":12},className = "text-primary mb-0 pb-0"),
+            #         #     dcc.Dropdown(
+            #         #         id = "lineage_warning",
+            #         #         options = [
+            #         #             {"label":"BA.1-like/BN-like/BA.2-like", "value":"BA.1_BN_BA.2"},
+            #         #             {"label":"BA.4-like/BA.5-like/BF-like","value":"BA.4_BA.5_BF"},
+            #         #             {"label":"BQ.1-like/XBB-like/AY-like","value":"BQ.1_XBB_AY"},
+            #         #             {"label":"B.1-like/CH.1-like","value":"B.1_CH.1"},
+            #         #             {"label":"FY.4_XBB.1.22.1-like","value":"FY.4_XBB.1.22.1"},
+            #         #         ],
+            #         #         value = "FY.4_XBB.1.22.1",
+            #         #     )       
+            #         # ],style={"width":"100%","font-size":12, "margin-bottom":"5px"}) #"margin-right":"190px",
+            #     ],xs=6, md=4, lg=2)
+            # ],justify="end",className = classname_col),
             
             dbc.Row([
                 dbc.Col([
                     dbc.Card([
+                        dbc.Row([
+                            
+                            dbc.Col([
+                                html.Div([
+                                html.Label("Select analyzed lineage-groups", style = {"font-size":12},className = "text-primary mb-0 pb-0"),
+                                    dcc.Dropdown(
+                                        id = "lineage_warning",
+                                        options = [
+                                            {"label":"BA.1-like/BN-like/BA.2-like", "value":"BA.1_BN_BA.2"},
+                                            {"label":"BA.4-like/BA.5-like/BF-like","value":"BA.4_BA.5_BF"},
+                                            {"label":"BQ.1-like/XBB-like/AY-like","value":"BQ.1_XBB_AY"},
+                                            {"label":"B.1-like/CH.1-like","value":"B.1_CH.1"},
+                                            {"label":"FY.4_XBB.1.22.1-like","value":"FY.4_XBB.1.22.1"},
+                                        ],
+                                        value = "FY.4_XBB.1.22.1",
+                                        )    
+                                       
+                                ],style={"font-size":12,"margin-end":"200px" ,"margin-bottom":"5px","width":"80%"}), #"width":"100%",
+                            ],xs=8,md=4,lg=3, className = "me-3")
+                            
+                        ],justify="end"),
                         
                         dbc.Row([
                             dbc.Col([
@@ -151,17 +175,17 @@ def update_content(n_intervals):
                                     html.Br(),
                                     html.Div(id = "range_lineage")
                                 ])
-
-                            ], xs=10,md=6,lg=6, style={}),
+                            ],xs=10,xxl=6,className = ""),#width="auto" md=6,lg=6
+                            
                             dbc.Col([
                                 dbc.CardBody([                                    
                                     html.P("Flag per Variant",className = col_title),
                                     html.Br(),
                                     html.Div(id = "summary_lineage")
                                 ])
-
-                            ], xs=10,md=5,lg=5)
-                        ])
+                            ],xs=10,xxl=5,className = "")#width="auto" ) #,md=5,lg=5
+                            
+                        ],justify = "center")
                     ],className = "border-0 rounded-0")
                 ],xs=11, md=11,lg=9)
            
@@ -179,10 +203,10 @@ def update_content(n_intervals):
         Input("lineage_warning","value")
 )
 def load_images(value):
-    if value in ["BQ.1_XBB_AY","BA.4_BA.5_BF","BA.1_BN_BA.2","B.1_CH.1"]:
+    if value in ["BQ.1_XBB_AY","BA.4_BA.5_BF","BA.1_BN_BA.2","B.1_CH.1","FY.4_XBB.1.22.1"]:
         return [
             html.Img(src = dash.get_asset_url("../assets/plots/" + value + "_range_lineage.png"),\
-                #style = {"width":"80hw","height":"30vh"}),
+                alt='image',
                 style = {"height":"360px", "width":"500px"}),
             html.Img(src = dash.get_asset_url("../assets/plots/" + value + "_summary_lineage.png"),\
                 style = {"height":"200px", "width":"450px"})]
