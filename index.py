@@ -17,7 +17,7 @@ style = {"text-decoration": "none"}
 
 #Navbar
 navbar =   html.Div([
-                    #barSimple
+                    
                     dbc.NavbarSimple([
                         dbc.NavItem(dbc.NavLink(html.A("Home", href="/apps/home.html/", className= tab_nav,style=style))),
                         dbc.NavItem(dbc.NavLink(html.A("County", href="/apps/counties.html/", className= tab_nav,style=style))),
@@ -55,11 +55,9 @@ app.layout = html.Div([
 def display_page(pathname):
     
     if pathname == "/apps/home.html/":
-        return dbc.Spinner(home.layout,type="border",color="info")
-    #elif pathname == "/apps/home2.html/":
-     #   return dbc.Spinner(home2.layout,type="border",color="info")
+        return dcc.Loading(home.layout)
     elif pathname == '/apps/counties.html/':
-            return dbc.Spinner(counties.layout,type="border",color="info")
+            return dcc.Loading(counties.layout)
     elif pathname == "/apps/vaccination.html/":
           return dbc.Spinner(vaccination.layout,type="border",color="info")
     elif pathname == "/apps/seroprevalence.html/":

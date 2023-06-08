@@ -50,7 +50,7 @@ total_recoveries = daily_updates_moh["total_recoveries"].dropna().iat[-1]
 # # proportion_fully_vaccntd_adults = daily_updates_moh["proportion_of_fully_vaccinated_adult_population"].dropna().iat[-1]
 overall_positivity = round(total_cases/total_tests*100,1)
 # #update_date = datetime.date.today().strftime("%B %d, %Y")
-update_date = datetime.strptime(daily_updates_moh.index[-1],"%Y-%m-%d").strftime("%B %d, %Y")
+update_date = datetime.strftime(daily_updates_moh.index[-1],"%B, %d %Y")#.strftime("%B %d, %Y")
 test_dates = datetime.strptime(test_date,"%Y-%m-%d").strftime("%B %d, %Y")
 
 # class fold_change:
@@ -123,16 +123,17 @@ fig_county.update_layout(margin = margin,font_size=10,uniformtext_minsize = 3, y
 fig_county.update_xaxes(title = "Reported cases",linecolor = "black",tickfont = dict(size=10),title_font = {"size":10})
 fig_county.update_yaxes(tickfont = dict(size=10),title_font = {"size":10})
 
-def daily_plots(observation1, observation2):
+def daily_plots(observation1,observation2):#, observation2
                 fig = go.Figure()
-                fig.add_trace(go.Scatter( x = daily_cases["Date"],mode='none', y = daily_cases[observation1]))
+                fig.add_trace(go.Scatter( x = daily_cases["Date"],mode='none', y = daily_cases[observation1],fill='tonext'))
                 fig.add_trace(go.Scatter(x = daily_cases["Date"], y = daily_cases[observation2]))
                 fig.update_layout(hovermode="x unified",showlegend=False,margin = margin)
                 fig.update_xaxes(showgrid=False,showline=True,linecolor = axis_color,tickfont = dict(size=tickfont))
                 fig.update_yaxes(tickfont = dict(size=tickfont),nticks=10,title = "7-day Average", title_font = {"size":titlefont})
                 return fig
-cases_trend = daily_plots("Reported_Cases","moving_average_cases") #plot of daily reported infections
-deaths_trends = daily_plots("death_cases","moving_average_deaths")
+            
+cases_trend = daily_plots("moving_average_cases","moving_average_cases") #"Reported_Cases",plot of daily reported infections
+deaths_trends = daily_plots("moving_average_deaths","moving_average_deaths") #,"moving_average_deaths"
 
 #county plot for daily updates
 filtered_data = county_daily_updates.iloc[[-1]].fillna(0)
@@ -155,7 +156,6 @@ affected_counties.update_xaxes(nticks=8,title = "Prevalence (%)",linecolor = "bl
                             title_font = {"size":10})
 affected_counties.update_traces(textposition = "outside",textfont_size=10,width=0.6)
 affected_counties.update_layout(margin=margin)
-    
 
   #age gender plots
 def age_gender_plots2(data):
@@ -215,7 +215,7 @@ age_gender_cases_plot,age_gender_death_plot = age_gender_plots2(age_gender_data)
 
 
 layout = html.Div([
-    
+        
                     dbc.Row([
                         dbc.Col([
                             html.P(f"""Last updated: {update_date}""", className = "text-end text-primary", style = {"font-size":12}), #{update_date}
@@ -302,7 +302,7 @@ layout = html.Div([
                         ],xs=10,md=1,lg=2,xxl=2,className = col_class,style = {"height":900}), #
                         
                         dbc.Col([
-                            dbc.Spinner([          
+                                    
                             html.P("COUNTIES WITH RECENT UPDATES",className = col_title,style = style_title),
                             dcc.Graph(figure = fig_county,responsive = True, style = {"width":"30hw","height":"25vh"}),
                             html.Hr(className = hr_class, style = hr_style),
@@ -313,8 +313,6 @@ layout = html.Div([
                             html.Hr(className = hr_class, style = hr_style),
                             html.P("CASES BY AGE AND GENDER",className = col_title,style = style_title),
                             dcc.Graph(figure = age_gender_cases_plot,responsive = True,style = {"width":"25hw","height":"30vh"}),
-                            
-                            ],type="border",color="info")
                         
                         ],xs=10,md=5,lg=4,xxl=4,className = col_class,style = {"margin-left":"15px","margin-right":"0px","height":900} ),#,"height":"900px"
                         
@@ -334,7 +332,7 @@ layout = html.Div([
                     ],justify = "center",className = classname_col,style={"height":950}),
              
             reference          
-])
+        ])
 
 # layout = html.Div([
     

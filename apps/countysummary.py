@@ -102,7 +102,6 @@ layout = html.Div([
             Output("total_deaths","children"),
             Output("affected","children"),
             Output("trends_plot_county", "figure"),
-            #Output("cumulative_plot", "figure"),
             Output("death_plot_county","figure"),
             Output("cases_age_gender","figure"),
             Output("deaths_age_gender","figure")
@@ -117,15 +116,8 @@ def render_callback(county):
         title_county = f"COVID-19 {county} County Summary Report"
         data_county = county_daily_data[county_daily_data["county"].isin([county])]
         death_data = data_county[data_county["outcome"] == "Dead"] 
-        #data_filter = data_filter.sort_index().loc[start_date : end_date]
         data_filter= data_county[["county","lab_results", "date_of_lab_confirmation"]].\
             groupby(["county","date_of_lab_confirmation"]).count().reset_index()
-        
-        # fig2 = px.line(data_filter, x="date_of_lab_confirmation" , y = data_filter["lab_results"].cumsum() , color = "county")
-        # fig2.update_yaxes(title =None, showline=True, linewidth = 0.1, linecolor = "gray")
-        # fig2.update_xaxes(title = None,linecolor = "gray", showline=True,showgrid=False)
-        # fig2.update_layout(hovermode="x unified",uniformtext_minsize = 3, bargap =0.05,margin =margin,
-        #                    legend = dict(orientation = "h"))#,yanchor = "top",y = 1,xanchor = "right",x = 1)) 
 
         data_average = seven_day_average(data_filter, "lab_results")
         fig = px.line(data_average, x="date_of_lab_confirmation" , y = "moving_average" , color = "county")

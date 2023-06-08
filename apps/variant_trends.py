@@ -7,8 +7,10 @@ variant_data = pd.read_table(DATA_PATH.joinpath("variant_month_data.txt"))
 variants_kenya = pd.read_table(DATA_PATH.joinpath("variant_data_kenya.tsv"))
 variants_kenya["Month"] = pd.to_datetime(variants_kenya["Month"], format = "%Y-%m-%d")
 kenya_data = pd.read_table(DATA_PATH.joinpath("kenya.metadata_0111_120122.tsv"))
-variants_data = pd.read_table(DATA_PATH.joinpath("kenya_lineages_until180523.tsv"))
+variants_data = pd.read_table(DATA_PATH.joinpath("kenya_lineages.txt"))
 variant_map = pd.read_table(DATA_PATH.joinpath("map_lineages.tsv"))
+variant_growth_rate_fy4 = pd.read_table(DATA_PATH.joinpath("FY.4_posterior_plot_data.tsv"))
+variant_growth_rate_xbb = pd.read_table(DATA_PATH.joinpath("XBB_posterior_plot_data.tsv"))
 
 class Variants:
         def __init__(self, percentage):
@@ -30,7 +32,7 @@ variant_plot = plots.variants_prevalence()
 legend = dict(orientation = "h",title=None,yanchor  = "bottom", xanchor = "left",y=-0.4,
                                                     font = dict(size=8))
 
-fig_var = px.bar(variants_kenya, x = "Month", y = "percentage", color="variant",range_x=["2020-01-01","2023-05-01"],
+fig_var = px.bar(variants_kenya, x = "Month", y = "percentage", color="variant",range_x=["2020-01-01","2023-06-01"],
                  color_discrete_sequence = ["#1b9e77","#d95f02","#7570b3","#e7298a","#8111A5","#e6ab02","#a6761d"])
 #fig_var.update_traces(textfont_size=10,textposition="outside", text = variant_values["Frequency"])
 fig_var.update_xaxes(nticks = 10,linecolor = "black",ticks="outside",tickfont = dict(size=10),title = None)
@@ -62,11 +64,26 @@ recent_lineages = recent_lineages.groupby(["date","lineage_group"])[["lineage_gr
 
 #do the plot
 sars_lineages = px.scatter(recent_lineages, x = "date",y = "lineage_group",size= "Frequency", color = "lineage_group",\
-                    range_x=["2023-01-01","2023-06-01"])
+                    range_x=["2023-01-01","2023-07-01"])
 sars_lineages.update_layout(margin=margin, showlegend = False)
 sars_lineages.update_xaxes(title = None,linecolor = "black",tickfont = dict(size=10), nticks=6)
 sars_lineages.update_yaxes(title = None, linecolor = "black",tickfont = dict(size=10),gridcolor = gridcolor)
 
+
+def growth_rate(data):
+    fig = px.scatter(data, x='week_prior_to',y='area',color='levelFlag2',
+                        #title = variant_growth_rate['lineage_group'].iat[0],
+                     color_discrete_map={'No Growth':'#9acd32','Slow Growth':'#ffc40c','Growing':'#da2c43'})
+    fig.update_traces(marker=dict(size=25, symbol='square'))
+    fig.update_xaxes(title = 'Week Prior To',linecolor = "black",tickfont = dict(size=10),nticks=10)
+    fig.update_yaxes(title = None, linecolor = "black",tickfont = dict(size=10),gridcolor = gridcolor)
+    fig.update_layout(margin=margin,
+                     legend=dict(orientation = "h",yanchor="bottom",xanchor = "left",y=-0.4,title=None),
+                     font = dict(size=10))#,title=None,yanchor  = "bottom", xanchor = "left",y=-0.4,
+    return fig
+                                        
+gr_fy4 = growth_rate(variant_growth_rate_fy4)
+gr_xbb = growth_rate(variant_growth_rate_xbb)
 
 layout = html.Div([
         dbc.Row([
@@ -104,7 +121,7 @@ def update_content(n_intervals):
             dbc.Col([
                 dbc.Card([
                     dbc.CardBody([
-                        html.Label("SARS-COV-2 lineages between January to April 2023", 
+                        html.Label("SARS-COV-2 lineages between January to June 2023", 
                             style = {"text-align":"start","font-size":14},className = "fw-bold text-dark ms-4"),
                         html.Br(),html.Br(),
                         dcc.Graph(figure = sars_lineages,responsive = True,style = {"width":"40hw","height":"30vh"}),
@@ -122,25 +139,7 @@ def update_content(n_intervals):
                     used are frequency of grouped lineages that are categorized based on region of isolation"], 
                 style = {"text-align":"start","font-size":14},className = "fw-normal text-dark"),
             ],xs = 10,md=9,lg=8),
-            
-            # dbc.Row([
-            #     dbc.Col([
-            #         # html.Div([
-            #         #     html.Label("Select analyzed lineage-groups", style = {"font-size":12},className = "text-primary mb-0 pb-0"),
-            #         #     dcc.Dropdown(
-            #         #         id = "lineage_warning",
-            #         #         options = [
-            #         #             {"label":"BA.1-like/BN-like/BA.2-like", "value":"BA.1_BN_BA.2"},
-            #         #             {"label":"BA.4-like/BA.5-like/BF-like","value":"BA.4_BA.5_BF"},
-            #         #             {"label":"BQ.1-like/XBB-like/AY-like","value":"BQ.1_XBB_AY"},
-            #         #             {"label":"B.1-like/CH.1-like","value":"B.1_CH.1"},
-            #         #             {"label":"FY.4_XBB.1.22.1-like","value":"FY.4_XBB.1.22.1"},
-            #         #         ],
-            #         #         value = "FY.4_XBB.1.22.1",
-            #         #     )       
-            #         # ],style={"width":"100%","font-size":12, "margin-bottom":"5px"}) #"margin-right":"190px",
-            #     ],xs=6, md=4, lg=2)
-            # ],justify="end",className = classname_col),
+        
             
             dbc.Row([
                 dbc.Col([
@@ -153,13 +152,11 @@ def update_content(n_intervals):
                                     dcc.Dropdown(
                                         id = "lineage_warning",
                                         options = [
-                                            {"label":"BA.1-like/BN-like/BA.2-like", "value":"BA.1_BN_BA.2"},
-                                            {"label":"BA.4-like/BA.5-like/BF-like","value":"BA.4_BA.5_BF"},
-                                            {"label":"BQ.1-like/XBB-like/AY-like","value":"BQ.1_XBB_AY"},
-                                            {"label":"B.1-like/CH.1-like","value":"B.1_CH.1"},
-                                            {"label":"FY.4_XBB.1.22.1-like","value":"FY.4_XBB.1.22.1"},
+                            
+                                            {"label":"FY.4-like","value":"FY.4"},
+                                            {"label":"XBB-like","value":"XBB-like"},
                                         ],
-                                        value = "FY.4_XBB.1.22.1",
+                                        value = "FY.4",
                                         )    
                                        
                                 ],style={"font-size":12,"margin-end":"200px" ,"margin-bottom":"5px","width":"80%"}), #"width":"100%",
@@ -173,20 +170,23 @@ def update_content(n_intervals):
                                     
                                     html.P("Flag per Country/Region",className = col_title),
                                     html.Br(),
-                                    html.Div(id = "range_lineage")
+                                    dcc.Graph(id = "range_lineage",responsive=True,style={"width":"100%","height":'50vh'}) 
                                 ])
-                            ],xs=10,xxl=6,className = ""),#width="auto" md=6,lg=6
+                            ],xs=10,lg=7,xxl=4,className = ""),
                             
-                            dbc.Col([
-                                dbc.CardBody([                                    
-                                    html.P("Flag per Variant",className = col_title),
-                                    html.Br(),
-                                    html.Div(id = "summary_lineage")
-                                ])
-                            ],xs=10,xxl=5,className = "")#width="auto" ) #,md=5,lg=5
+                            # dbc.Col([
+                            #     dbc.CardBody([                                    
+                            #         html.P("Flag per Variant",className = col_title),
+                            #         html.Br(),
+                            #         html.Div(id = "summary_lineage")
+                            #     ])
+                            # ],xs=10,xxl=5,className = "")#width="auto" ) #,md=5,lg=5
                             
                         ],justify = "center")
+                        
                     ],className = "border-0 rounded-0")
+                    
+                    
                 ],xs=11, md=11,lg=9)
            
             ],justify = "center"),
@@ -198,16 +198,15 @@ def update_content(n_intervals):
     return dev
     
 @app.callback(
-        [Output("range_lineage", "children"),
-        Output("summary_lineage","children")],
+        Output("range_lineage", "figure"),
+        #Output("summary_lineage","children")],
         Input("lineage_warning","value")
 )
 def load_images(value):
-    if value in ["BQ.1_XBB_AY","BA.4_BA.5_BF","BA.1_BN_BA.2","B.1_CH.1","FY.4_XBB.1.22.1"]:
-        return [
-            html.Img(src = dash.get_asset_url("../assets/plots/" + value + "_range_lineage.png"),\
-                alt='image',
-                style = {"height":"360px", "width":"500px"}),
-            html.Img(src = dash.get_asset_url("../assets/plots/" + value + "_summary_lineage.png"),\
-                style = {"height":"200px", "width":"450px"})]
+    if value in ["FY.4"]:
+        return gr_fy4
+    elif value == 'XBB-like':
+        return gr_xbb
+        
+        
     

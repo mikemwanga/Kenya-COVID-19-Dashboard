@@ -42,7 +42,10 @@ layout = Layout(plot_bgcolor = pcolor,paper_bgcolor=pcolor)
 cardbody_style = {"background-color":pcolor}
 cardbody_style_home = {"background-color":pcolor_home}
 cardbody_style_vac = {"background-color":pcolor_home, "height":"200%"}
-color_patterns = ["#d95f02","#377eb8","#4daf4a","#984ea3","#073763"]  #e41a1c
+
+color_patterns = ['#0000FF','#1f78b4','#00FF00','#008000','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#ffff99','#b15928',\
+                "#FF00FF",'#800080','#808080'] 
+
 tickfont = 9
 titlefont = 12
 
