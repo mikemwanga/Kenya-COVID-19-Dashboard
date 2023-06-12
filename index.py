@@ -14,7 +14,6 @@ from apps import home, counties,vaccination,seroprevalence,variant_trends,phylog
 
 tab_nav = "text-light fw-light"
 style = {"text-decoration": "none"}
-
 #Navbar
 navbar =   html.Div([
                     

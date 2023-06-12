@@ -38,6 +38,7 @@ fillcolor = "#6baed6"
 markercolor = "#bdbdbd"#cccccc"#"#3C565B"
 style = {"height":"200px", "width":"300px"}
 margin = dict(l=10, r=10, t=5, b=5)
+margin_county = dict(l=10, r=10, t=35, b=5)
 layout = Layout(plot_bgcolor = pcolor,paper_bgcolor=pcolor)
 cardbody_style = {"background-color":pcolor}
 cardbody_style_home = {"background-color":pcolor_home}
@@ -48,13 +49,12 @@ color_patterns = ['#0000FF','#1f78b4','#00FF00','#008000','#fb9a99','#e31a1c','#
 
 tickfont = 9
 titlefont = 12
-
 tickfont_dict = dict(size=9)
-
 card_class = "text-center"
 classname_col = "bg-secondary bg-opacity-10 g-1 justify-content-center p-2 m-2" 
 class_style = "shadow-sm bg-light border rounded g-1"
 col_title = "text-center text-secondary fw-bold mb-0"
+col_title_start = "text-start text-secondary fw-bold mb-0"
 style_title = {"font-size":12}
 
 col_style  = {"margin-left":"15px","margin-right":"0px"}
@@ -72,6 +72,9 @@ gridcolor = "#e0e0e0"
 margin_size = "1px"
 
 div = "bg-secondary bg-opacity-10"
+
+plotly_display = {'displaylogo': False,'displayModeBar':False}
+
 #margin = dict(l=5, r=5, t=5, b=5)
 
 marker_text = "#67001f"

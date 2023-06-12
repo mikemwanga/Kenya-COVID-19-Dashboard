@@ -248,7 +248,7 @@ overall_image = html.Div([
                 html.P("OVERALL SEROPREVALENCE IN SELECTED STUDY POPULATIONS",className = col_title),
                 html.Br(),
                 dbc.CardBody([
-                    dcc.Graph(figure = subfig,responsive = True,style = {"width":"40hw","height":"50vh"})
+                    dcc.Graph(figure = subfig,responsive = True,style = {"width":"40hw","height":"50vh"},config= plotly_display)
                 ]),
                 
                 dbc.Row([
@@ -283,20 +283,20 @@ blood_donors_plot = html.Div([
                 dbc.Col([
                     html.Br(),
                     html.P("Overall Seroprevalence",className = col_title),
-                    dcc.Graph(figure = sero_class.population_plot("Blood donors"),responsive = True, style ={"height":"40vh"}),
+                    dcc.Graph(figure = sero_class.population_plot("Blood donors"),responsive = True, style ={"height":"40vh"},config= plotly_display),
                     html.Hr(),
                     html.P("Seroprevalence by gender",className = col_title),
-                    dcc.Graph(figure = blood_donor_strat().gender_plot(),responsive = True, style={"height":"40vh"})
+                    dcc.Graph(figure = blood_donor_strat().gender_plot(),responsive = True, style={"height":"40vh"},config= plotly_display)
                 
                 ],xs=8,md=5,xxl=4,className = col_class,style = {"margin-right":"10px"}),
             
                 dbc.Col([
                     html.Br(),
                     html.P("Seroprevalence by age",className = col_title),
-                    dcc.Graph(figure = blood_donor_strat().age_plot(),responsive = True, style={"height":"40vh"}),
+                    dcc.Graph(figure = blood_donor_strat().age_plot(),responsive = True, style={"height":"40vh"},config= plotly_display),
                     html.Hr(),
                     html.P("Seroprevalence in by region",className = col_title),
-                    dcc.Graph(figure = blood_donor_strat().region_plot(),responsive = True, style={"height":"40vh"})
+                    dcc.Graph(figure = blood_donor_strat().region_plot(),responsive = True, style={"height":"40vh"},config= plotly_display)
                 ],xs=8,md=5,xxl=4,className = col_class)
                 
             ],justify = "center")
@@ -308,20 +308,20 @@ health_care_workers = html.Div([
                 dbc.Col([
                     html.Br(),
                     html.P("Overall Seroprevalence",className = col_title),
-                    dcc.Graph(figure = sero_class.population_plot("Health workers"),responsive = True, style ={"height":"40vh"}),
+                    dcc.Graph(figure = sero_class.population_plot("Health workers"),responsive = True, style ={"height":"40vh"},config= plotly_display),
                     html.Hr(),
                     html.P("Seroprevalence by Gender",className = col_title),
-                    dcc.Graph(figure = health_workers_strat().gender_plot(),responsive = True, style={"height":"40vh"})
+                    dcc.Graph(figure = health_workers_strat().gender_plot(),responsive = True, style={"height":"40vh"},config= plotly_display)
                 
                 ],xs=8,md=5,xxl=4,className = "bg-white align-self-center",style = {"margin-right":"10px", "height":"100%"}),
             
                 dbc.Col([
                     html.Br(),
                     html.P("Seroprevalence by age",className = col_title),
-                    dcc.Graph(figure = health_workers_strat().age_plot(),responsive = True, style={"height":"40vh"}),
+                    dcc.Graph(figure = health_workers_strat().age_plot(),responsive = True, style={"height":"40vh"},config= plotly_display),
                     html.Hr(),
                     html.P("Seroprevalence in by region",className = col_title),
-                    dcc.Graph(figure = health_workers_strat().region_plot(),responsive = True, style={"height":"40vh"})
+                    dcc.Graph(figure = health_workers_strat().region_plot(),responsive = True, style={"height":"40vh"},config= plotly_display)
                 ],xs=8,md=5,xxl=4,className = col_class)
                 
             ],justify = "center",className = "")
@@ -334,20 +334,20 @@ hdss_residents = html.Div([
             dbc.Col([
                     html.Br(),
                     html.P("Overall Seroprevalence",className = col_title),
-                    dcc.Graph(figure = sero_class.population_plot("HDSS residents"),responsive = True, style ={"height":"40vh"}),
+                    dcc.Graph(figure = sero_class.population_plot("HDSS residents"),responsive = True, style ={"height":"40vh"},config= plotly_display),
                     html.Hr(),
                     html.P("Seroprevalence by Gender",className = col_title),
-                    dcc.Graph(figure = hdss_residents_strat().gender_plot(),responsive = True, style={"height":"40vh"})
+                    dcc.Graph(figure = hdss_residents_strat().gender_plot(),responsive = True, style={"height":"40vh"},config= plotly_display)
                 
                 ],xs=8,md=5,xxl=4,className = col_class,style = {"margin-right":"10px"}),
             
             dbc.Col([
                 html.Br(),
                     html.P("Seroprevalence by age",className = col_title),
-                    dcc.Graph(figure = hdss_residents_strat().age_plot(),responsive = True, style={"height":"40vh"}),
+                    dcc.Graph(figure = hdss_residents_strat().age_plot(),responsive = True, style={"height":"40vh"},config= plotly_display),
                     html.Hr(),
                     html.P("Seroprevalence in by region",className = col_title),
-                    dcc.Graph(figure = hdss_residents_strat().region_plot(),responsive = True, style={"height":"40vh"})
+                    dcc.Graph(figure = hdss_residents_strat().region_plot(),responsive = True, style={"height":"40vh"},config= plotly_display)
                     
             ],xs=8,md=5,xxl=4,className = col_class)        
         ],justify = "center")

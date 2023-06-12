@@ -135,7 +135,7 @@ def update_content(n_intervals):
                         dbc.Card([
                             html.P("Vaccination by Age and Dose",className = col_title),
                             dbc.CardBody([
-                                dcc.Graph(figure = vac_age_fig,responsive = True, style = {"width":"25hw","height":"30vh"}),#"width":"25hw","height":"30vh"
+                                dcc.Graph(figure = vac_age_fig,responsive = True, style = {"width":"25hw","height":"30vh"},config= plotly_display),#"width":"25hw","height":"30vh"
                             ]),
                         ], className='border-0 rounded-0'),
                     ],xs=10,md=6,lg=5,xxl=6),
@@ -151,13 +151,13 @@ def update_content(n_intervals):
                             dbc.Row([
                                 dbc.Col([
                                     dbc.CardBody([
-                                        dcc.Graph(figure = vac_fig2,responsive = True, style = {"width":"50hw","height":"60vh"})
+                                        dcc.Graph(figure = vac_fig2,responsive = True, style = {"width":"50hw","height":"60vh"},config= plotly_display)
                                     ],class_name = "border-end")
                                 ],xs=10,md=6,className = ""),
 
                                 dbc.Col([
                                     dbc.CardBody(
-                                        dcc.Graph(figure = vac_fig1,responsive = True, style = {"width":"50hw","height":"60vh"})
+                                        dcc.Graph(figure = vac_fig1,responsive = True, style = {"width":"50hw","height":"60vh"},config= plotly_display)
                                     ),
                                 ],xs=10,md=6,) #col-md-6
                             ],justify="center"),

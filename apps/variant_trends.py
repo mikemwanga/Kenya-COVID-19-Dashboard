@@ -7,10 +7,24 @@ variant_data = pd.read_table(DATA_PATH.joinpath("variant_month_data.txt"))
 variants_kenya = pd.read_table(DATA_PATH.joinpath("variant_data_kenya.tsv"))
 variants_kenya["Month"] = pd.to_datetime(variants_kenya["Month"], format = "%Y-%m-%d")
 kenya_data = pd.read_table(DATA_PATH.joinpath("kenya.metadata_0111_120122.tsv"))
+
 variants_data = pd.read_table(DATA_PATH.joinpath("kenya_lineages.txt"))
+variants_data['date'] = variants_data['date'].apply(lambda x:pd.to_datetime(x))
+variants_data = variants_data[variants_data['pangolin_lineage'] != 'Unassigned']
+
 variant_map = pd.read_table(DATA_PATH.joinpath("map_lineages.tsv"))
+var_type =  dict(zip(variant_map.lineage, variant_map.lineage_group))
+variants_data["lineage_type"] = variants_data["pangolin_lineage"].map(var_type)
+
 variant_growth_rate_fy4 = pd.read_table(DATA_PATH.joinpath("FY.4_posterior_plot_data.tsv"))
 variant_growth_rate_xbb = pd.read_table(DATA_PATH.joinpath("XBB_posterior_plot_data.tsv"))
+
+##COUNTY SUMMARY OF LINEAGES
+county_lineages = variants_data[variants_data["date"] > "2022-01-01"][['date','division','pangolin_lineage','lineage_type']]
+county_lineages  =county_lineages.groupby(['division','lineage_type'])[['lineage_type']].count().rename(columns={'lineage_type':'Freq'}).reset_index()
+county_lineages['lineage_type_prop'] = round(county_lineages['Freq']/county_lineages[['division','Freq']].\
+                         groupby('division')['Freq'].transform('sum') *100,1)
+
 
 class Variants:
         def __init__(self, percentage):
@@ -60,7 +74,8 @@ recent_lineages = lineages[lineages.index >= "2023-01-01"].reset_index()
 lineage_map = dict(zip(variant_map.lineage, variant_map.lineage_group))
 recent_lineages["lineage_group"] = recent_lineages["pangolin_lineage"].map(lineage_map)
 recent_lineages = recent_lineages[recent_lineages["lineage_group"] != "Unassigned"] #drop columns with unassigned annotations
-recent_lineages = recent_lineages.groupby(["date","lineage_group"])[["lineage_group"]].count().rename(columns = {"lineage_group":"Frequency"}).reset_index()
+recent_lineages = recent_lineages.groupby(["date","lineage_group"])[["lineage_group"]].count().\
+    rename(columns = {"lineage_group":"Frequency"}).reset_index()
 
 #do the plot
 sars_lineages = px.scatter(recent_lineages, x = "date",y = "lineage_group",size= "Frequency", color = "lineage_group",\
@@ -68,7 +83,6 @@ sars_lineages = px.scatter(recent_lineages, x = "date",y = "lineage_group",size=
 sars_lineages.update_layout(margin=margin, showlegend = False)
 sars_lineages.update_xaxes(title = None,linecolor = "black",tickfont = dict(size=10), nticks=6)
 sars_lineages.update_yaxes(title = None, linecolor = "black",tickfont = dict(size=10),gridcolor = gridcolor)
-
 
 def growth_rate(data):
     fig = px.scatter(data, x='week_prior_to',y='area',color='levelFlag2',
@@ -84,6 +98,29 @@ def growth_rate(data):
                                         
 gr_fy4 = growth_rate(variant_growth_rate_fy4)
 gr_xbb = growth_rate(variant_growth_rate_xbb)
+
+def do_figure(data,counties):
+    # if len(counties) < 4 :
+    #     return print('Only accepts 4 counties')
+    figures=[]
+    for county in counties:
+        data_f = data[data['division'].isin([county])]
+        data_f = data_f.sort_values('lineage_type_prop',ascending=False)
+        plot = px.bar(data_f.head(),y='lineage_type',x='lineage_type_prop',
+                     orientation = "h",range_x=[0,100])
+        plot.update_xaxes(title='Proportion(%)',title_font = {"size":10},tickfont = dict(size=10),linecolor=gridcolor)
+        plot.update_yaxes(title=None,tickfont = dict(size=10),categoryorder ="total ascending")
+        plot.update_layout(margin=margin_county,title = county,modebar_remove=['zoom', 'pan'])
+        plot.update_traces( width=0.6) #textposition = "outside", textfont_size=10,cliponaxis=True,
+        
+        figures.append(plot)
+    return figures
+
+counties = ['Nairobi','Kilifi','Kiambu','Mombasa','Kisumu','Nakuru']
+data = county_lineages[county_lineages['division'].isin(counties)]
+fig1,fig2,fig3,fig4,fig5,fig6 = do_figure(data,counties)
+
+plotsize={"width":"40hw","height":"25vh"}
 
 layout = html.Div([
         dbc.Row([
@@ -108,27 +145,65 @@ def update_content(n_intervals):
     dev = html.Div([
         dbc.Row([
             dbc.Col([
-                dbc.Card([
-                    dbc.CardBody([
-                        html.Label("Temporal prevalence of SARS-COV-2 variants in Kenya", 
-                            style = {"text-align":"start","font-size":14},className = "fw-bold text-dark ms-4"),
+                html.P('VARIANT DISTRIBUTION IN KENYA',className = col_title_start),
+                dbc.Row([
 
-                        dcc.Graph(figure = fig_var,responsive = True,style = {"width":"50hw","height":"40vh"}),
-                    ])
-                ], className = "border-0 text-center rounded-0")
-            ],xs = 10,md=6, lg=5),
+                    dbc.Col([
+                        dbc.Card([
+                            dbc.CardBody([
+                                html.Label("Temporal prevalence of SARS-COV-2 variants in Kenya", 
+                                    style = {"text-align":"start","font-size":14},className = "fw-bold text-dark ms-4"),
+
+                                dcc.Graph(figure = fig_var,responsive = True,style = {"width":"50hw","height":"40vh"},config= plotly_display),
+                            ])
+                        ], className = "border-0 text-center rounded-0")
+                    ],xs = 12,md=7, lg=7),
+
+                    dbc.Col([
+                        dbc.Card([
+                            dbc.CardBody([
+                                html.Label("SARS-COV-2 lineages between January to June 2023", 
+                                    style = {"text-align":"start","font-size":14},className = "fw-bold text-dark ms-4"),
+                                html.Br(),html.Br(),
+                                dcc.Graph(figure = sars_lineages,responsive = True,style = {"width":"40hw","height":"30vh"},config= plotly_display),
+                            ]),
+                        ],className = "h-100 border-0 text-center rounded-0")
+
+                    ],xs=12, md=5,lg=5),
+                ],justify = "center",className='mt-1'),
+            ],width=10)
+        ],justify = "center",className = classname_col),
+        
+        dbc.Row([
             
             dbc.Col([
-                dbc.Card([
-                    dbc.CardBody([
-                        html.Label("SARS-COV-2 lineages between January to June 2023", 
-                            style = {"text-align":"start","font-size":14},className = "fw-bold text-dark ms-4"),
-                        html.Br(),html.Br(),
-                        dcc.Graph(figure = sars_lineages,responsive = True,style = {"width":"40hw","height":"30vh"}),
-                    ]),
-                ],className = "h-100 border-0 text-center rounded-0")
+                html.P('VARIANT PREVALENCE AT COUNTY LEVELS (Jan 2022 to Date)',className = col_title_start),
+                dbc.Row([
+                    dbc.Col([
+                        dcc.Graph(figure = fig1,responsive=True,style=plotsize,config= plotly_display)
+                    ],xs=6,md=4,lg=4),
+                    dbc.Col([
+                        dcc.Graph(figure =fig2,responsive=True,style=plotsize,config= plotly_display)
+                    ],xs=6,md=4,lg=4),
+                    dbc.Col([
+                        dcc.Graph(figure =fig5,responsive=True,style=plotsize,config= plotly_display)
+                    ],xs=6,md=4,lg=4),
+                ],justify='center',className='g-2 mt-1'),
                 
-            ],xs=10, md=5,lg=4),
+                dbc.Row([
+                    dbc.Col([
+                        dcc.Graph(figure =fig3,responsive=True,style=plotsize,config= plotly_display)
+                    ],xs=6,md=4,lg=4),
+                    dbc.Col([
+                        dcc.Graph(figure =fig4,responsive=True,style=plotsize,config= plotly_display)
+                    ],xs=6,md=4,lg=4),
+                    dbc.Col([
+                        dcc.Graph(figure =fig6,responsive=True,style=plotsize,config= plotly_display)
+                    ],xs=6,md=4,lg=4)
+                ],justify='center',className='g-2 mt-1')
+                
+            ],width=10),
+            
         ],justify = "center",className = classname_col),
         
         dbc.Row([
@@ -170,7 +245,7 @@ def update_content(n_intervals):
                                     
                                     html.P("Flag per Country/Region",className = col_title),
                                     html.Br(),
-                                    dcc.Graph(id = "range_lineage",responsive=True,style={"width":"100%","height":'50vh'}) 
+                                    dcc.Graph(id = "range_lineage",responsive=True,style={"width":"100%","height":'50vh'},config= plotly_display) 
                                 ])
                             ],xs=10,lg=7,xxl=4,className = ""),
                             
@@ -193,10 +268,15 @@ def update_content(n_intervals):
             
         ],justify = "center",className = classname_col)
         
-    ]),           
+        ]),           
 
     return dev
-    
+####**********************************
+
+
+
+
+ 
 @app.callback(
         Output("range_lineage", "figure"),
         #Output("summary_lineage","children")],
@@ -209,4 +289,5 @@ def load_images(value):
         return gr_xbb
         
         
+
     

@@ -304,28 +304,28 @@ layout = html.Div([
                         dbc.Col([
                                     
                             html.P("COUNTIES WITH RECENT UPDATES",className = col_title,style = style_title),
-                            dcc.Graph(figure = fig_county,responsive = True, style = {"width":"30hw","height":"25vh"}),
+                            dcc.Graph(figure = fig_county,responsive = True, style = {"width":"30hw","height":"25vh"},config= plotly_display),
                             html.Hr(className = hr_class, style = hr_style),
                                     
                             html.P("TRENDS IN CASES",className = col_title,style = style_title),
-                            dcc.Graph(figure=cases_trend,responsive = True, style = {"width":"30hw","height":"25vh"}),
+                            dcc.Graph(figure=cases_trend,responsive = True, style = {"width":"30hw","height":"25vh"},config= plotly_display),
                             
                             html.Hr(className = hr_class, style = hr_style),
                             html.P("CASES BY AGE AND GENDER",className = col_title,style = style_title),
-                            dcc.Graph(figure = age_gender_cases_plot,responsive = True,style = {"width":"25hw","height":"30vh"}),
+                            dcc.Graph(figure = age_gender_cases_plot,responsive = True,style = {"width":"25hw","height":"30vh"},config= plotly_display),
                         
                         ],xs=10,md=5,lg=4,xxl=4,className = col_class,style = {"margin-left":"15px","margin-right":"0px","height":900} ),#,"height":"900px"
                         
                         dbc.Col([
                             html.P("MOST AFFECTED COUNTIES",className = col_title,style = style_title),
-                            dcc.Graph(figure = affected_counties, responsive = True, style = {"width":"32hw","height":"25vh"}),
+                            dcc.Graph(figure = affected_counties, responsive = True, style = {"width":"32hw","height":"25vh"},config= plotly_display),
                             html.Hr(className = hr_class, style = hr_style),
                             html.P("TRENDS IN FATALITIES",className = col_title,style = style_title),
-                            dcc.Graph(figure = deaths_trends,responsive = True, style = {"width":"30hw","height":"25vh"}),
+                            dcc.Graph(figure = deaths_trends,responsive = True, style = {"width":"30hw","height":"25vh"},config= plotly_display),
                             
                             html.Hr(className = hr_class, style = hr_style),
                             html.P("FATALITIES BY AGE AND GENDER",className = col_title,style = style_title),
-                            dcc.Graph(figure= age_gender_death_plot, responsive = True, style = {"width":"25hw","height":"30vh"}),#
+                            dcc.Graph(figure= age_gender_death_plot, responsive = True, style = {"width":"25hw","height":"30vh"},config= plotly_display),#
                         ],xs=10,md=5,lg=4,xxl=4,className = col_class,style = {"margin-left":"15px","margin-right":"0px","height":900}),
                         
                         

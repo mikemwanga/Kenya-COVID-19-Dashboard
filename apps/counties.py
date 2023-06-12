@@ -76,7 +76,7 @@ layout = html.Div([
                             html.Br(),html.Br(),html.Br(),
                             html.Hr(),
                             html.P("Cumulative cases for the selected county",className = col_title),
-                            dcc.Graph(id = "cumulative_plot", figure = {},responsive=True,style={"width":"25hw","height":"30vh"}),
+                            dcc.Graph(id = "cumulative_plot", figure = {},responsive=True,style={"width":"25hw","height":"30vh"},config= plotly_display),
                             
                             
                         ],xs=10,md=5,xxl=5,className = col_class,style = {"height":"800px"}),
@@ -85,12 +85,12 @@ layout = html.Div([
                             html.Br(),
                             html.P("Trends in cases for the selected county (14-days average)",
                                 className = col_title),
-                            dcc.Graph(id = "trends_plot", figure = {}, responsive=True,style={"width":"25hw","height":"30vh"}),
+                            dcc.Graph(id = "trends_plot", figure = {}, responsive=True,style={"width":"25hw","height":"30vh"},config= plotly_display),
                             html.Hr(),
                             
                             html.Br(),
                             html.P("Trends in deaths for the selected county",className = col_title),
-                            dcc.Graph(id = "death_plots", figure = {},responsive=True,style={"width":"25hw","height":"30vh"})
+                            dcc.Graph(id = "death_plots", figure = {},responsive=True,style={"width":"25hw","height":"30vh"},config= plotly_display)
                             
                             
                         ],xs=10,md=5,xxl=5,className = col_class,style={"margin-left":"10px", "height":"800px"}),
