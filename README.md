@@ -14,4 +14,4 @@ The datasets used in here have been shared by the Ministry of Health and others 
 4. Run the dashboard <br>
         `python index.py`
 5. View the dashboard <br>
-        `http://0.0.0.0:3042/`
+        `https://kcd.kemri-wellcome.org/`

@@ -181,25 +181,25 @@ def update_content(n_intervals):
                 dbc.Row([
                     dbc.Col([
                         dcc.Graph(figure = fig1,responsive=True,style=plotsize,config= plotly_display)
-                    ],xs=6,md=4,lg=4),
+                    ],xs=9,md=4,lg=4),
                     dbc.Col([
                         dcc.Graph(figure =fig2,responsive=True,style=plotsize,config= plotly_display)
-                    ],xs=6,md=4,lg=4),
+                    ],xs=9,md=4,lg=4),
                     dbc.Col([
                         dcc.Graph(figure =fig5,responsive=True,style=plotsize,config= plotly_display)
-                    ],xs=6,md=4,lg=4),
+                    ],xs=9,md=4,lg=4),
                 ],justify='center',className='g-2 mt-1'),
                 
                 dbc.Row([
                     dbc.Col([
                         dcc.Graph(figure =fig3,responsive=True,style=plotsize,config= plotly_display)
-                    ],xs=6,md=4,lg=4),
+                    ],xs=9,md=4,lg=4),
                     dbc.Col([
                         dcc.Graph(figure =fig4,responsive=True,style=plotsize,config= plotly_display)
-                    ],xs=6,md=4,lg=4),
+                    ],xs=9,md=4,lg=4),
                     dbc.Col([
                         dcc.Graph(figure =fig6,responsive=True,style=plotsize,config= plotly_display)
-                    ],xs=6,md=4,lg=4)
+                    ],xs=9,md=4,lg=4)
                 ],justify='center',className='g-2 mt-1')
                 
             ],width=10),
