@@ -5,12 +5,10 @@ from dash.dependencies import Input,Output
 from app import app
 from app import server
 import dash_mantine_components as dmc
-#from utils import dmc
 
 app.title = "Kenya COVID-19 Dashboard"
-
 #connect to your app pages
-from apps import home, counties,vaccination,seroprevalence,variant_trends,phylogeny#,summary_report,countysummary#,markdown#home,
+from apps import home,counties,vaccination,seroprevalence,variants,phylogeny#,summary_report,countysummary#,markdown#home,
 
 tab_nav = "text-light fw-light"
 style = {"text-decoration": "none"}
@@ -22,34 +20,31 @@ navbar =   html.Div([
                         dbc.NavItem(dbc.NavLink(html.A("County", href="/apps/counties.html/", className= tab_nav,style=style))),
                         dbc.NavItem(dbc.NavLink(html.A("Vaccination",href = "/apps/vaccination.html/",className= tab_nav,style=style))),
                         dbc.NavItem(dbc.NavLink(html.A("Seroprevalence",href = "/apps/seroprevalence.html/",className= tab_nav,style=style))),
-                        dbc.NavItem(dbc.NavLink(html.A("Variants", href="/apps/variant_trends.html/",className= tab_nav,style=style))),
+                        dbc.NavItem(dbc.NavLink(html.A("Variants", href="/apps/variants.html/",className= tab_nav,style=style))),
                         dbc.NavItem(dbc.NavLink(html.A("Phylogeny", href="/apps/phylogeny.html/",className= tab_nav,style=style))),
+                        #dbc.NavItem(dbc.NavLink(html.A("Home2", href="/apps/home2.html/", className= tab_nav,style=style))),
                         #dbc.DropdownMenu([
                          #   dbc.DropdownMenuItem("Countrywide",href="/apps/summaryreport"),
                           #  dbc.DropdownMenuItem("County",href="/apps/countysummary")
                         #],nav=True,in_navbar=True,label="Summary"),
-
-                    ],             brand_href="/apps/home.html",
+                        # 
+                        ],             brand_href="/apps/home.html",
                                     
                                       
                                     brand="Kenya COVID-19 Dashboard",
                                     style={"margin-bottom":5},
                                     color="#1DA1F2",light=True,dark=True,#, # #333972 
-                                    fixed ="top",className = "text-light fw-light",
-                                    
-                     ),     
+                                    fixed ="top",className = "text-light fw-light"),     
 ])                   
-#app.layout = serve_lay
-
 app.layout = html.Div([
     dcc.Location(id='url', refresh=True),
     navbar,
     html.Div(id='page-content', children=[]),
-    
 ])
-
 @app.callback(Output('page-content', 'children'),
-            Input('url', 'pathname'),prevent_initial_callback=True)
+            Input('url', 'pathname'),
+            prevent_initial_callback=True)
+            
 
 def display_page(pathname):
     
@@ -58,19 +53,15 @@ def display_page(pathname):
     elif pathname == '/apps/counties.html/':
             return dcc.Loading(counties.layout)
     elif pathname == "/apps/vaccination.html/":
-          return dbc.Spinner(vaccination.layout,type="border",color="info")
+          return dcc.Loading(vaccination.layout)
     elif pathname == "/apps/seroprevalence.html/":
-         return dbc.Spinner(seroprevalence.layout,type="border",color="info")
-    elif pathname == "/apps/variant_trends.html/":
-         return dbc.Spinner(variant_trends.layout,color="info")
+         return dcc.Loading(seroprevalence.layout)
+    elif pathname == "/apps/variants.html/":
+         return dcc.Loading(variants.layout)
     elif pathname == "/apps/phylogeny.html/":
-         return phylogeny.layout
-    elif pathname == "/apps/summaryreport.html/":
-        return dbc.Spinner(summary_report.layout,type="border",color="info")
-    elif pathname == "/apps/countysummary.html/":
-        return dbc.Spinner(countysummary.layout,type="border",color="info")
+         return dcc.Loading(phylogeny.layout)
     else:
-        return dbc.Spinner(home.layout,type="border",color="info")
+        return dcc.Loading(home.layout)
 
 if __name__ == '__main__':
     app.run_server(debug=True,host="0.0.0.0", port = "3042", threaded=True)

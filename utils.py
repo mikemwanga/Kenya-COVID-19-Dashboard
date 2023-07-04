@@ -16,7 +16,7 @@ import numpy as np
 from dash import dash_table as dt
 from apps import home as hm
 warnings.filterwarnings('ignore')
-load_figure_template("sandstone") #cerulean,flatly,journal,litera,pulse,sandstone,minty
+load_figure_template(["sketchy", "cyborg", "minty"]) #cerulean,flatly,journal,litera,pulse,sandstone,minty
 from app import app
 #import geopandas as gpd
 from plotly.subplots import make_subplots
@@ -75,12 +75,12 @@ div = "bg-secondary bg-opacity-10"
 
 plotly_display = {'displaylogo': False,'displayModeBar':False}
 
-#margin = dict(l=5, r=5, t=5, b=5)
+hoverlabel=dict(bgcolor="white",font_size=16,font_family="Tahoma")
 
 marker_text = "#67001f"
 
 #intervals
-interval = dcc.Interval(id = "interval-component", interval = 3600 * 24 *1000, n_intervals = 0)
+interval = dcc.Interval(id = "interval-component", interval = 60 * 60 *1000, n_intervals = 0)
 
 #sero content
 

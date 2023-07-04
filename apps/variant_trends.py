@@ -8,8 +8,8 @@ variants_kenya = pd.read_table(DATA_PATH.joinpath("variant_data_kenya.tsv"))
 variants_kenya["Month"] = pd.to_datetime(variants_kenya["Month"], format = "%Y-%m-%d")
 kenya_data = pd.read_table(DATA_PATH.joinpath("kenya.metadata_0111_120122.tsv"))
 
-variants_data = pd.read_table(DATA_PATH.joinpath("kenya_lineages.txt"))
-variants_data['date'] = variants_data['date'].apply(lambda x:pd.to_datetime(x))
+variants_data = pd.read_table(DATA_PATH.joinpath("kenya_lineages2.txt"))
+variants_data['date'] = pd.to_datetime(variants_data['date'],format="%Y-%m-%d")
 variants_data = variants_data[variants_data['pangolin_lineage'] != 'Unassigned']
 
 variant_map = pd.read_table(DATA_PATH.joinpath("map_lineages.tsv"))
@@ -20,7 +20,7 @@ variant_growth_rate_fy4 = pd.read_table(DATA_PATH.joinpath("FY.4_posterior_plot_
 variant_growth_rate_xbb = pd.read_table(DATA_PATH.joinpath("XBB_posterior_plot_data.tsv"))
 
 ##COUNTY SUMMARY OF LINEAGES
-county_lineages = variants_data[variants_data["date"] > "2022-01-01"][['date','division','pangolin_lineage','lineage_type']]
+county_lineages = variants_data[variants_data["date"] > "2023-01-01"][['date','division','pangolin_lineage','lineage_type']]
 county_lineages  =county_lineages.groupby(['division','lineage_type'])[['lineage_type']].count().rename(columns={'lineage_type':'Freq'}).reset_index()
 county_lineages['lineage_type_prop'] = round(county_lineages['Freq']/county_lineages[['division','Freq']].\
                          groupby('division')['Freq'].transform('sum') *100,1)
@@ -68,18 +68,18 @@ fig_kenya.update_layout(margin=margin, showlegend = False)
 #---------------------------------------------------------------------
 #plots for observed lineages
 #process data
-lineages = variants_data[["date","pangolin_lineage"]].set_index("date")#.head()
-lineages.index = pd.to_datetime(lineages.index, format='%d/%m/%Y')
-recent_lineages = lineages[lineages.index >= "2023-01-01"].reset_index()
+lineages = variants_data[["date","pangolin_lineage"]]#.set_index("date")#.head()
+#lineages = pd.to_datetime(lineages.index, format='%d/%m/%Y')
+#recent_lineages = lineages[lineages.index >= "2023-01-01"]#.reset_index()
 lineage_map = dict(zip(variant_map.lineage, variant_map.lineage_group))
-recent_lineages["lineage_group"] = recent_lineages["pangolin_lineage"].map(lineage_map)
-recent_lineages = recent_lineages[recent_lineages["lineage_group"] != "Unassigned"] #drop columns with unassigned annotations
-recent_lineages = recent_lineages.groupby(["date","lineage_group"])[["lineage_group"]].count().\
+lineages["lineage_group"] = lineages["pangolin_lineage"].map(lineage_map)
+lineages = lineages[lineages["lineage_group"] != "Unassigned"] #drop columns with unassigned annotations
+lineages = lineages.groupby(["date","lineage_group"])[["lineage_group"]].count().\
     rename(columns = {"lineage_group":"Frequency"}).reset_index()
 
 #do the plot
-sars_lineages = px.scatter(recent_lineages, x = "date",y = "lineage_group",size= "Frequency", color = "lineage_group",\
-                    range_x=["2023-01-01","2023-07-01"])
+sars_lineages = px.scatter(lineages, x = "date",y = "lineage_group",size= "Frequency", color = "lineage_group",\
+                    range_x=["2023-01-01","2023-07-01"],color_discrete_sequence=color_patterns)
 sars_lineages.update_layout(margin=margin, showlegend = False)
 sars_lineages.update_xaxes(title = None,linecolor = "black",tickfont = dict(size=10), nticks=6)
 sars_lineages.update_yaxes(title = None, linecolor = "black",tickfont = dict(size=10),gridcolor = gridcolor)
@@ -116,7 +116,7 @@ def do_figure(data,counties):
         figures.append(plot)
     return figures
 
-counties = ['Nairobi','Kilifi','Kiambu','Mombasa','Kisumu','Nakuru']
+counties = ['Nairobi','Kilifi','Kiambu','Mombasa','Kisumu','Lamu']
 data = county_lineages[county_lineages['division'].isin(counties)]
 fig1,fig2,fig3,fig4,fig5,fig6 = do_figure(data,counties)
 
@@ -137,7 +137,8 @@ layout = html.Div([
 ])
 
 @app.callback(
-    Output("variant-content","children"), Input("interval-component", "n_intervals")
+    Output("variant-content","children"),
+    Input("interval-component", "n_intervals")
 )
 
 def update_content(n_intervals):
@@ -214,7 +215,6 @@ def update_content(n_intervals):
                     used are frequency of grouped lineages that are categorized based on region of isolation"], 
                 style = {"text-align":"start","font-size":14},className = "fw-normal text-dark"),
             ],xs = 10,md=9,lg=8),
-        
             
             dbc.Row([
                 dbc.Col([

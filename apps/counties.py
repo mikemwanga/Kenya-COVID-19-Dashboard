@@ -1,15 +1,15 @@
 #layout for counties tab
 from utils import *
 #load dataset
-
-#def load_data():
-    #global data, county_daily_data
-data = pd.read_csv(DATA_PATH.joinpath("cases_per_county.csv"))
-county_daily_data = pd.read_csv(DATA_PATH.joinpath("county_daily_data.csv"),dtype='unicode', low_memory=False)
-county_daily_data["date_of_lab_confirmation"] = pd.to_datetime(county_daily_data["date_of_lab_confirmation"], format = "%d/%m/%Y")
-county_daily_data["Date"] = county_daily_data["date_of_lab_confirmation"]#.dt.date
-county_daily_data.set_index("Date", inplace = True)
-    #return data, county_daily_data
+def load_data():
+    global county_daily_data,data
+    data = pd.read_csv(DATA_PATH.joinpath("cases_per_county.csv"))
+    county_daily_data = pd.read_csv(DATA_PATH.joinpath("county_daily_data.csv"),dtype='unicode', low_memory=False)
+    county_daily_data["date_of_lab_confirmation"] = pd.to_datetime(county_daily_data["date_of_lab_confirmation"], format = "%d/%m/%Y")
+    county_daily_data["Date"] = county_daily_data["date_of_lab_confirmation"]#.dt.date
+    county_daily_data.set_index("Date", inplace = True)
+    return county_daily_data,data
+    
 
 #function for 7-day moving average
 def seven_day_average(data,column):
@@ -25,19 +25,20 @@ def seven_day_average(data,column):
     return data
 
 #set layout
-# layout = html.Div([
-#         html.Div(id = "county-content"),
-#         interval
-# ]),
-
-# @app.callback(
-#     Output("county-content","children"),
-#     Input("interval-component", "n_intervals")
-# )
-# def update_content(n_intervals):
-#     load_data()
 layout = html.Div([
-                dbc.Spinner([
+        html.Div(id = "county-content"),
+        interval
+]),
+
+@app.callback(
+    Output("county-content","children"),
+    Input("interval-component", "n_intervals")
+)
+
+def update_content(n_intervals):
+    load_data()
+    county_layout = html.Div([
+                
                     dbc.Row([
                         dbc.Col([
                             html.H5("Visualization of trends at County level",className = col_title,style ={"text-align":"start"}),
@@ -114,8 +115,8 @@ layout = html.Div([
                     ],justify = "center",className = classname_col),
                 
                 hm.reference,
-                ],type="border",color="info")
             ]),
+    return county_layout
 
    
 @app.callback( [Output("trends_plot", "figure"),
@@ -128,6 +129,7 @@ def update_graph_card(county):
         if len(county) == 0:
             return dash.no_update
         else:
+            load_data()
             data_county = county_daily_data[county_daily_data["county"].isin(county)]
             death_data = data_county[data_county["outcome"] == "Dead"] 
             #data_filter = data_filter.sort_index().loc[start_date : end_date]
