@@ -1,7 +1,0 @@
-dash=2.7.0
-dash-bootstrap-components==1.4.1
-dash-bootstrap-templates==1.0.8
-dash-iconify==0.1.2
-geopandas==0.13.0
-numpy==1.24.3
-pandas==2.0.1

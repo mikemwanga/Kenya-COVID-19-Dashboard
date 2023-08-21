@@ -87,7 +87,9 @@ layout = html.Div([
 def update_home_content(n_intervals):
     daily_updates_moh,county_daily_updates,daily_cases,age_gender_data,data = load_home_data()
     test_date = "2023-03-30"
+    daily_updates_moh = daily_updates_moh[pd.notnull(daily_updates_moh.index)]
     test_dates = datetime.strptime(test_date,"%Y-%m-%d").strftime("%B %d, %Y")
+    #print(daily_updates_moh.index[-1])
     update_date = datetime.strftime(daily_updates_moh.index[-1],"%B, %d %Y")
     total_cases = daily_updates_moh["total_confirmed_cases"].dropna().iat[-1]
     total_tests =  daily_updates_moh["cumulative_tests"].dropna().iat[-1]

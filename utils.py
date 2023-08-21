@@ -55,7 +55,7 @@ classname_col = "bg-secondary bg-opacity-10 g-1 justify-content-center p-2 m-2"
 class_style = "shadow-sm bg-light border rounded g-1"
 col_title = "text-center text-secondary fw-bold mb-0"
 col_title_start = "text-start text-secondary fw-bold mb-0"
-style_title = {"font-size":12}
+style_title = {"font-size":13}
 
 col_style  = {"margin-left":"15px","margin-right":"0px"}
 style_label={"font-size":35, "align":"center"}
@@ -65,7 +65,60 @@ col_class = "bg-white align-self-center"
 hr_style = {"height":"3vh", "align":"center"}
 hr_class = "bg-secondary bg-opacity-10 justify-content-center mb-0 pb-0"
 col1_class = "ms-2"
+val_class = "fs-2 fw-normal ms-2"
+######hiv status########################
+colors = {'Empty':'#DEDEDE','No':'#077c86','Yes':'#e83357','missing':'#db2153',#eeeeee'
+          'Negative':'#bfa07f','Positive':'#c93071','Unknown':'#d9a744'}
+
+classname_col = "bg-secondary bg-opacity-10 g-1 justify-content-center p-2 m-2" 
+
+midrow_classname = "g-1 justify-content-center"# p-2 m-2"
 val_class = "fs-4 fw-normal ms-3"
+col1_class = "ms-2"
+
+central = '#794d65'
+western='#c39054'
+
+discrete_color = [central,western]
+col_title = "text-start text-secondary fw-bold mb-0 ms-4 mt-2"
+section_title = "text-start text-secondary ms-3 text-start fw-bold fs-5"
+male_color = '#00698f'# 
+female_color = '#de6f1d' # 
+gender_color =[female_color,male_color]
+gridcolor = '#e5e4e2'
+linecolor ='#170B3B'
+plot_color = "rgba(0,0,0,0)"
+line_class = 'align-items-start mb-0 ms-1'
+line_style = {'width':'70%'}
+
+ring_color = '#3d86b8'
+fill_color='#333338'
+
+tabs_styles = {
+    'height': '44px'
+}
+
+tab_style = {
+    'borderBottom': '1px solid #d6d6d6',
+    'padding': '6px',
+    #'fontWeight': 'bold'
+}
+
+tab_selected_style = {
+    'borderTop': '1px solid #d6d6d6',
+    'borderBottom': '1px solid #d6d6d6',
+    'backgroundColor': '#87ceeb',# '#119DFF',
+    'color': 'black',
+    'padding': '6px',
+    'fontWeight': 'bold'
+}
+
+
+plotly_display = {'displaylogo': False,'scrollZoom':False,
+                'modeBarButtonsToRemove': ['pan','autoScale','resetScale2d','zoom2d','zoomIn2d','zoomOut2d', 'hoverCompareCartesian', 
+                                           'resetViewMapbox','hoverClosestCartesian', 'toggleSpikelines']}
+    
+
 pcolor_vaccination = "#5D6D7E"
 bg_color = "rgba(0,0,0,0)"
 gridcolor = "#e0e0e0"
@@ -80,7 +133,7 @@ hoverlabel=dict(bgcolor="white",font_size=16,font_family="Tahoma")
 marker_text = "#67001f"
 
 #intervals
-interval = dcc.Interval(id = "interval-component", interval = 60 * 60 *1000, n_intervals = 0)
+interval = dcc.Interval(id = "interval-component", interval = 60 * 60 * 12 *1000, n_intervals = 0)
 
 #sero content
 

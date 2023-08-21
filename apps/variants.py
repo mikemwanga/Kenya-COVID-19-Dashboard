@@ -2,6 +2,8 @@ from utils import *
 
 variant_growth_rate_fy4 = pd.read_table(DATA_PATH.joinpath("FY.4_posterior_plot_data.tsv"))
 variant_growth_rate_xbb = pd.read_table(DATA_PATH.joinpath("XBB_posterior_plot_data.tsv"))
+variant_growth_rate_ge = pd.read_table(DATA_PATH.joinpath("GE.1_posterior_plot_data.tsv"))
+variant_growth_rate_eg = pd.read_table(DATA_PATH.joinpath("EG.5_posterior_plot_data.tsv"))
 plotsize={"width":"40hw","height":"25vh"}
 
 def load_varaint_data():
@@ -29,13 +31,17 @@ def load_varaint_data():
 def growth_rate(data):
     fig = px.scatter(data, x='week_prior_to',y='area',color='levelFlag2',
                      color_discrete_map={'No Growth':'#9acd32','Slow Growth':'#ffc40c','Growing':'#da2c43'})
-    fig.update_traces(marker=dict(size=25, symbol='square'))
+    fig.update_traces(marker=dict(size=20, symbol='square'))
     fig.update_xaxes(title = 'Week Prior To',linecolor = "black",tickfont = dict(size=10),nticks=10)
-    fig.update_yaxes(title = None, linecolor = "black",tickfont = dict(size=10),gridcolor = gridcolor)
+    fig.update_yaxes(title = None, linecolor = "black",tickfont = dict(size=10),gridcolor = gridcolor,tickson="boundaries",
+                     ticks='outside',ticklen=60,tickcolor=gridcolor)
+    
     fig.update_layout(margin=margin,
                      legend=dict(orientation = "h",yanchor="bottom",xanchor = "left",y=-0.4,title=None),
                      font = dict(size=10))#,title=None,yanchor  = "bottom", xanchor = "left",y=-0.4,
     return fig
+
+
 
 def do_figure(data,counties):
     # if len(counties) < 4 :
@@ -99,7 +105,8 @@ def update_content(n_intervals):
                         range_x=["2023-01-01","2023-07-01"],color_discrete_sequence=color_patterns)
     sars_lineages.update_layout(margin=margin, showlegend = False)
     sars_lineages.update_xaxes(title = None,linecolor = "black",tickfont = dict(size=10), nticks=6)
-    sars_lineages.update_yaxes(title = None, linecolor = "black",tickfont = dict(size=10),gridcolor = gridcolor)
+    sars_lineages.update_yaxes(title = None, linecolor = "black",tickfont = dict(size=10),gridcolor = gridcolor,
+                               categoryorder='category descending')
     
     counties = ['Nairobi','Kilifi','Kiambu','Mombasa','Kisumu','Lamu']
     data = county_lineages[county_lineages['division'].isin(counties)]
@@ -119,7 +126,7 @@ def update_content(n_intervals):
                                 html.Label("Temporal prevalence of SARS-COV-2 variants in Kenya", 
                                     style = {"text-align":"start","font-size":14},className = "fw-bold text-dark ms-4"),
 
-                                dcc.Graph(figure = fig_var,responsive = True,style = {"width":"50hw","height":"40vh"},config= plotly_display),
+                                dcc.Graph(figure = fig_var,responsive = True,style = {"width":"50hw","height":"50vh"},config= plotly_display),
                             ])
                         ], className = "border-0 text-center rounded-0")
                     ],xs = 12,md=7, lg=7),
@@ -130,13 +137,13 @@ def update_content(n_intervals):
                                 html.Label("SARS-COV-2 lineages between January to June 2023", 
                                     style = {"text-align":"start","font-size":14},className = "fw-bold text-dark ms-4"),
                                 html.Br(),html.Br(),
-                                dcc.Graph(figure = sars_lineages,responsive = True,style = {"width":"40hw","height":"30vh"},config= plotly_display),
+                                dcc.Graph(figure = sars_lineages,responsive = True,style = {"width":"50hw","height":"40vh"},config= plotly_display),
                             ]),
                         ],className = "h-100 border-0 text-center rounded-0")
 
                     ],xs=12, md=5,lg=5),
                 ],justify = "center",className='mt-1'),
-            ],width=10)
+            ],width=12)
         ],justify = "center",className = classname_col),
         
         dbc.Row([
@@ -194,14 +201,16 @@ def update_content(n_intervals):
                             
                                             {"label":"FY.4-like","value":"FY.4"},
                                             {"label":"XBB-like","value":"XBB-like"},
+                                            {"label":"GE.1-like","value":"GE_1-like"},
+                                            {"label":"EG.5-like","value":"EG_5-like"},
                                         ],
                                         value = "FY.4",
                                         )    
                                        
-                                ],style={"font-size":12,"margin-end":"200px" ,"margin-bottom":"5px","width":"80%"}), #"width":"100%",
-                            ],xs=8,md=4,lg=3, className = "me-3")
+                                ],style={"font-size":12,"margin-start":"200px" ,"margin-bottom":"5px","width":"80%"}), #"width":"100%",
+                            ],xs=4,md=3, className = "ms-3 mt-3")
                             
-                        ],justify="end"),
+                        ],justify="start"),
                         
                         dbc.Row([
                             dbc.Col([
@@ -209,16 +218,16 @@ def update_content(n_intervals):
                                     
                                     html.P("Flag per Country/Region",className = col_title),
                                     html.Br(),
-                                    dcc.Graph(id = "range_lineage",responsive=True,style={"width":"100%","height":'50vh'},config= plotly_display) 
+                                    dcc.Graph(id = "range_lineage",responsive=True,style={"width":"60%","height":'100%'},config= plotly_display) 
                                 ])
-                            ],xs=10,lg=7,xxl=4,className = ""),
+                            ],xs=10,md=10),
                             
                         ],justify = "center")
                         
                     ],className = "border-0 rounded-0")
                     
                     
-                ],xs=11, md=11,lg=9)
+                ],xs=12, md=12,lg=12)
            
             ],justify = "center"),
             
@@ -230,6 +239,8 @@ def update_content(n_intervals):
 
 gr_fy4 = growth_rate(variant_growth_rate_fy4)
 gr_xbb = growth_rate(variant_growth_rate_xbb)
+gr_ge1 = growth_rate(variant_growth_rate_ge)
+gr_eg = growth_rate(variant_growth_rate_eg)
 
 @app.callback(
         Output("range_lineage", "figure"),
@@ -241,4 +252,8 @@ def load_images(value):
         return gr_fy4
     elif value == 'XBB-like':
         return gr_xbb
+    elif value == 'GE_1-like':
+        return gr_ge1
+    elif value == 'EG_5-like':
+        return gr_eg
         
