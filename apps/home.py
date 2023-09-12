@@ -135,7 +135,7 @@ def update_home_content(n_intervals):
     homelayout = html.Div([
         dbc.Row([
             dbc.Col([
-                html.P(f"""Last updated: {update_date}""", className = "text-end text-primary", style = {"font-size":12}), #{update_date}
+                html.P(f"""Data as of: {update_date}""", className = "text-end text-primary", style = {"font-size":12}), #{update_date}
                 html.P("This dashboard allows a visualization of COVID-19 disease trends in cases, fatalities, vaccination and variant diversity. \
                 This platform intergrates data from Ministry of Health of Republic of Kenya, GISAID and other SARS-CoV-2 associated studies.",
                 className = "fs-6",style ={"text-align":"start"}),
