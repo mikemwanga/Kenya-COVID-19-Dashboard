@@ -14,10 +14,10 @@ import datetime as datetime
 import warnings
 import numpy as np
 from dash import dash_table as dt
-from apps import home as hm
+# from apps import home as hm
 warnings.filterwarnings('ignore')
 load_figure_template(["sketchy", "cyborg", "minty"]) #cerulean,flatly,journal,litera,pulse,sandstone,minty
-from app import app
+# from app import app
 #import geopandas as gpd
 from plotly.subplots import make_subplots
 from datetime import datetime,date,timedelta
@@ -53,9 +53,9 @@ tickfont_dict = dict(size=9)
 card_class = "text-center"
 classname_col = "bg-secondary bg-opacity-10 g-1 justify-content-center p-2 m-2" 
 class_style = "shadow-sm bg-light border rounded g-1"
-col_title = "text-center text-secondary fw-bold mb-0"
+col_title = "text-center text-secondary fw-bold mb-0 ms-4"
 col_title_start = "text-start text-secondary fw-bold mb-0"
-style_title = {"font-size":12}
+style_title = {"font-size":13}
 
 col_style  = {"margin-left":"15px","margin-right":"0px"}
 style_label={"font-size":35, "align":"center"}
@@ -65,7 +65,61 @@ col_class = "bg-white align-self-center"
 hr_style = {"height":"3vh", "align":"center"}
 hr_class = "bg-secondary bg-opacity-10 justify-content-center mb-0 pb-0"
 col1_class = "ms-2"
+val_class = "fs-2 fw-normal ms-2"
+######hiv status########################
+colors = {'Empty':'#DEDEDE','No':'#077c86','Yes':'#e83357','missing':'#db2153',#eeeeee'
+          'Negative':'#bfa07f','Positive':'#c93071','Unknown':'#d9a744'}
+
+classname_col = "bg-secondary bg-opacity-10 g-1 justify-content-center p-2 m-2" 
+
+midrow_classname = "g-1 justify-content-center"# p-2 m-2"
 val_class = "fs-4 fw-normal ms-3"
+col1_class = "ms-2"
+
+central = '#794d65'
+western='#c39054'
+
+discrete_color = [central,western]
+col_title = "text-start text-secondary fw-bold mb-0 ms-4 mt-2"
+section_title = "text-start text-secondary ms-3 text-start fw-bold fs-5"
+male_color = '#00698f'# 
+female_color = '#de6f1d' # 
+gender_color =[female_color,male_color]
+gridcolor = '#e5e4e2'
+linecolor ='#170B3B'
+plot_color = "rgba(0,0,0,0)"
+line_class = 'align-items-start mb-0 ms-1'
+line_style = {'width':'70%'}
+
+ring_color = '#3d86b8'
+fill_color='#333338'
+titlefont = {"size":11}
+
+tabs_styles = {
+    'height': '44px'
+}
+
+tab_style = {
+    'borderBottom': '1px solid #d6d6d6',
+    'padding': '6px',
+    #'fontWeight': 'bold'
+}
+
+tab_selected_style = {
+    'borderTop': '1px solid #d6d6d6',
+    'borderBottom': '1px solid #d6d6d6',
+    'backgroundColor': '#87ceeb',# '#119DFF',
+    'color': 'black',
+    'padding': '6px',
+    'fontWeight': 'bold'
+}
+
+
+plotly_display = {'displaylogo': False,'scrollZoom':False,
+                'modeBarButtonsToRemove': ['pan','autoScale','resetScale2d','zoom2d','zoomIn2d','zoomOut2d', 'hoverCompareCartesian', 
+                                           'resetViewMapbox','hoverClosestCartesian', 'toggleSpikelines']}
+    
+
 pcolor_vaccination = "#5D6D7E"
 bg_color = "rgba(0,0,0,0)"
 gridcolor = "#e0e0e0"
@@ -101,43 +155,3 @@ home_content = "The home page provides a summary of COVID-19 prevalence across t
                 positivity, reported fatalities and reported recoveries. A summary of cases at counties, epidemic waves on cases and fatalities and disease prevalence \
                 based on gender and sex is displayed."
 #acknowledgment section
-reference = dbc.Row([
-                dbc.Col(width=1),
-                dbc.Col([
-                    html.Img(src=dash.get_asset_url("../assets/kwtrp_logo.png"),style = {"width":"8vw","height":"7vh"})
-                ],width=1,style = {"margin-right":"10px",
-                                   "display":"flex","align-items": "center","justify-content": "center",}),
-                dbc.Col([
-                    html.Img(src=dash.get_asset_url("../assets/moh_kenya.png"),style = {"width":"6vw","height":"10vh"})
-                ],width=1, style = {"margin-left":"10px","display":"flex","align-items": "center","justify-content": "center",}),
-                dbc.Col([
-                    html.Img(src=dash.get_asset_url("../assets/fcdo_logo.png"),style = {"width":"10vw","height":"11vh"})
-                ],width=1, style = {"display":"flex","align-items": "center","justify-content": "center",}),
-
-                dbc.Col([
-
-                    html.P("Other Information",className = "fw-bolder text-decoration-underline mb-0 pb-0",style = {"font-size":12}),
-                    html.Label(["Developed and maintained by KEMRI-Wellcome Trust, in collaboration with National Public Health Surveillance Laboratory \
-                        at Ministry of Health, Kenya. Bayesian Model for Early Warning estimation was developed by ", \
-                            html.A("Laura et al.,2022", href="https://doi.org/10.1101/2022.01.01.21268131")," \
-                            Funding support from Foreign Commonwealth and Development Office (FCDO)."],
-                        style = {"font-size":10}),
-
-                    html.P("Data Source",className = "fw-bolder text-decoration-underline mb-0 pb-0",style = {"font-size":12}),
-                    dcc.Link("Ministry of Health,Kenya (NPHL)",href="https://www.health.go.ke/",
-                             style = {"font-size":10, "margin-right":"10px"}),
-                    dcc.Link("Global Science Initiative(GISAID)",href="https://gisaid.org", 
-                             style = {"font-size":10,"margin-right":"10px"}),
-                    dcc.Link("Sero-study", href = "https://www.nature.com/articles/s41467-021-24062-3",
-                             style = {"font-size":10}),
-
-                    html.P("Contact Us",className = "fw-bolder text-decoration-underline mb-0 pb-0 mt-2",style = {"font-size":12}),
-                    dcc.Link("jmwanga@kemri-wellcome.org",title="email_me",href="mailto:jmwanga@kemri-wellcome.org",target="_blank",
-                             style = {"font-size":10,"margin-right":"10px"}),
-                    dcc.Link("ggithinji@kemri-wellcome.org",title="email_me",href="mailto:ggithinji@kemri-wellcome.org",target="_blank",
-                             style = {"font-size":10})
-
-                ], width = {"size":6,"offset":1},xxl=4, className = "mb-3"),
-                dbc.Col(width=1),
-        ],className = "bg-secondary bg-opacity-10 border-top border-1 shadow justify-content-center ms-2 ps-2 mt-3 pt-3 mb-4")
-

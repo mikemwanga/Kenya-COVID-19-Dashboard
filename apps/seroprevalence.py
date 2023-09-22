@@ -288,7 +288,7 @@ blood_donors_plot = html.Div([
                     html.P("Seroprevalence by gender",className = col_title),
                     dcc.Graph(figure = blood_donor_strat().gender_plot(),responsive = True, style={"height":"40vh"},config= plotly_display)
                 
-                ],xs=8,md=5,xxl=4,className = col_class,style = {"margin-right":"10px"}),
+                ],xs=8,md=6,xxl=5,className = col_class,style = {"margin-right":"10px"}),
             
                 dbc.Col([
                     html.Br(),
@@ -297,7 +297,7 @@ blood_donors_plot = html.Div([
                     html.Hr(),
                     html.P("Seroprevalence in by region",className = col_title),
                     dcc.Graph(figure = blood_donor_strat().region_plot(),responsive = True, style={"height":"40vh"},config= plotly_display)
-                ],xs=8,md=5,xxl=4,className = col_class)
+                ],xs=8,md=6,xxl=5,className = col_class)
                 
             ],justify = "center")
         ])
@@ -313,7 +313,7 @@ health_care_workers = html.Div([
                     html.P("Seroprevalence by Gender",className = col_title),
                     dcc.Graph(figure = health_workers_strat().gender_plot(),responsive = True, style={"height":"40vh"},config= plotly_display)
                 
-                ],xs=8,md=5,xxl=4,className = "bg-white align-self-center",style = {"margin-right":"10px", "height":"100%"}),
+                ],xs=8,md=6,xxl=5,className = "bg-white align-self-center",style = {"margin-right":"10px", "height":"100%"}),
             
                 dbc.Col([
                     html.Br(),
@@ -322,7 +322,7 @@ health_care_workers = html.Div([
                     html.Hr(),
                     html.P("Seroprevalence in by region",className = col_title),
                     dcc.Graph(figure = health_workers_strat().region_plot(),responsive = True, style={"height":"40vh"},config= plotly_display)
-                ],xs=8,md=5,xxl=4,className = col_class)
+                ],xs=8,md=6,xxl=5,className = col_class)
                 
             ],justify = "center",className = "")
         ], style = {"height":"100vh"}),
@@ -339,7 +339,7 @@ hdss_residents = html.Div([
                     html.P("Seroprevalence by Gender",className = col_title),
                     dcc.Graph(figure = hdss_residents_strat().gender_plot(),responsive = True, style={"height":"40vh"},config= plotly_display)
                 
-                ],xs=8,md=5,xxl=4,className = col_class,style = {"margin-right":"10px"}),
+                ],xs=8,md=6,xxl=5,className = col_class,style = {"margin-right":"10px"}),
             
             dbc.Col([
                 html.Br(),
@@ -349,7 +349,7 @@ hdss_residents = html.Div([
                     html.P("Seroprevalence in by region",className = col_title),
                     dcc.Graph(figure = hdss_residents_strat().region_plot(),responsive = True, style={"height":"40vh"},config= plotly_display)
                     
-            ],xs=8,md=5,xxl=4,className = col_class)        
+            ],xs=8,md=6,xxl=5,className = col_class)        
         ],justify = "center")
 ])
 

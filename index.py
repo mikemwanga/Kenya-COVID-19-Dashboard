@@ -8,7 +8,7 @@ import dash_mantine_components as dmc
 
 app.title = "Kenya COVID-19 Dashboard"
 #connect to your app pages
-from apps import home,counties,vaccination,seroprevalence,variants,phylogeny,syndromic_trends#,summary_report,countysummary#,markdown#home,
+from apps import home,counties,vaccination,seroprevalence,variants#,syndromic_trends
 tab_nav = "text-light fw-light"
 style = {"text-decoration": "none"}
 #Navbar
@@ -21,7 +21,7 @@ navbar =   html.Div([
                         dbc.NavItem(dbc.NavLink(html.A("Seroprevalence",href = "/apps/seroprevalence.html/",className= tab_nav,style=style))),
                         #dbc.NavItem(dbc.NavLink(html.A("ASS",href = "/apps/syndromic.html/",className= tab_nav,style=style))),
                         dbc.NavItem(dbc.NavLink(html.A("Variants", href="/apps/variants.html/",className= tab_nav,style=style))),
-                        dbc.NavItem(dbc.NavLink(html.A("ASS", href="/apps/syndromic_trends.html/",className= tab_nav,style=style))),
+                        #dbc.NavItem(dbc.NavLink(html.A("Syndromic-Surveillance", href="/apps/syndromic_trends.html/",className= tab_nav,style=style))),
                         dbc.NavItem(dbc.NavLink(html.A("Phylogeny", href="/apps/phylogeny.html/",className= tab_nav,style=style))),
                         #dbc.NavItem(dbc.NavLink(html.A("Home2", href="/apps/home2.html/", className= tab_nav,style=style))),
                         #dbc.DropdownMenu([
@@ -59,8 +59,8 @@ def display_page(pathname):
          return dcc.Loading(seroprevalence.layout)
     elif pathname == "/apps/variants.html/":
          return dcc.Loading(variants.layout)
-    elif pathname == "/apps/syndromic_trends.html/":
-         return dcc.Loading(syndromic_trends.layout)
+    # elif pathname == "/apps/syndromic_trends.html/":
+    #      return dcc.Loading(syndromic_trends.layout)
     elif pathname == '/apps/syndromic.html':
         return dcc.Loading(ass.ass_layout)
     elif pathname == "/apps/phylogeny.html/":

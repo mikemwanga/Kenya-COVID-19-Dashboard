@@ -29,42 +29,45 @@ total_central = len(data[data['region'] == 'Central'])
 total_western = len(data[data['region'] == 'Western'])
 
 margin = dict(l=10, r=10, t=5, b=5)
+
 total_patients = len(data)
+
 malep = len(data[data['sex'] == 'Male'])
 femalep = len(data[data['sex'] == 'Female'])
 #total_patients = malep + femalep
-
 male_percentage = round((malep/(total_patients)*100),1)
 female_percentage = round((femalep/(total_patients)*100),1)
 
+titlefont = {"size":11}
+
 reg_data = data[['record_id','date_of_admission','hospital','sex','age_years','region','age_groups','month','outcome',
                  'status_at_discharge','date_of_discharge']]
-
 
 df_all = data.loc[(data['sex'].isin(['Male','Female'])) & (data['date_of_admission'] >'2022-12-31' )]\
     [['age_groups','month','sex','date_of_admission','calculated_age','age_years']]
 df_age = df_all[(df_all.age_years > 0) & (df_all.age_years < 100)]
 age_sex = df_age.groupby(['sex','age_groups'])[['sex']].count().rename(columns={'sex':'count'}).reset_index()
 age_sex_f = age_sex[age_sex['sex'] == 'Female']
+age_sex_f['prop'] = round(age_sex_f['count']/age_sex_f['count'].sum()*100,0)
 age_sex_m = age_sex[age_sex['sex'] == 'Male']
-
+age_sex_m['prop'] = round(age_sex_m['count']/age_sex_m['count'].sum()*100,0)
+# print(age_sex_m)
 
 def age_gender_plot(male_data,female_data):
     age_plot= go.Figure()
-    age_plot.add_trace(go.Bar(y = female_data["age_groups"], x = female_data["count"]*-1, orientation="h",name = "Female",
+    age_plot.add_trace(go.Bar(y = female_data["age_groups"], x = female_data["prop"]*-1, orientation="h",name = "Female",
                             marker=dict(color=female_color),
                             ))
-
-    age_plot.add_trace(go.Bar(y = male_data["age_groups"], x = male_data["count"], orientation="h",name = "Male",
+    age_plot.add_trace(go.Bar(y = male_data["age_groups"], x = male_data["prop"], orientation="h",name = "Male",
                             marker=dict(color=male_color)))
     age_plot.update_layout(barmode = "relative",bargap = 0.5,bargroupgap=0,
-                            xaxis =  dict(tickvals = [-800,-600,-400,-200,0,200,400,600,800],
-                                            ticktext = ["800","600","400","200","0","200","400","600","800"]),
+                            xaxis =  dict(tickvals = [-60,-40,-20,0,20,40,60],
+                                            ticktext = ["60","40","20","0","20","40","60"]),
                             legend = dict(orientation = "h",title=None,yanchor='top',y=1.2,xanchor='right',x=1),
                             margin=margin,paper_bgcolor=plot_color,plot_bgcolor=plot_color),
     age_plot.update_traces(width=0.5)
-    age_plot.update_yaxes(tickfont = dict(size=12),title =None,title_font = {"size":12},ticks='outside',)
-    age_plot.update_xaxes(tickfont = dict(size=12),title = None,gridcolor=gridcolor, linecolor=linecolor,ticks='outside')
+    age_plot.update_yaxes(tickfont = dict(size=12),title ='Age in Years',title_font = titlefont,ticks='outside',)
+    age_plot.update_xaxes(tickfont = dict(size=12),title = 'Proportion(%)',gridcolor=gridcolor, linecolor=linecolor,ticks='outside',nticks=20)
     return age_plot
 
 age_plot = age_gender_plot(age_sex_f,age_sex_m)
@@ -86,13 +89,13 @@ reg_period = reg_data.groupby(['region','month'])[['region']].count().rename(col
 reg_period['proportion'] = round(100 * reg_period['count']/reg_period.groupby('region')['count'].transform('sum'),1)
 
 def plot_reg_period(data):
-    fig = px.bar(data, x='month',y='proportion',barmode='group',color='region',range_y=([0,100]),
+    fig = px.bar(data, x='month',y='count',barmode='group',color='region',range_y=[0, data['count'].max()+200],
                         color_discrete_sequence= discrete_color,text = 'count')
     fig.update_xaxes(categoryorder='array',categoryarray=['Jan-23','Feb-23','Mar-23','Apr-23','May-23','Jun-23'])
     fig.update_layout(margin=margin,legend=dict(orientation='h', title=None,yanchor='top',y=1.2,xanchor='right',x=1),
                       paper_bgcolor=plot_color,plot_bgcolor=plot_color)
     fig.update_xaxes(tickfont = dict(size=12),title=None,linecolor='gray',ticks='outside',)
-    fig.update_yaxes(tickfont = dict(size=12),nticks=6,title='Proportion(%)',gridcolor=gridcolor,ticks='outside',)
+    fig.update_yaxes(tickfont = dict(size=12),nticks=6,title='Frequency',gridcolor=gridcolor,ticks='outside',)
     fig.update_traces(textposition='outside',textfont_size=10)
     
     return fig
@@ -143,18 +146,19 @@ df_vital_signs.set_index('region',inplace=True)
 df_vital_signs = (df_vital_signs.div(total_patients)*100).round(1)
 
 #heatmap plot
-def heatmap_plot(data):
+def heatmap_plot(data,yname):
     fig = px.imshow(data,text_auto=True,aspect="auto",range_color=(0,100),
                     color_continuous_scale=px.colors.sequential.amp)#PuBu)amp
     fig.update_layout(margin=margin)
+    fig.update_yaxes(title=yname,title_font=titlefont)
     fig.update_xaxes(title=None,side='top', gridcolor='gray',ticks='outside')
     fig.update_coloraxes(colorbar={'title':'Proportion(%)','orientation':'h', 'thickness':7, 'y':-0.4, 'titleside':'bottom'})
     fig.update_traces(ygap=1,xgap=1)
 
     return fig
 
-fig_demo_heatmap = heatmap_plot(df_demo.T)
-fig_vital_heatmap = heatmap_plot(df_vital_signs.T)
+fig_demo_heatmap = heatmap_plot(df_demo.T,'Variable')
+fig_vital_heatmap = heatmap_plot(df_vital_signs.T,'Vital Signs')
 
 
 #function for data
@@ -173,15 +177,12 @@ cov_vaccine_month = priority_group(data,'month','received_covid_19_vaccine')
 def priority_plot(data,column,yaxis):
     fig = px.bar(data, x='prop', y=yaxis, color=column,
              orientation='h', color_discrete_map=colors)
-    fig.update_xaxes(title=None,gridcolor=gridcolor,ticks='outside')
-    fig.update_yaxes(title=None,ticks='outside')
-    #fig.update_traces(textposition='inside',textfont_size=10)
+    fig.update_xaxes(title='Proportion(%)',title_font=titlefont,gridcolor=gridcolor,ticks='outside')
+    fig.update_yaxes(title=yaxis,title_font=titlefont,ticks='outside')
     fig.update_yaxes(categoryorder='array',categoryarray=['Jan-23','Feb-23','Mar-23','Apr-23','May-23','Jun-23'])
     fig.update_layout(barmode='stack',margin=margin,
-                      legend=dict(title=None,orientation='h',yanchor='bottom',y=-0.8,x=0))
+                      legend=dict(title=None,orientation='h',yanchor='top',y=1.5,x=0))
     return fig
-
-#reg_per_fig.update_xaxes(categoryorder='array',categoryarray=['Jan-23','Feb-23','Mar-23','Apr-23','May-23','Jun-23']
                          
 fig_cov_vacc_region = priority_plot(cov_vaccine_region,'received_covid_19_vaccine','region')
 fig_cov_vacc_month = priority_plot(cov_vaccine_month,'received_covid_19_vaccine','month')
@@ -231,8 +232,8 @@ symp_data = pd.merge(df_headach,df_diarrhoea,on='region').\
             merge(df_vomiting,on='region').merge(df_fever,on='region').\
                         merge(df_dysuria,on='region').merge(df_losscon,on='region')
 
+symp_data.rename(columns={'loss_of_consciousness':'LoC'},inplace=True)
 
-symp_data.rename(columns={'loss_of_consciousness':'Asphyxia'},inplace=True)
 df = symp_data.T
 figplot= go.Figure()
 figplot.add_trace(go.Bar(x = df['Central']*-1,y=df.index, orientation="h",name = "Central",marker=dict(color=central)))
@@ -244,16 +245,16 @@ figplot.update_layout(barmode = "relative",bargap = 0.5,bargroupgap=0,
                                 yanchor='top',y=1.3,xanchor='left',x=0.5),
                    margin=margin,paper_bgcolor=plot_color,plot_bgcolor=plot_color)
 figplot.update_traces(width=0.5)
-figplot.update_yaxes(tickfont = dict(size=12),title = None,ticks='outside')
+figplot.update_yaxes(tickfont = dict(size=12),title = 'Symptoms',title_font = titlefont,ticks='outside')
 figplot.update_xaxes(tickfont = dict(size=12),title = "Proportion(%)",ticks='outside',
-                     gridcolor=gridcolor,title_font = {"size":12},linecolor=linecolor)
+                     gridcolor=gridcolor,title_font = titlefont,linecolor=linecolor)
 
 
 def presenting_symptoms_period(value):
     sum_len = len(data[value].isin(['Yes','No']))
     df= data[data[value]=='Yes'][['record_id','month',value]]
     df = df.groupby('month')[[value]].count()
-    df[value] =  round(df[value].apply(lambda x: (100*x/sum_len)),1)
+    df[value] =  round(df[value].apply(lambda x: (100*x/sum_len)),0)
     return df
 
 period_headach = presenting_symptoms_period('headache')
@@ -271,10 +272,10 @@ perioddata= pd.merge(period_headach,period_diarrhoea,on='month').\
             merge(period_vomiting,on='month').merge(period_fever,on='month').\
                         merge(period_dysuria,on='month').merge(period_losscon,on='month')
 
-perioddata.rename(columns={'loss_of_consciousness':'Asphyxia'},inplace=True)
+perioddata.rename(columns={'loss_of_consciousness':'LoC'},inplace=True)
 perioddata = perioddata.T[['Feb-23','Mar-23','Apr-23','May-23','Jun-23']]
 
-fig_period_heatmap = heatmap_plot(perioddata)
+fig_period_heatmap = heatmap_plot(perioddata, 'Symptoms')
 
 count_data = data[['date_of_admission','region']].groupby(['region','date_of_admission'])[['date_of_admission']]\
                          .count().rename(columns={'date_of_admission':'Count'}).reset_index()
@@ -343,21 +344,21 @@ test_region = test_region.T.reset_index()
 test_region_fig = px.bar(test_region, x = ['Central','Western'] , y='index',barmode='group',range_x=[0,60],
                          color_discrete_sequence= discrete_color)
 test_region_fig.update_xaxes(title='Proportion(%)',linecolor=linecolor)
-test_region_fig.update_yaxes(title=None)
+test_region_fig.update_yaxes(title='Tests',title_font=titlefont)
 test_region_fig.update_layout(margin=margin,legend=dict(orientation='h',title=None,yanchor='top',y=1.1,xanchor='right',x=1))
 
 
-test_period_figure = heatmap_plot(test_period) #FIGURE showing tests done at admission by period
+test_period_figure = heatmap_plot(test_period,'Tests') #FIGURE showing tests done at admission by period
 ##########################################################################################
 
 layout = html.Div([
         dbc.Row([
                 dbc.Col([
-                html.H4('Adult Syndromic Surveillance (ASS)',className = col_title),
+                html.H4('Adult Syndromic Surveillance',className = col_title),
                 html.Hr(),
                 html.P('A summary of data from a hospital based surveillance program focused on contributing useful information to the Ministry of Health \
-                            to allow for monitoring,planning and mobilizing resources for management and control of COVID-19.')
-                ],md=10)
+                            to allow for monitoring,planning and mobilizing resources for management and control of COVID-19. Data was collected between January to June 2023.')
+                ],md=11)
         ],justify="center", className = "mb-2 ms-4 me-4 ps-4 pe-4 mt-5 pt-5"),
                 
         dcc.Tabs([
@@ -371,30 +372,49 @@ layout = html.Div([
                             dbc.CardBody([
                                 html.H3(total_patients),
                                 html.Small("Total Patients",className='card-text'),
+                                dmc.Space(h=30),
+                                html.Hr(),
                             ]),
                             
                             dbc.CardBody([
+                                html.H3(malep),
+                                dmc.Progress(value=male_percentage,label=f'{male_percentage}%',size=15, color="#4169e1"),
                                 
-                                dmc.RingProgress(
-                                    sections=[{'value':male_percentage,'color': male_color}], #
-                                    label=dmc.Center(dmc.Text(f'{male_percentage}%',color= fill_color)),#fill_color)),
-                                    roundCaps=False,
-                                ), 
-                                                             
-                                html.Small('Male Patients',className='card-text'),
-                            ]),                            
+                                html.Small("Male Patients",className='card-text'),
+                                dmc.Space(h=30),
+                                html.Hr(),
+                            ]),
                             dbc.CardBody([
+                                html.H3(femalep),
+                                dmc.Progress(value=female_percentage,label=f'{female_percentage}%',size=15, color="#4169e1"),
                                 
-                                dmc.RingProgress(
-                                    sections=[{'value':female_percentage,'color':female_color}],
-                                    label=dmc.Center(dmc.Text(f'{female_percentage}%',color=fill_color)),
-                                    roundCaps=False,
+                                html.Small("Female Patients",className='card-text'),
+                            ]),
+                            
+                            
+                            
+                            # dbc.CardBody([
+                                
+                            #     dmc.RingProgress(
+                            #         sections=[{'value':male_percentage,'color': male_color}], #
+                            #         label=dmc.Center(dmc.Text(f'{male_percentage}%',color= fill_color)),#fill_color)),
+                            #         roundCaps=False,
+                            #     ), 
+                                                             
+                            #     html.Small('Male Patients',className='card-text'),
+                            # ]),                            
+                            # dbc.CardBody([
+                                
+                            #     dmc.RingProgress(
+                            #         sections=[{'value':female_percentage,'color':female_color}],
+                            #         label=dmc.Center(dmc.Text(f'{female_percentage}%',color=fill_color)),
+                            #         roundCaps=False,
                                     
-                                    style={"marginLeft":3} #,'width':'25px'
-                                ),
+                            #         style={"marginLeft":3} #,'width':'25px'
+                            #     ),
                                 
-                                html.Small('Female Patients',className='card-text'),
-                            ],className=''),
+                            #     html.Small('Female Patients',className='card-text'),
+                            # ],className=''),
                             
                         ],body=True,className='h-100 border-0 text-center'),
                         
@@ -438,45 +458,55 @@ layout = html.Div([
                 ],label='Patient Demography',style=tab_style,selected_style=tab_selected_style),
                 
                 dcc.Tab([
+                    html.P('Overview of laboratory tests and symptoms presented during admission in all health facilities',className='mt-3 ms-2'),
+                    
                     dbc.Row([
-                        html.P('PRESENTING SYMPTOMS AND TESTS AT ADMISSION',className=section_title),
-                        #dbc.Row([
-                            dbc.Col([
-                                dbc.Card([
+                        html.P('PRESENTING SYMPTOMS AT ADMISSION',className=section_title),
+                        dbc.Col([
+                            dbc.Card([
                                     html.P('SYPMTOMS BY REGION', className = col_title,style = style_title),
                                     dbc.CardBody([
-                                        dcc.Graph(figure = figplot,responsive=True,config=plotly_display, style={"width":"40vw",'height':'35vh'}) 
+                                        dcc.Graph(figure = figplot,responsive=True,config=plotly_display, style={"width":"40vw",'height':'35vh'}),
+                                        html.Small('LoC - Loss of Consciousness')
                                     ]),
-                                    html.Hr(),
-                                    html.P('LABORATORY TESTS AT ADMISSION BY PERIOD', className = col_title,style = style_title),                                  
+                                    
+                                ],className='h-100 border-0 rounded-0'),
+                        ], md=6),
+                        
+                        dbc.Col([
+                            dbc.Card([
+                                    html.P('SYMPTOMS AT ADMISSION BY PERIOD', className = col_title,style = style_title),
+                                    dbc.CardBody([
+                                        dcc.Graph(figure=fig_period_heatmap ,responsive=True,config=plotly_display,
+                                            style={"width":"40vw",'height':'35vh'}),
+                                        html.Small('LoC - Loss of Consciousness')
+                                    ]),
+                            ],className='h-100 border-0 text-center rounded-0'),
+                        ])
+                    ],justify = "center",className = classname_col),
+                    
+                    dbc.Row([
+                        html.P('LABORATORY TESTS AT ADMISSION',className=section_title),
+                        dbc.Col([
+                            dbc.Card([                                    
+                                    html.P('TESTS AT ADMISSION BY PERIOD', className = col_title,style = style_title),                                  
                                     dbc.CardBody([
                                         dcc.Graph(figure =test_period_figure ,responsive=True,config=plotly_display,style={"width":"40vw",'height':'35vh'}) 
                                     ]),
                                     
-                                ],className='h-100 border-0 text-center rounded-0'),
-                                                    
-                            ], md=6),
+                            ],className='h-100 border-0 text-center rounded-0'),
+                        ],md=6),
+            
+                        dbc.Col([
+                                dbc.Card([ 
+                                    html.P('TESTS AT ADMISSION BY REGION', className = col_title,style = style_title),                                  
 
-                            dbc.Col([
-                                dbc.Card([
-                                    html.P('SYMPTOMS AT ADMISSION BY PERIOD', className = col_title,style = style_title),
-                                    dbc.CardBody([
-                                        dcc.Graph(figure=fig_period_heatmap ,responsive=True,config=plotly_display,
-                                      style={"width":"40vw",'height':'35vh'})
-                                    ]),
-                                    html.Hr(),
-                                    html.P('LABORATORY TESTS AT ADMISSION BY REGION', className = col_title,style = style_title),                                  
-                                    
                                     dbc.CardBody([
                                         dcc.Graph(figure=test_region_fig,responsive=True,config=plotly_display,
                                       style={"width":"40vw",'height':'35vh'}) 
                                     ]),
-                                
-                                ],className='h-100 border-0 text-center rounded-0')
-                            ], md=6),
-
-                    
-
+                                ],className='h-100 border-0 text-center rounded-0'),
+                        ])
                     ],justify = "center",className = classname_col),
 
                 ],label='Admissions',style=tab_style,selected_style=tab_selected_style),
@@ -562,7 +592,213 @@ layout = html.Div([
                             html.Hr(className='mt-3'),
 
                         ],justify = "center",className = classname_col), 
-                ],label='Outcome',style=tab_style,selected_style=tab_selected_style)
+                ],label='Outcome',style=tab_style,selected_style=tab_selected_style),
+                
+                dcc.Tab([
+                    html.P('We acknowledge the following health facilities for providing the dataset',className='mt-3 ms-2'),
+                    
+                    dbc.Row([
+                        dbc.Col([
+                            dcc.Markdown(
+                                '''
+                                * Kisumu East
+                                * Nyakach
+                                * Seme
+                                * Gem
+                                * Muhoroni
+                                * Rarieda
+                                * Bondo
+                                * Nyando
+                                * Other
+                                * Sabatia
+                                * Kisumu Central
+                                * Kisumu West
+                                * Nyamira North
+                                * Bomachoge Chache
+                                * Awendo
+                                * Kuria West
+                                * Transmara West
+                                * Kuria East
+                                * Molo
+                                * Rachuonyo East
+                                * Mumias East
+                                * Luanda                                
+                                '''
+                            )
+                        ]),
+                        dbc.Col([
+                            dcc.Markdown(
+                                '''
+                                * Ugenya
+                                * Rachuonyo South
+                                * Ugunja
+                                * Suna East
+                                * Vihiga
+                                * Rangwe
+                                * Alego-usonga
+                                * Suba North
+                                * Bunyala
+                                * Bonchari
+                                * Bobasi
+                                * Kitutu Chache South
+                                * Nyaribari Chache
+                                * Bomachoge Borabu
+                                * Masaba North
+                                * Borabu
+                                * South Mugirango
+                                * Transmara East
+                                * Kitutu Chache North
+                                * Hamisi
+                                '''
+                            )
+                            
+                        ]),
+                        dbc.Col([
+                            dcc.Markdown(
+                                '''                                
+                                * Rachuonyo North
+                                * Lamu East
+                                * Bomet Central
+                                * Homa Bay
+                                * Matayos
+                                * Narok East
+                                * Ndhiwa
+                                * Teso North
+                                * Nyaribari Masaba
+                                * Nyamira South
+                                * Malava
+                                * Nambale
+                                * Likuyani
+                                * Kabuchai
+                                * Mt. Elgon
+                                * Sirisia
+                                * Kimilili
+                                * Webuye East
+                                * Webuye West
+                                * Tongaren
+                                * Saboti
+                                '''
+                            )
+                        ]),
+                        dbc.Col([
+                            dcc.Markdown(
+                                '''
+                                * Kipkelion East
+                                * Nyatike
+                                * Teso South
+                                * Manga
+                                * Rongo
+                                * Uriri
+                                * Khwisero
+                                * Emuhaya
+                                * Naivasha
+                                * Kinangop
+                                * Lari
+                                * Nakuru Town East
+                                * Navakholo
+                                * Shinyalu
+                                * Ikolomani
+                                * Butere
+                                * Samia
+                                * Matungu
+                                * Mumias West
+                                * Ainabkoi
+                                * Lugari
+                                * Bumula
+                                * Kanduyi      
+                                '''
+                            )
+                        ]),
+                        dbc.Col([
+                            dcc.Markdown(
+                                '''
+                                * Limuru
+                                * Kiambu
+                                * Gilgil
+                                * Narok North
+                                * Mathare
+                                * Githunguri
+                                * Kasarani
+                                * Ruiru
+                                * Kiambaa
+                                * Gatundu South
+                                * Thika Town
+                                * Nyeri Central
+                                * Kibra
+                                * Bomet East
+                                * Langata
+                                * Bahati
+                                * Kajiado South
+                                * Narok West
+                                * Kajiado Central
+                                * Kibwezi East
+                                * Manyatta
+                                * Lurambi
+                                '''
+                            )
+                            
+                        ]),
+                        dbc.Col([
+                            dcc.Markdown(
+                                '''
+                                * Westlands
+                                * Maragwa
+                                * Roysambu
+                                * Mwala
+                                * Kigumo
+                                * Kapseret
+                                * Juja
+                                * Kikuyu
+                                * Gatanga
+                                * Mathioya
+                                * Embakasi East
+                                * Gatundu North
+                                * Kaiti
+                                * Kangundo
+                                * Ainamoi
+                                * Kamukunji
+                                * Makadara
+                                * Embakasi West
+                                * Embakasi South
+                                * Kitui Central
+                                * Starehe
+                                * Rongai
+                                '''
+                            )
+                        ]),
+                        dbc.Col([
+                            dcc.Markdown(
+                                '''
+                                * Dagoretti North
+                                * Nandi Hills
+                                * Mwingi Central
+                                * Embakasi North
+                                * Kabete
+                                * Tigania West
+                                * Machakos
+                                * Embakasi Central
+                                * Kathiani
+                                * Kaloleni
+                                * Ruaraka
+                                * Kangema
+                                * Kirinyaga East
+                                * Butula
+                                * Makueni
+                                * Missing
+                                * Masinga
+                                * Yatta
+                                * Kilome
+                                * Matungulu
+                                * Mbooni
+                                * Mavoko
+                                * Kibwezi West
+                                '''
+                            )
+                        ])
+                    ],justify = "center",className = classname_col)
+                      
+                ],label='Data Source',style=tab_style,selected_style=tab_selected_style)
+                
         ],style=tabs_styles),
         
         reference
@@ -577,6 +813,7 @@ layout = html.Div([
 
 def return_discharge_data(value):
     
+    # print(outcome_sex)
     male_alive = outcome_sex[(outcome_sex['outcome'] == value) & (outcome_sex['sex'] == 'Male')]['prop'].iat[0]
     female_alive = outcome_sex[(outcome_sex['outcome'] == value) & (outcome_sex['sex'] == 'Female')]['prop'].iat[0]
     df_region = outcome_region[(outcome_region['outcome'] == value)]
@@ -587,7 +824,10 @@ def return_discharge_data(value):
     df_age = df_data[(df_data.age_years > 0) & (df_data.age_years < 100)]
     age_sex = df_age.groupby(['sex','age_groups'])[['sex']].count().rename(columns={'sex':'count'}).reset_index()
     age_sex_f = age_sex[age_sex['sex'] == 'Female']
+    age_sex_f['prop'] = round(age_sex_f['count']/age_sex_f['count'].sum()*100,0)
     age_sex_m = age_sex[age_sex['sex'] == 'Male']
+    age_sex_m['prop'] = round(age_sex_m['count']/age_sex_m['count'].sum()*100,0)
+    
     
     alive_death_period = df_data .groupby(['region','month'])[['region']].count().rename(columns={'region':'count'}).reset_index()
     alive_death_period['proportion'] = round(100 * alive_death_period['count']/alive_death_period.groupby('region')['count'].transform('sum'),1)

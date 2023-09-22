@@ -53,7 +53,7 @@ tickfont_dict = dict(size=9)
 card_class = "text-center"
 classname_col = "bg-secondary bg-opacity-10 g-1 justify-content-center p-2 m-2" 
 class_style = "shadow-sm bg-light border rounded g-1"
-col_title = "text-center text-secondary fw-bold mb-0"
+col_title = "text-center text-secondary fw-bold mb-0 ms-4"
 col_title_start = "text-start text-secondary fw-bold mb-0"
 style_title = {"font-size":13}
 

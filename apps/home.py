@@ -9,6 +9,7 @@ def load_home_data():
                                          parse_dates=["Date"], index_col='Date')
     daily_cases = pd.read_csv(DATA_PATH.joinpath("covid_daily_data.csv"))
     daily_cases["Date"] = pd.to_datetime(daily_cases["Date"],format = "%d/%m/%Y")
+    # print(daily_cases.tail())
     age_gender_data = pd.read_table(DATA_PATH.joinpath("age_gender_data.txt"),sep = "\t")
     data = pd.read_csv(DATA_PATH.joinpath("cases_per_county.csv"))
     data["percentage_cases"] = round(data["cases"]/data["cases"].sum() * 100,2)
@@ -16,9 +17,13 @@ def load_home_data():
 
 def daily_plots(df,observation1,observation2):#, observation2
     fig = go.Figure()
-    fig.add_trace(go.Scatter( x = df["Date"],mode='none', y = df[observation1],fill='tonext'))
+    fig.add_trace(go.Scatter( x = df["Date"],mode='none', y = df[observation1],fill='tonext',
+                             hovertext=df['Reported_Cases']))
     fig.add_trace(go.Scatter(x = df["Date"], y = df[observation2]))
-    fig.update_layout(hovermode="x unified",showlegend=False,margin = margin)
+    fig.update_layout(showlegend=False,margin = margin)
+    
+    
+    
     fig.update_xaxes(showgrid=False,showline=True,linecolor = axis_color,tickfont = dict(size=tickfont))
     fig.update_yaxes(tickfont = dict(size=tickfont),nticks=10,title = "7-day Average", title_font = {"size":titlefont})
     return fig
@@ -144,6 +149,11 @@ def update_home_content(n_intervals):
         ],justify="center", className = "mb-1 ms-3 me-3 ps-3 pe-3 mt-5 pt-5"),
         
         dbc.Row([
+            dbc.Row([
+                dbc.Col([
+                    html.P([html.Label("CASE UPDATES",className = col_title,style = style_title)]),
+                ],width=11,className='ms-3')
+            ],justify='center'),
             
             dbc.Col([
                 dbc.CardBody([

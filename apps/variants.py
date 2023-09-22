@@ -11,7 +11,7 @@ def load_varaint_data():
     global variant_growth_rate_fy4,variant_growth_rate_xbb
     variants_kenya = pd.read_table(DATA_PATH.joinpath("variant_data_kenya.tsv"))
     variants_kenya["Month"] = pd.to_datetime(variants_kenya["Month"], format = "%Y-%m-%d")
-    variants_data = pd.read_table(DATA_PATH.joinpath("kenya_lineages2.txt"))
+    variants_data = pd.read_table(DATA_PATH.joinpath("kenya_lineages3.tsv"))
     variants_data['date'] = pd.to_datetime(variants_data['date'],format="%Y-%m-%d")
     variants_data = variants_data[variants_data['pangolin_lineage'] != 'Unassigned']
 
@@ -85,11 +85,17 @@ def update_content(n_intervals):
     
     legend = dict(orientation = "h",title=None,yanchor  = "bottom", xanchor = "left",y=-0.4,
                                                     font = dict(size=8))
-    fig_var = px.bar(variants_kenya, x = "Month", y = "percentage", color="variant",range_x=["2020-01-01","2023-07-01"],
-                     color_discrete_sequence = ["#1b9e77","#d95f02","#7570b3","#e7298a","#8111A5","#e6ab02","#a6761d"])
+    
+    next_month = max(variants_kenya['Month']) + pd.offsets.MonthBegin(1)    
+    fig_var = px.bar(variants_kenya, x = "Month",y = "percentage", color="variant",range_x=["2020-01-01",next_month],
+                     color_discrete_sequence = ["#1b9e77","#d95f02","#7570b3","#e7298a","#8111A5","#e6ab02","#a6761d"],
+                     hover_name='variant',hover_data={'Month':True,'Frequency':True,'variant':False,'percentage':False}
+                     )
     fig_var.update_xaxes(nticks = 10,linecolor = "black",ticks="outside",tickfont = dict(size=10),title = None)
     fig_var.update_yaxes(linecolor = "black",ticks="outside",tickfont = dict(size=12),title ="Proportion", title_font = {"size":12})
     fig_var.update_layout(legend=legend,margin = margin,hoverlabel=hoverlabel)
+    
+    
                           #,hoverlabel=hoverlabel,hover_name='variant',hover_data=['Month'])
 
 
@@ -100,9 +106,11 @@ def update_content(n_intervals):
     lineages = lineages.groupby(["date","lineage_group"])[["lineage_group"]].count().\
         rename(columns = {"lineage_group":"Frequency"}).reset_index()   
 
-    #do the plot
+    maxdate = max(lineages['date'] - pd.offsets.MonthBegin(0))
+
     sars_lineages = px.scatter(lineages, x = "date",y = "lineage_group",size= "Frequency", color = "lineage_group",\
-                        range_x=["2023-01-01","2023-07-01"],color_discrete_sequence=color_patterns)
+                        range_x=["2023-01-01",maxdate],color_discrete_sequence=color_patterns)
+    
     sars_lineages.update_layout(margin=margin, showlegend = False)
     sars_lineages.update_xaxes(title = None,linecolor = "black",tickfont = dict(size=10), nticks=6)
     sars_lineages.update_yaxes(title = None, linecolor = "black",tickfont = dict(size=10),gridcolor = gridcolor,
@@ -126,18 +134,18 @@ def update_content(n_intervals):
                                 html.Label("Temporal prevalence of SARS-COV-2 variants in Kenya", 
                                     style = {"text-align":"start","font-size":14},className = "fw-bold text-dark ms-4"),
 
-                                dcc.Graph(figure = fig_var,responsive = True,style = {"width":"50hw","height":"50vh"},config= plotly_display),
+                                dcc.Loading(dcc.Graph(figure = fig_var,responsive = True,style = {"width":"50hw","height":"50vh"},config= plotly_display)),
                             ])
-                        ], className = "border-0 text-center rounded-0")
+                        ], className = "h-100 border-0 text-center rounded-0")
                     ],xs = 12,md=7, lg=7),
 
                     dbc.Col([
                         dbc.Card([
                             dbc.CardBody([
-                                html.Label("SARS-COV-2 lineages between January to June 2023", 
+                                html.Label("Kenya SARS-COV-2 lineages in 2023", 
                                     style = {"text-align":"start","font-size":14},className = "fw-bold text-dark ms-4"),
                                 html.Br(),html.Br(),
-                                dcc.Graph(figure = sars_lineages,responsive = True,style = {"width":"50hw","height":"40vh"},config= plotly_display),
+                                dcc.Loading(dcc.Graph(figure = sars_lineages,responsive = True,style = {"width":"60hw","height":"50vh"},config= plotly_display)),
                             ]),
                         ],className = "h-100 border-0 text-center rounded-0")
 
