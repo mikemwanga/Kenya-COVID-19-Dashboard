@@ -1,3 +1,0 @@
-2023-06-26 15:07:10 [INFO] Running PandasAI with openai LLM...
-2023-06-26 15:07:10 [INFO] Prompt ID: dd3d9663-9dbc-4c3d-bd4c-6aa8a43fa637
-2023-06-26 15:07:12 [INFO] error_code=None error_message='You exceeded your current quota, please check your plan and billing details.' error_param=None error_type=insufficient_quota message='OpenAI API error received' stream_error=False
