@@ -91,7 +91,8 @@ def update_content(n_intervals):
                      color_discrete_sequence = ["#1b9e77","#d95f02","#7570b3","#e7298a","#8111A5","#e6ab02","#a6761d"],
                      hover_name='variant',hover_data={'Month':True,'Frequency':True,'variant':False,'percentage':False}
                      )
-    fig_var.update_xaxes(nticks = 10,linecolor = "black",ticks="outside",tickfont = dict(size=10),title = None)
+    fig_var.update_xaxes(nticks = 10,linecolor = "black",ticks="outside",tickfont = dict(size=10),title = None,
+                         tickformat='%b-%y')
     fig_var.update_yaxes(linecolor = "black",ticks="outside",tickfont = dict(size=12),title ="Proportion", title_font = {"size":12})
     fig_var.update_layout(legend=legend,margin = margin,hoverlabel=hoverlabel)
     
@@ -112,7 +113,7 @@ def update_content(n_intervals):
                         range_x=["2023-01-01",maxdate],color_discrete_sequence=color_patterns)
     
     sars_lineages.update_layout(margin=margin, showlegend = False)
-    sars_lineages.update_xaxes(title = None,linecolor = "black",tickfont = dict(size=10), nticks=6)
+    sars_lineages.update_xaxes(title = None,linecolor = "black",tickfont = dict(size=10), nticks=6,tickformat='%b-%y',ticks="outside")
     sars_lineages.update_yaxes(title = None, linecolor = "black",tickfont = dict(size=10),gridcolor = gridcolor,
                                categoryorder='category descending')
     

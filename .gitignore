@@ -24,3 +24,6 @@ sequence_metadata.tsv
 sequence_metadata_region.tsv
 data
 genome_coverage.ipynb
+syndromic_data
+notebooks_Scripts
+syndromic_notebook.ipynb

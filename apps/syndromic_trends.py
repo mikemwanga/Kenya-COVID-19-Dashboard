@@ -1,17 +1,33 @@
 from utils import *
 
-data = pd.read_csv(DATA_PATH.joinpath('Syndromic_Surveillance_data.csv'),low_memory=False)
+data = pd.read_csv(DATA_PATH.joinpath('Syndromic_Surveillance_data_2023_12_18.csv'),low_memory=False)
 data[['date_of_admission', 'date_of_discharge']] = data[['date_of_admission', 'date_of_discharge']].\
                                 apply(pd.to_datetime, format="%Y-%m-%d")
 data[(data['sex'] != 'Male') & (data['sex'] != 'Female')]
-data = data[data['date_of_admission'] >'2022-12-31']
-data.age_years.fillna(data.calculated_age,inplace=True)
+data = data[data['date_of_admission'] >= '2023-04-01']
+# data.age.fillna(data.calculated_age,inplace=True)
 data['month'] = data['date_of_admission'].apply(lambda x: x.strftime('%b-%y'))
 
 #map regions
-map_dict = {'Naivasha':'Central',
-'Kiambu':'Central','Mbagathi':'Central','Mama_Lucy':'Central','JOOTRH':'Western','Kisumu':'Western','Kakamega':'Western','Busia':'Western',
-'Kitale':'Western','Bungoma':'Western','Kisii':'Western'}
+map_dict = {
+'JOOTRH':'Western','Naivasha':'Central', 'Kiambu':'Central', 'Machakos':'Central','Mama Lucy':'Central',
+'Mbagathi':'Central', 'Kerugoya':'Central', 'Kisumu':'Western', 'Kakamega':'Western', 'Busia':'Western', 'Kitale':'Western',
+'Bungoma':'Western', 'Kisii':'Western', 'CGTRH':'Coast', 'Kilifi':'Coast',
+'Jaramogi Oginga Odinga Teaching and Referral Hospital' : 'Western','Naivasha County Referral Hospital':'Central',
+'Kiambu Level 5 Hospital':'Central','Machakos Level 5 Hospital':'Central',
+'Mama Lucy Kibaki Hospital':'Central', 'Mbagathi Hospital':'Central',
+'Kerugoya County Referral Hospital':'Central',
+'Coast General Teaching and Referral Hospital':'Coast','Kisumu County Hospital':'Western',
+'Kakamega County General & Teaching Referral Hospital':'Western',
+'Busia County Referral Hospital':'Western',
+'Kitale County Referral Hospital':'Western','Bungoma County Hospital':'Western',
+'Kisii Teaching and Referral Hospital':'Western'}
+
+data['region'] = data['hospital'].map(map_dict)
+
+central = '#794d65'
+western='#c39054'
+coast = '#3182bd'
 
 data['region'] = data['hospital'].map(map_dict)
 #group age groups
@@ -22,7 +38,7 @@ def age_group(dataframe,column):
                                        labels=['<10','11-20','21-30','31-40','41-50','51-60','61-70','>70'])
         return dataframe
     
-data = age_group(data,'age_years')
+data = age_group(data,'age')
 data['duration'] = (data['date_of_discharge']-data['date_of_admission'])/np.timedelta64(1,'D')
 
 total_central = len(data[data['region'] == 'Central'])
@@ -40,12 +56,12 @@ female_percentage = round((femalep/(total_patients)*100),1)
 
 titlefont = {"size":11}
 
-reg_data = data[['record_id','date_of_admission','hospital','sex','age_years','region','age_groups','month','outcome',
+reg_data = data[['record_id','date_of_admission','hospital','sex','age','region','age_groups','month','outcome',
                  'status_at_discharge','date_of_discharge']]
 
 df_all = data.loc[(data['sex'].isin(['Male','Female'])) & (data['date_of_admission'] >'2022-12-31' )]\
-    [['age_groups','month','sex','date_of_admission','calculated_age','age_years']]
-df_age = df_all[(df_all.age_years > 0) & (df_all.age_years < 100)]
+    [['age_groups','month','sex','date_of_admission','age']]
+df_age = df_all[(df_all.age >=11 ) & (df_all.age < 100)]
 age_sex = df_age.groupby(['sex','age_groups'])[['sex']].count().rename(columns={'sex':'count'}).reset_index()
 age_sex_f = age_sex[age_sex['sex'] == 'Female']
 age_sex_f['prop'] = round(age_sex_f['count']/age_sex_f['count'].sum()*100,0)
@@ -104,7 +120,7 @@ reg_per_fig =plot_reg_period(reg_period)
 
 ####################################################################################################
 #data captured
-data_campture = data[['record_id','dob_known','date_of_entry','biodata_complete','sex','age_years','region','age_groups','month',\
+data_campture = data[['record_id','dob_known','date_of_entry','biodata_complete','sex','age','region','age_groups','month',\
     'date_of_admission','weight','height','outcome','status_at_discharge','date_of_discharge',
     'd1_present','cause_of_death','temp','heart_rate','resp_rate','blood_pressure_sys','blood_pressure_dia','oxygen_sat']]
 
@@ -125,9 +141,9 @@ resp_rate = group_between('resp_rate',5,30)
 height_complete = group_between('height',50,250)
 weight_complete = group_between('weight',40,250)
 oxy_rate = group_between('oxygen_sat',20,100)
-age_complete = group_between('age_years',18,100)
-bp_dialysis = group_between('blood_pressure_dia',50,200)
-bp_systolic = group_between('blood_pressure_sys',50,200)
+age_complete = group_between('age',18,100)
+# bp_dialysis = group_between('blood_pressure_dia',50,200)
+# bp_systolic = group_between('blood_pressure_sys',50,200)
 
 df_demo = pd.merge(dob_known,sex_complete,on='region').\
     merge(height_complete,on='region').\
@@ -138,9 +154,9 @@ df_demo = (df_demo.div(total_patients)*100).round(1)
 
 df_vital_signs = pd.merge(temp,resp_rate,on='region').\
     merge(heart_rate,on='region').\
-        merge(oxy_rate,on='region').\
-            merge(bp_dialysis,on='region').\
-                merge(bp_systolic,on='region')
+        merge(oxy_rate,on='region')#.\
+            # merge(bp_dialysis,on='region').\
+            #     merge(bp_systolic,on='region')
                 
 df_vital_signs.set_index('region',inplace=True)
 df_vital_signs = (df_vital_signs.div(total_patients)*100).round(1)
@@ -273,7 +289,7 @@ perioddata= pd.merge(period_headach,period_diarrhoea,on='month').\
                         merge(period_dysuria,on='month').merge(period_losscon,on='month')
 
 perioddata.rename(columns={'loss_of_consciousness':'LoC'},inplace=True)
-perioddata = perioddata.T[['Feb-23','Mar-23','Apr-23','May-23','Jun-23']]
+perioddata = perioddata.T#[['Feb-23','Mar-23','Apr-23','May-23','Jun-23']]
 
 fig_period_heatmap = heatmap_plot(perioddata, 'Symptoms')
 
@@ -317,7 +333,7 @@ status_at_discharge_plot.update_layout(margin=margin,paper_bgcolor=plot_color,pl
 status_at_discharge_plot.update_traces(textposition='outside',marker_color='indianred')
 
 ############################################################
-df_test = data[['outcome','status_at_discharge','date_of_admission','date_of_discharge','sex','age_years','month','region','d1_present','cause_of_death',\
+df_test = data[['outcome','status_at_discharge','date_of_admission','date_of_discharge','sex','age','month','region','d1_present','cause_of_death',\
                 'disease_specific_tests___1','disease_specific_tests___2','disease_specific_tests___4','disease_specific_tests___5','microbiology___1',
                 'biochemistry___3','haematology___1','microbiology___5']]
 df_test.rename(columns={'disease_specific_tests___1':'Malaria','disease_specific_tests___2':'TB','disease_specific_tests___4':'HIV',
@@ -336,7 +352,7 @@ def admission_test_group(data, value):
 
 test_region = admission_test_group(df_test, 'region')
 test_period = admission_test_group(df_test, 'month')
-test_period = test_period.T[['Jan-23','Feb-23','Mar-23','Apr-23','May-23','Jun-23']]
+test_period = test_period.T#[['Jan-23','Feb-23','Mar-23','Apr-23','May-23','Jun-23']]
 
 test_region = test_region.T.reset_index()
 #print(test_region)
@@ -541,33 +557,33 @@ layout = html.Div([
                             #html.Br(className='mb-1'),
                             #html.Hr(),
                             dbc.Row([
-                dbc.Col([
-                    dbc.Card([
-                        dbc.CardBody([
-                            html.P('COVID-19 VACCINATION BY REGION', className = col_title,style = style_title),
-                            dcc.Graph(figure=fig_cov_vacc_region,responsive=True,config=plotly_display,
-                                      style={'height':'20vh'}),#'height':'30vh','width':'35hw'}),
-                            html.Br(),
-                            html.P('COVID-19 VACCINATION BY PERIOD', className = col_title,style = style_title),
-                            dcc.Graph(figure = fig_cov_vacc_month,responsive=True,config=plotly_display,
-                                      style={'height':'30vh'}),#'height':'30vh','width':'35vw'})
-                        ]),
-                    ],className='border-0 text-center rounded-0')
-                ],md=6),
-                dbc.Col([
-                    dbc.Card([
-                        dbc.CardBody([
-                            html.P('HIV STATUS BY REGION', className = col_title,style = style_title),
-                            dcc.Graph(figure=fig_hiv_region,responsive=True,config=plotly_display,
-                                      style={'height':'20vh','width':'35vw'}),
-                            html.Br(),
-                            html.P('HIV STATUS BY PERIOD', className = col_title,style = style_title),
-                            dcc.Graph(figure=fig_hiv_period,responsive=True,
-                                      config=plotly_display,style={'height':'30vh','width':'35vw'})
-                        ])
-                    ],className='h-100 border-0 text-center rounded-0')
-                ],md=6)
-            ],justify = "center",className= midrow_classname),#className = classname_col),
+                                dbc.Col([
+                                    dbc.Card([
+                                        dbc.CardBody([
+                                            html.P('COVID-19 VACCINATION BY REGION', className = col_title,style = style_title),
+                                            dcc.Graph(figure=fig_cov_vacc_region,responsive=True,config=plotly_display,
+                                                      style={'height':'20vh'}),#'height':'30vh','width':'35hw'}),
+                                            html.Br(),
+                                            html.P('COVID-19 VACCINATION BY PERIOD', className = col_title,style = style_title),
+                                            dcc.Graph(figure = fig_cov_vacc_month,responsive=True,config=plotly_display,
+                                                      style={'height':'30vh'}),#'height':'30vh','width':'35vw'})
+                                        ]),
+                                    ],className='border-0 text-center rounded-0')
+                                ],md=6),
+                                dbc.Col([
+                                    dbc.Card([
+                                        dbc.CardBody([
+                                            html.P('HIV STATUS BY REGION', className = col_title,style = style_title),
+                                            dcc.Graph(figure=fig_hiv_region,responsive=True,config=plotly_display,
+                                                      style={'height':'20vh','width':'35vw'}),
+                                            html.Br(),
+                                            html.P('HIV STATUS BY PERIOD', className = col_title,style = style_title),
+                                            dcc.Graph(figure=fig_hiv_period,responsive=True,
+                                                      config=plotly_display,style={'height':'30vh','width':'35vw'})
+                                        ])
+                                    ],className='h-100 border-0 text-center rounded-0')
+                                ],md=6)
+                            ],justify = "center",className= midrow_classname),#className = classname_col),
 
                         ],justify = "center",className = classname_col),
                 ],label='Priority Measures',style=tab_style,selected_style=tab_selected_style),
@@ -601,200 +617,31 @@ layout = html.Div([
                         dbc.Col([
                             dcc.Markdown(
                                 '''
-                                * Kisumu East
-                                * Nyakach
-                                * Seme
-                                * Gem
-                                * Muhoroni
-                                * Rarieda
-                                * Bondo
-                                * Nyando
-                                * Other
-                                * Sabatia
-                                * Kisumu Central
-                                * Kisumu West
-                                * Nyamira North
-                                * Bomachoge Chache
-                                * Awendo
-                                * Kuria West
-                                * Transmara West
-                                * Kuria East
-                                * Molo
-                                * Rachuonyo East
-                                * Mumias East
-                                * Luanda                                
+                                * Jaramogi Oginga Odinga Teaching and Referral Hospital,
+                                * Naivasha County Referral Hospital,
+                                * Kiambu Level 5 Hospital,
+                                * Machakos Level 5 Hospital,
+                                * Mama Lucy Kibaki Hospital,
+                                * Mbagathi Hospital, 
+                                * Kerugoya County Referral Hospital,
+                                * Kilifi County Referral Hospital                            
                                 '''
                             )
                         ]),
                         dbc.Col([
                             dcc.Markdown(
                                 '''
-                                * Ugenya
-                                * Rachuonyo South
-                                * Ugunja
-                                * Suna East
-                                * Vihiga
-                                * Rangwe
-                                * Alego-usonga
-                                * Suba North
-                                * Bunyala
-                                * Bonchari
-                                * Bobasi
-                                * Kitutu Chache South
-                                * Nyaribari Chache
-                                * Bomachoge Borabu
-                                * Masaba North
-                                * Borabu
-                                * South Mugirango
-                                * Transmara East
-                                * Kitutu Chache North
-                                * Hamisi
-                                '''
-                            )
-                            
-                        ]),
-                        dbc.Col([
-                            dcc.Markdown(
-                                '''                                
-                                * Rachuonyo North
-                                * Lamu East
-                                * Bomet Central
-                                * Homa Bay
-                                * Matayos
-                                * Narok East
-                                * Ndhiwa
-                                * Teso North
-                                * Nyaribari Masaba
-                                * Nyamira South
-                                * Malava
-                                * Nambale
-                                * Likuyani
-                                * Kabuchai
-                                * Mt. Elgon
-                                * Sirisia
-                                * Kimilili
-                                * Webuye East
-                                * Webuye West
-                                * Tongaren
-                                * Saboti
+                                * Coast General Teaching and Referral Hospital,
+                                * Kisumu County Hospital,
+                                * Kakamega County General & Teaching Referral Hospital,
+                                * Busia County Referral Hospital,
+                                * Kitale County Referral Hospital,
+                                * Bungoma County Hospital,
+                                * Kisii Teaching and Referral Hospital                              
                                 '''
                             )
                         ]),
-                        dbc.Col([
-                            dcc.Markdown(
-                                '''
-                                * Kipkelion East
-                                * Nyatike
-                                * Teso South
-                                * Manga
-                                * Rongo
-                                * Uriri
-                                * Khwisero
-                                * Emuhaya
-                                * Naivasha
-                                * Kinangop
-                                * Lari
-                                * Nakuru Town East
-                                * Navakholo
-                                * Shinyalu
-                                * Ikolomani
-                                * Butere
-                                * Samia
-                                * Matungu
-                                * Mumias West
-                                * Ainabkoi
-                                * Lugari
-                                * Bumula
-                                * Kanduyi      
-                                '''
-                            )
-                        ]),
-                        dbc.Col([
-                            dcc.Markdown(
-                                '''
-                                * Limuru
-                                * Kiambu
-                                * Gilgil
-                                * Narok North
-                                * Mathare
-                                * Githunguri
-                                * Kasarani
-                                * Ruiru
-                                * Kiambaa
-                                * Gatundu South
-                                * Thika Town
-                                * Nyeri Central
-                                * Kibra
-                                * Bomet East
-                                * Langata
-                                * Bahati
-                                * Kajiado South
-                                * Narok West
-                                * Kajiado Central
-                                * Kibwezi East
-                                * Manyatta
-                                * Lurambi
-                                '''
-                            )
-                            
-                        ]),
-                        dbc.Col([
-                            dcc.Markdown(
-                                '''
-                                * Westlands
-                                * Maragwa
-                                * Roysambu
-                                * Mwala
-                                * Kigumo
-                                * Kapseret
-                                * Juja
-                                * Kikuyu
-                                * Gatanga
-                                * Mathioya
-                                * Embakasi East
-                                * Gatundu North
-                                * Kaiti
-                                * Kangundo
-                                * Ainamoi
-                                * Kamukunji
-                                * Makadara
-                                * Embakasi West
-                                * Embakasi South
-                                * Kitui Central
-                                * Starehe
-                                * Rongai
-                                '''
-                            )
-                        ]),
-                        dbc.Col([
-                            dcc.Markdown(
-                                '''
-                                * Dagoretti North
-                                * Nandi Hills
-                                * Mwingi Central
-                                * Embakasi North
-                                * Kabete
-                                * Tigania West
-                                * Machakos
-                                * Embakasi Central
-                                * Kathiani
-                                * Kaloleni
-                                * Ruaraka
-                                * Kangema
-                                * Kirinyaga East
-                                * Butula
-                                * Makueni
-                                * Missing
-                                * Masinga
-                                * Yatta
-                                * Kilome
-                                * Matungulu
-                                * Mbooni
-                                * Mavoko
-                                * Kibwezi West
-                                '''
-                            )
-                        ])
+                        
                     ],justify = "center",className = classname_col)
                       
                 ],label='Data Source',style=tab_style,selected_style=tab_selected_style)
@@ -819,9 +666,9 @@ def return_discharge_data(value):
     df_region = outcome_region[(outcome_region['outcome'] == value)]
 
     df_data = data_campture .loc[(data_campture ['outcome'] == value) & (data_campture ['sex'].isin(['Male','Female'])) & \
-         (data_campture ['date_of_admission'] >'2022-12-31' )][['age_groups','region','month','sex','date_of_admission','age_years']]
+         (data_campture ['date_of_admission'] >'2022-12-31' )][['age_groups','region','month','sex','date_of_admission','age']]
     
-    df_age = df_data[(df_data.age_years > 0) & (df_data.age_years < 100)]
+    df_age = df_data[(df_data.age > 0) & (df_data.age < 100)]
     age_sex = df_age.groupby(['sex','age_groups'])[['sex']].count().rename(columns={'sex':'count'}).reset_index()
     age_sex_f = age_sex[age_sex['sex'] == 'Female']
     age_sex_f['prop'] = round(age_sex_f['count']/age_sex_f['count'].sum()*100,0)

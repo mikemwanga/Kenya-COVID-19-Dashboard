@@ -4,7 +4,7 @@ from utils import *
 #laod data
 def load_data():
     global vac_by_age, kenya_data,daily_updates_moh,kenya_county,total_doses_administered,total_vaccines_received,fully_vaccinated_adults \
-            ,partially_vaccinated_adults,booster_doses,perc_vaccinated
+            ,partially_vaccinated_adults,booster_doses,perc_vaccinated,percentage_doses_administered
             
     daily_updates_moh =  pd.read_excel(DATA_PATH.joinpath("daily_updates_metadata.xlsx"))
     metadata = pd.read_table(DATA_PATH.joinpath("county_metadata.tsv"))
@@ -18,13 +18,16 @@ def load_data():
     vac_by_age = pd.read_table(DATA_PATH.joinpath("vaccination_by_age.txt"))
     total_doses_administered = daily_updates_moh["total_doses_administered"].dropna().iat[-1]
     total_vaccines_received = daily_updates_moh["total_vaccines_received"].dropna().iat[-1]
+
+    percentage_doses_administered = round(total_doses_administered/total_vaccines_received*100,0)
+
     fully_vaccinated_adults= daily_updates_moh["fully_vaccinated_adult_population"].dropna().iat[-1]
     partially_vaccinated_adults= daily_updates_moh["partially_vaccinated_adult_population"].dropna().iat[-1]
     booster_doses = daily_updates_moh["Booster_doses"].dropna().iat[-1]
     perc_vaccinated = round(daily_updates_moh["proportion_of_fully_vaccinated_adult_population"].dropna().iat[-1],1)
     
     return vac_by_age,kenya_data,daily_updates_moh,total_doses_administered,total_vaccines_received,fully_vaccinated_adults \
-            ,partially_vaccinated_adults,booster_doses,perc_vaccinated #kenya_county
+            ,partially_vaccinated_adults,booster_doses,perc_vaccinated,percentage_doses_administered
     
 
 #vaccination by age plot
@@ -94,14 +97,14 @@ def update_content(n_intervals):
                         dbc.Card([
                             dbc.CardBody([
                                 html.Label(f"{int(fully_vaccinated_adults):,}",style = {"color":marker_text},className ="fs-5"),
-                                html.P("Fully vaccinated",style = style_text)
+                                html.P("People Fully vaccinated",style = style_text)
                             ])
                         ], className='text-center border-0 rounded-0 mt-1',style = {}),
 
                         dbc.Card([
                             dbc.CardBody([
                                html.Label(f"{int(partially_vaccinated_adults):,}",style = {"color":marker_text},className ="fs-5"),
-                                html.P("Partially vaccinated",style = style_text)
+                                html.P("People Partially vaccinated",style = style_text)
                             ])
                         ], className='text-center border-0 mt-1 rounded-0',style = {})
                     ],xs=5, md=3,lg=2,xxl=2,className=""),
@@ -110,7 +113,8 @@ def update_content(n_intervals):
                         dbc.Card([
                             dbc.CardBody([
                                 html.Label(f"{int(total_doses_administered):,}",style = {"color":marker_text},className ="fs-5"),
-                                html.P("Total Doses",style = style_text),
+                                # html.P(f"{percentage_doses_administered}%"),
+                                html.P("Doses administered",style = style_text),
                             ]), 
 
                         ], className='border-0 text-center rounded-0',style = {}),
@@ -118,7 +122,7 @@ def update_content(n_intervals):
                         dbc.Card([
                            dbc.CardBody([
                                html.Label(f"{int(booster_doses):,}",style = {"color":marker_text},className ="fs-5"),
-                               html.P("Booster doses",style = style_text),
+                               html.P("People Booster doses",style = style_text),
                            ])
                         ], className='border-0 text-center rounded-0 mt-1',style = {}),
 

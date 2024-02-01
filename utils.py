@@ -78,8 +78,9 @@ col1_class = "ms-2"
 
 central = '#794d65'
 western='#c39054'
+coast = '#3182bd'
 
-discrete_color = [central,western]
+discrete_color = [central,western,coast]
 col_title = "text-start text-secondary fw-bold mb-0 ms-4 mt-2"
 section_title = "text-start text-secondary ms-3 text-start fw-bold fs-5"
 male_color = '#00698f'# 
@@ -185,8 +186,8 @@ reference = dbc.Row([
                              style = {"font-size":10}),
 
                     html.P("Contact Us",className = "fw-bolder text-decoration-underline mb-0 pb-0 mt-2",style = {"font-size":12}),
-                    dcc.Link("jmwanga@kemri-wellcome.org",title="email_me",href="mailto:jmwanga@kemri-wellcome.org",target="_blank",
-                             style = {"font-size":10,"margin-right":"10px"}),
+                    # dcc.Link("jmwanga@kemri-wellcome.org",title="email_me",href="mailto:jmwanga@kemri-wellcome.org",target="_blank",
+                    #          style = {"font-size":10,"margin-right":"10px"}),
                     dcc.Link("ggithinji@kemri-wellcome.org",title="email_me",href="mailto:ggithinji@kemri-wellcome.org",target="_blank",
                              style = {"font-size":10})
 
