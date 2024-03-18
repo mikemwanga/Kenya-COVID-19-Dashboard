@@ -53,9 +53,13 @@ tickfont_dict = dict(size=9)
 card_class = "text-center"
 classname_col = "bg-secondary bg-opacity-10 g-1 justify-content-center p-2 m-2" 
 class_style = "shadow-sm bg-light border rounded g-1"
+
 col_title = "text-center text-secondary fw-bold mb-0 ms-4"
 col_title_start = "text-start text-secondary fw-bold mb-0"
-style_title = {"font-size":13}
+style_title = {"font-size":16}
+
+description_text = "text-start text-secondary mb-2 mt-2 ms-4"
+description_style_title = {"font-size":13}
 
 col_style  = {"margin-left":"15px","margin-right":"0px"}
 style_label={"font-size":35, "align":"center"}
@@ -67,12 +71,12 @@ hr_class = "bg-secondary bg-opacity-10 justify-content-center mb-0 pb-0"
 col1_class = "ms-2"
 val_class = "fs-2 fw-normal ms-2"
 ######hiv status########################
-colors = {'Empty':'#DEDEDE','No':'#077c86','Yes':'#e83357','missing':'#db2153',#eeeeee'
+colors = {'Not recorded':'#DEDEDE','Empty':'#DEDEDE','No':'#077c86','Yes':'#e83357','missing':'#db2153',#eeeeee'
           'Negative':'#bfa07f','Positive':'#c93071','Unknown':'#d9a744'}
 
 classname_col = "bg-secondary bg-opacity-10 g-1 justify-content-center p-2 m-2" 
 
-midrow_classname = "g-1 justify-content-center"# p-2 m-2"
+midrow_classname = "g-1 justify-content-center mt-1"# p-2 m-2"
 val_class = "fs-4 fw-normal ms-3"
 col1_class = "ms-2"
 
@@ -81,8 +85,9 @@ western='#c39054'
 coast = '#3182bd'
 
 discrete_color = [central,western,coast]
+region_map_color ={'Central':central,'Western':western,'Coast':coast}
 col_title = "text-start text-secondary fw-bold mb-0 ms-4 mt-2"
-section_title = "text-start text-secondary ms-3 text-start fw-bold fs-5"
+section_title = "text-start text-secondary ms-1 mt-2 text-start fw-bold fs-5"
 male_color = '#00698f'# 
 female_color = '#de6f1d' # 
 gender_color =[female_color,male_color]
