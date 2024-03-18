@@ -8,7 +8,9 @@ The datasets used in here have been shared by the Ministry of Health and others 
 
 1. Clone repository
 2. Install dependencies and create environment by installing packages in the `requirements.txt` file.<br>
+
         `conda install package-name`
+        `conda create --name dashboard --file requirements.txt`
 3. Activate environment <br>
         `conda activate dashboard`
 4. Run the dashboard <br>
