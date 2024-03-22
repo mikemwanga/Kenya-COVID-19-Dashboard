@@ -1,6 +1,6 @@
 from data_processing import *
 from utils import *
-from html.parser import HTMLParser
+
 #*********************************************************************************************************************
 
 space = html.B(className='mb-4')
@@ -114,6 +114,16 @@ layout = html.Div([
                                 ]),
                             ],body=True,className='border-0'),
                         ],className='border-0'),
+                        
+                        dbc.Col([
+                            dbc.Card([
+                                html.P('CENTRAL REGION',className=col_title,style = style_title),  
+                                dbc.CardBody([
+                                    dcc.Graph(figure=central_documentation_plot,responsive=True,config=plotly_display,
+                                            style={"height":"25vh"} ), 
+                                ]),
+                            ],body=True,className='border-0'),
+                        ],className='border-0'),
                         dbc.Col([
                             dbc.Card([
                                 html.P('WESTERN REGION',className=col_title,style = style_title), 
@@ -123,15 +133,6 @@ layout = html.Div([
                                 ]),
                             ],body=True,className='border-0'),
                         ],className='border-0'),
-                        dbc.Col([
-                            dbc.Card([
-                                html.P('CENTRAL REGION',className=col_title,style = style_title),  
-                                dbc.CardBody([
-                                    dcc.Graph(figure=central_documentation_plot,responsive=True,config=plotly_display,
-                                            style={"height":"25vh"} ), 
-                                ]),
-                            ],body=True,className='border-0'),
-                        ],className='border-0')
                     ],justify = "center",className= midrow_classname),                                       
                 ],label='Vitals',style=tab_style,selected_style=tab_selected_style),
                 dcc.Tab([

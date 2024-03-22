@@ -97,22 +97,23 @@ reg_fig.update_yaxes(tickfont = dict(size=tick_font),title = None,ticks='outside
 reg_fig.update_xaxes(title ='Proportion(%)',nticks=10, tickfont = dict(size=tick_font),linecolor= linecolor,gridcolor=gridcolor,
                      ticks='outside')
 reg_period = reg_data.groupby(['region','month'])[['region']].count().rename(columns={'region':'count'}).reset_index()
-reg_period['proportion'] = round(100 * reg_period['count']/reg_period.groupby('region')['count'].transform('sum'),1)
+#reg_period['proportion'] = round(100 * reg_period['count']/reg_period.groupby('region')['count'].transform('sum'),1)
 reg_period['month']=pd.to_datetime(reg_period['month'], format="%b-%y").sort_values()
 
 # print(reg_period)
 def plot_reg_period(data):
     fig = px.bar(data, x='month',y='count',barmode='group',color='region',range_y=[0, data['count'].max()+200],
                         color_discrete_map= region_map_color,text = 'count')
-    fig.update_xaxes(categoryorder='array')#,categoryarray=['Jan-23','Feb-23','Mar-23','Apr-23','May-23','Jun-23'])
+    
     fig.update_layout(margin=margin,legend=dict(orientation='h', title=None,yanchor='top',y=1.2,xanchor='right',x=1),
                       paper_bgcolor=plot_color,plot_bgcolor=plot_color)
-    fig.update_xaxes(tickfont = dict(size=12),title=None,linecolor='gray',nticks=20,ticks='outside',tickformat='%b-%y')
+    fig.update_xaxes(tickfont = dict(size=12),title=None,linecolor='gray',nticks=10,ticks='outside',tickformat='%b-%y')
     fig.update_yaxes(tickfont = dict(size=12),nticks=8,title='Frequency',linecolor= linecolor,gridcolor=gridcolor,ticks='outside')
     fig.update_traces(textposition='outside',textfont_size=12)
     return fig
 
 reg_per_fig =plot_reg_period(reg_period)
+
 
 ####################################################################################################
 #data captured
@@ -407,20 +408,19 @@ outcome_deaths_sex = outcome_deaths[['month','sex']].groupby(['sex','month',])[[
     rename(columns={'sex':'Freq'}).reset_index()
 outcome_deaths_sex['proportion_month'] =  round(outcome_deaths_sex['Freq']/outcome_deaths_sex.groupby('month')['Freq'].transform('sum')*100,1)
 
-# outcome_deaths_region = outcome_deaths[['month','region']].groupby(['region','month'])[['region']].count().\
-#                         rename(columns={'region':'Freq'}).reset_index()
-# outcome_deaths_region['proportion_month'] = round(outcome_deaths_region['Freq']/outcome_deaths_region.groupby('month')['Freq'].transform('sum')*100,1)
-# outcome_deaths_region['proportion_region'] = round(outcome_deaths_region['Freq']/outcome_deaths_region.groupby('region')['Freq'].transform('sum')*100,1)
+# print(outcome_deaths_sex)
 
 def plot_stack_bar(data,color_col,color_pattern):
-    fig = px.bar(data, x = 'month', y='proportion_month',color=color_col,text='Freq',
-                 color_discrete_map=color_pattern)
+    fig = px.bar(data, x = 'month', y='proportion_month',color=color_col,text='Freq',barmode='group',
+                 color_discrete_map=color_pattern, range_y=(0,70))
     fig.update_xaxes(tickformat='%b-%y',title=None,linecolor='black',ticks='outside',
                      tickfont = dict(size=tick_font),nticks=10)
     fig.update_yaxes(ticks='outside',color='black',tickfont = dict(size=tick_font),linecolor='black',title='Proportion(%)',
                  title_font=dict(size=16))
     fig.update_layout(margin=margin,legend=dict(orientation='h',title=None, xanchor='left',x=0.3))
-    #fig.update_traces(width=0.5)
+    
+    fig.update_traces(textposition='outside',textfont_size=12)
+    
     return fig
 
 
@@ -479,12 +479,27 @@ outcome_deaths  = outcome_data[outcome_data['outcome'] == 'Dead']
 outcome_deaths['month']= pd.to_datetime(outcome_deaths['month'], format="%b-%y").sort_values()
 outcome_deaths_sex = outcome_deaths.groupby(['sex', 'month', 'region']).size().reset_index(name='Freq')
 
-def plot_outcome(data,region):
-    max = data['Freq'].max()+ 50
+# outcome_deaths_sex_coast = outcome_deaths_sex[outcome_deaths_sex['region'] == 'Coast']
+# outcome_deaths_sex_coast['proportion'] = round(outcome_deaths_sex_coast['Freq']/outcome_deaths_sex_coast.\
+#                                                 groupby('sex')['Freq'].transform('sum')*100,1)
+def group_region(data,region):
     data = data[data['region'] == region]
-    fig = px.line(data,  x = 'month',y='Freq', color='sex',line_group='sex',markers=True,
+    data['proportion'] = round(data['Freq']/data.groupby('sex')['Freq'].transform('sum')*100,1)
+    return data
+
+
+# outcome_deaths_sex['proportion_month'] =  round(outcome_deaths_sex['Freq']/outcome_deaths_sex.groupby('month')['Freq'].transform('sum')*100,1)
+outcome_deaths_sex_coast = group_region(outcome_deaths_sex,'Coast')
+outcome_deaths_sex_western = group_region(outcome_deaths_sex,'Western')
+outcome_deaths_sex_central = group_region(outcome_deaths_sex,'Central')
+
+print(outcome_deaths_sex_western)
+def plot_outcome(data):
+    #max = data['Freq'].max()+ 50
+    # data = data[data['region'] == region]
+    fig = px.line(data,  x = 'month',y='proportion', color='sex',line_group='sex',markers=True,
                   color_discrete_map={'Male':male_color,'Female':female_color})
-    fig.update_yaxes(title='Frequency',range = (0,max),title_font=titlefont,ticks='outside',linecolor='black',
+    fig.update_yaxes(title='Proportion(%)',range = (0,100),title_font=titlefont,ticks='outside',linecolor='black',
                      tickfont = dict(size=14))
     fig.update_xaxes(title = None,tickformat='%b-%y',title_font=titlefont,gridcolor=gridcolor,ticks='outside',
                      linecolor='black',tickfont = dict(size=14))
@@ -493,15 +508,15 @@ def plot_outcome(data,region):
 
     return fig
 
-coast_outcome_plot = plot_outcome(outcome_deaths_sex, 'Coast')
-central_outcome_plot = plot_outcome(outcome_deaths_sex, 'Central')
-western_outcome_plot = plot_outcome(outcome_deaths_sex, 'Western')
+coast_outcome_plot = plot_outcome(outcome_deaths_sex_coast)
+central_outcome_plot = plot_outcome(outcome_deaths_sex_central)
+western_outcome_plot = plot_outcome(outcome_deaths_sex_western)
 
 #OVERALL OUTCOME DEAD VS ALIVE
 overall_outcome = data.groupby(['month','outcome']).size().reset_index(name='count')
 overall_outcome['month']= pd.to_datetime(overall_outcome['month'], format="%b-%y").sort_values()
 
-outcome_plot = px.bar(overall_outcome, x = 'month', y ='count', color='outcome',text='count',
+outcome_plot = px.bar(overall_outcome, x = 'month', y ='count', color='outcome',text='count',#barmode='group',
                       color_discrete_map = {'Dead':'#b2182b','Alive':'#2171b5'})
 outcome_plot.update_layout(margin=margin,
                       legend=dict(title=None,orientation='h',xanchor='left',x=0.3))
@@ -509,4 +524,5 @@ outcome_plot.update_xaxes(title = None,tickformat='%b-%y',title_font=titlefont,g
                      linecolor='black',tickfont = dict(size=14))
 outcome_plot.update_yaxes(ticks='outside',color='black',tickfont = dict(size=tick_font),linecolor='black',title='Counts',
                  title_font=dict(size=16))
+outcome_plot.update_traces(textposition='outside',textfont_size=12)
 

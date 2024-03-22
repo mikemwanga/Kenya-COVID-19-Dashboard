@@ -25,8 +25,7 @@ navbar =   html.Div([
                         dbc.NavItem(dbc.NavLink(html.A("Syndromic-Surveillance", href="/apps/syndromic_trends.html/",className= tab_nav,style=style))),
                         dbc.NavItem(dbc.NavLink(html.A("Variants", href="/apps/variants.html/",className= tab_nav,style=style))),
                         dbc.NavItem(dbc.NavLink(html.A("Phylogeny", href="/apps/phylogeny.html/",className= tab_nav,style=style))),
-                        # 
-                        ],             brand_href="/apps/home.html",
+                       ],             brand_href="/apps/home.html",
                                     
                                       
                                     brand="Kenya COVID-19 Dashboard",

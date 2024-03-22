@@ -11,7 +11,7 @@ def load_varaint_data():
     global variant_growth_rate_fy4,variant_growth_rate_xbb
     variants_kenya = pd.read_table(DATA_PATH.joinpath("variant_data_kenya.tsv"))
     variants_kenya["Month"] = pd.to_datetime(variants_kenya["Month"], format = "%Y-%m-%d")
-    variants_data = pd.read_table(DATA_PATH.joinpath("kenya_lineages3.tsv"))
+    variants_data = pd.read_table(DATA_PATH.joinpath("kenya_lineages4.tsv"))
     variants_data['date'] = pd.to_datetime(variants_data['date'],format="%Y-%m-%d")
     variants_data = variants_data[variants_data['pangolin_lineage'] != 'Unassigned']
 
@@ -143,7 +143,7 @@ def update_content(n_intervals):
                     dbc.Col([
                         dbc.Card([
                             dbc.CardBody([
-                                html.Label("Kenya SARS-COV-2 lineages in 2023", 
+                                html.Label("Kenya SARS-COV-2 lineages: 2023-2024", 
                                     style = {"text-align":"start","font-size":14},className = "fw-bold text-dark ms-4"),
                                 html.Br(),html.Br(),
                                 dcc.Loading(dcc.Graph(figure = sars_lineages,responsive = True,style = {"width":"60hw","height":"50vh"},config= plotly_display)),
