@@ -493,7 +493,6 @@ outcome_deaths_sex_coast = group_region(outcome_deaths_sex,'Coast')
 outcome_deaths_sex_western = group_region(outcome_deaths_sex,'Western')
 outcome_deaths_sex_central = group_region(outcome_deaths_sex,'Central')
 
-print(outcome_deaths_sex_western)
 def plot_outcome(data):
     #max = data['Freq'].max()+ 50
     # data = data[data['region'] == region]

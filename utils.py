@@ -47,7 +47,7 @@ cardbody_style_vac = {"background-color":pcolor_home, "height":"200%"}
 color_patterns = ['#0000FF','#1f78b4','#00FF00','#008000','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#ffff99','#b15928',\
                 "#FF00FF",'#800080','#808080'] 
 
-tickfont = 9
+tickfont = 11
 titlefont = 12
 tickfont_dict = dict(size=9)
 card_class = "text-center"
@@ -96,6 +96,9 @@ linecolor ='#170B3B'
 plot_color = "rgba(0,0,0,0)"
 line_class = 'align-items-start mb-0 ms-1'
 line_style = {'width':'70%'}
+
+space = html.B(className='mb-4')
+line = html.Hr()
 
 ring_color = '#3d86b8'
 fill_color='#333338'

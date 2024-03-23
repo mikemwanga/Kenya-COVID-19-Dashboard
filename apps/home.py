@@ -17,15 +17,11 @@ def load_home_data():
 
 def daily_plots(df,observation1,observation2):#, observation2
     fig = go.Figure()
-    fig.add_trace(go.Scatter( x = df["Date"],mode='none', y = df[observation1],fill='tonext',
-                             hovertext=df['Reported_Cases']))
+    fig.add_trace(go.Scatter( x = df["Date"],mode='none', y = df[observation1],fill='tonext',hovertext=df['Reported_Cases']))
     fig.add_trace(go.Scatter(x = df["Date"], y = df[observation2]))
     fig.update_layout(showlegend=False,margin = margin)
-    
-    
-    
-    fig.update_xaxes(showgrid=False,showline=True,linecolor = axis_color,tickfont = dict(size=tickfont))
-    fig.update_yaxes(tickfont = dict(size=tickfont),nticks=10,title = "7-day Average", title_font = {"size":titlefont})
+    fig.update_xaxes(showgrid=False,showline=True,nticks=10,ticks='outside',linecolor = axis_color,tickfont = dict(size=tickfont))
+    fig.update_yaxes(tickfont = dict(size=tickfont),nticks=15,title = "7-day Average", title_font = {"size":titlefont})
     return fig
 
   #age gender plots
@@ -46,7 +42,7 @@ def age_gender_plots2(data):
                         legend = dict(orientation = "h",title=None,font = dict(size=9)))
             
             age_gender_cases_plot.update_yaxes(tickfont = dict(size=tickfont),title = "Age group",title_font = {"size":titlefont})
-            age_gender_cases_plot.update_xaxes(tickfont = dict(size=tickfont),title = None,title_font = {"size":titlefont} )
+            age_gender_cases_plot.update_xaxes(linecolor = axis_color,ticks='outside',tickfont = dict(size=tickfont),title = None,title_font = {"size":titlefont} )
             age_gender_cases_plot.update_traces(width=0.6)
             
             #--------------------------------------------------------------------------------------------------------------------
@@ -62,7 +58,7 @@ def age_gender_plots2(data):
                         margin=margin,
                         legend = dict(orientation = "h",font = dict(size=9)))
             age_gender_death_plot.update_yaxes(tickfont = dict(size=tickfont),title = "Age group",title_font = {"size":titlefont})
-            age_gender_death_plot.update_xaxes(tickfont = dict(size=tickfont),title = None,title_font = {"size":titlefont})
+            age_gender_death_plot.update_xaxes(linecolor = axis_color,ticks='outside',tickfont = dict(size=tickfont),title = None,title_font = {"size":titlefont})
             age_gender_death_plot.update_traces(width=0.6)
             
             total_female_cases = data["Female_cases"].sum()
@@ -194,68 +190,118 @@ def update_home_content(n_intervals):
             
         ],justify="center",align = "center", className = "bg-secondary bg-opacity-10 g-1 justify-content-center"),
         
+   
+
         dbc.Row([
             dbc.Col([
-                html.P([html.Label("TESTING UPDATES",className = col_title,style = style_title),
-                        html.Br(),html.A(f" On {test_dates}",style={"font-size":12})]),
-                html.Hr(className =hr_class,style=hr_style),
-                        html.H6("Cases",className=col1_class),
-                        html.Hr(className = col1_class,style = {"width":"50%"}),
-                        html.Strong(new_cases_last_24hrs,className = val_class),
-                        #html.Span(children = [arrow_type,cases_fold_value],className = fold_change_class,
-                #                style = {"margin-left":"20px"}),
-                html.Hr(className =hr_class,style=hr_style),
-                        html.H6("Positivity",className=col1_class),
+                dbc.Card([  
+                    html.P([html.Label("TESTING UPDATES",className = col_title,style = style_title),
+                            html.Br(),html.A(f" On {test_dates}",style={"font-size":12})]),
+                    html.Hr(className =hr_class,style=hr_style),
+                            html.H6("Cases",className=col1_class),
+                            html.Hr(className = col1_class,style = {"width":"50%"}),
+                            html.Strong(new_cases_last_24hrs,className = val_class),
+                            #html.Span(children = [arrow_type,cases_fold_value],className = fold_change_class,
+                    #                style = {"margin-left":"20px"}),
+                    html.Hr(className =hr_class,style=hr_style),
+                            html.H6("Positivity",className=col1_class),
+                            html.Hr(className=col1_class,style = {"width":"50%"}),
+                            html.Strong(f"{posity_last_24}%",className = val_class), 
+                    html.Hr(className =hr_class,style=hr_style),
+                        html.H6("Fatalities",className = col1_class),
                         html.Hr(className=col1_class,style = {"width":"50%"}),
-                        html.Strong(f"{posity_last_24}%",className = val_class), 
-                html.Hr(className =hr_class,style=hr_style),
-                    html.H6("Fatalities",className = col1_class),
-                    html.Hr(className=col1_class,style = {"width":"50%"}),
-                    html.Strong(fatalities_last_24 ,className = val_class),
-                    #html.Span(children = [fat_arrow_type, fat_fold_value],className = fat_fold_change_class,
-                     #           style = {"margin-left":"20px"}),
-                html.Hr(className =hr_class,style=hr_style),
-                        html.H6("Recoveries",className = col1_class),
-                        html.Hr(className = col1_class,style = {"width":"50%"}),
-                        html.Strong(recoveries_last_24,className = val_class),
-                        #html.Span(children = [rec_arrow_type, rec_fold_value],className = rec_fold_change_class,
-                        #       style = {"margin-left":"20px"}),
-                html.Hr(className =hr_class,style=hr_style),
-                        html.H6("Samples Tested",className = col1_class),
-                        html.Hr(className = col1_class,style = {"width":"50%"}),
-                        html.Strong(samplesize_last_24hrs,className = val_class),
-                html.Hr(),
-            ],xs=10,md=1,lg=2,xxl=2,className = col_class,style = {"height":900}), #
+                        html.Strong(fatalities_last_24 ,className = val_class),
+                        #html.Span(children = [fat_arrow_type, fat_fold_value],className = fat_fold_change_class,
+                        #           style = {"margin-left":"20px"}),
+                    html.Hr(className =hr_class,style=hr_style),
+                            html.H6("Recoveries",className = col1_class),
+                            html.Hr(className = col1_class,style = {"width":"50%"}),
+                            html.Strong(recoveries_last_24,className = val_class),
+                            #html.Span(children = [rec_arrow_type, rec_fold_value],className = rec_fold_change_class,
+                            #       style = {"margin-left":"20px"}),
+                    html.Hr(className =hr_class,style=hr_style),
+                            html.H6("Samples Tested",className = col1_class),
+                            html.Hr(className = col1_class,style = {"width":"50%"}),
+                            html.Strong(samplesize_last_24hrs,className = val_class),
+                    html.Hr(),
+                ],body=True,className='h-100 border-0')
+            ],xs=10,md=1,lg=2,xxl=2,className = 'mt-1'),#, style = {"height":1200}
             
             dbc.Col([
+                dbc.Card([
+                    html.P("TRENDS IN CASES",className = col_title,style = style_title),
+                    dcc.Graph(figure=cases_trend,responsive = True, style = {"width":"30hw","height":"25vh"},   config= plotly_display),
+                ],className='border-0'),
+                space,
+                dbc.Card([
+                    html.P("TRENDS IN FATALITIES",className = col_title,style = style_title),
+                    dcc.Graph(figure = deaths_trends,responsive = True, style = {"width":"30hw","height":"25vh"},config= plotly_display),
+                ],className='border-0 mt-1'),
+
+                dbc.Row([
+                    dbc.Col([
+                        dbc.Card([
+                            dbc.CardBody([  
+                            html.P("COUNTIES WITH RECENT UPDATES",className = col_title,style = style_title),
+                            dcc.Graph(figure = fig_county,responsive = True, style = {"height":"25vh"},config= plotly_display),
+                            ])
+                        ],className='border-0 mt-1'),
+
+                        dbc.Card([
+                        html.P("CASES BY AGE AND GENDER",className = col_title,style = style_title),
+                        dcc.Graph(figure = age_gender_cases_plot,responsive = True,style = {"height":"30vh"},config= plotly_display),
+                        ],className='border-0 mt-1'),   
+                    ]),
+                    dbc.Col([
+                        dbc.Card([
+                        html.P("MOST AFFECTED COUNTIES",className = col_title,style = style_title),
+                        dcc.Graph(figure = affected_counties, responsive = True, style = {"height":"25vh"},config= plotly_display),
+                        ],body=True,className='border-0 mt-1'),
+
+                        dbc.Card([
+                        #html.Hr(className = hr_class, style = hr_style),
+                        html.P("FATALITIES BY AGE AND GENDER",className = col_title,style = style_title),
+                        dcc.Graph(figure= age_gender_death_plot, responsive = True, style = {"height":"30vh"},config= plotly_display),
+                        ],className='border-0 mt-1'),
+                    ]),
+                      
+
+                ],justify='center',className= midrow_classname)
+
+
+            ],md=7,className='mt-3') #className = col_class,,style={"height":1200}
+            
+        ],justify = "center"),
+            
+            # dbc.Col([
                                     
-                html.P("COUNTIES WITH RECENT UPDATES",className = col_title,style = style_title),
-                dcc.Graph(figure = fig_county,responsive = True, style = {"width":"30hw","height":"25vh"},config= plotly_display),
-                html.Hr(className = hr_class, style = hr_style),
+            #     html.P("COUNTIES WITH RECENT UPDATES",className = col_title,style = style_title),
+            #     dcc.Graph(figure = fig_county,responsive = True, style = {"width":"30hw","height":"25vh"},config= plotly_display),
+            #     html.Hr(className = hr_class, style = hr_style),
                         
-                html.P("TRENDS IN CASES",className = col_title,style = style_title),
-                dcc.Graph(figure=cases_trend,responsive = True, style = {"width":"30hw","height":"25vh"},config= plotly_display),
+            #     html.P("TRENDS IN CASES",className = col_title,style = style_title),
+            #     dcc.Graph(figure=cases_trend,responsive = True, style = {"width":"30hw","height":"25vh"},config= plotly_display),
                 
-                html.Hr(className = hr_class, style = hr_style),
-                html.P("CASES BY AGE AND GENDER",className = col_title,style = style_title),
-                dcc.Graph(figure = age_gender_cases_plot,responsive = True,style = {"width":"25hw","height":"30vh"},config= plotly_display),
+            #     html.Hr(className = hr_class, style = hr_style),
+            #     html.P("CASES BY AGE AND GENDER",className = col_title,style = style_title),
+            #     dcc.Graph(figure = age_gender_cases_plot,responsive = True,style = {"width":"25hw","height":"30vh"},config= plotly_display),
                         
-            ],xs=10,md=5,lg=4,xxl=4,className = col_class,style = {"margin-left":"15px","margin-right":"0px","height":900} ),
+            # ],xs=10,md=5,lg=4,xxl=4,className = col_class,style = {"margin-left":"15px","margin-right":"0px","height":900} ),
             
-            dbc.Col([
-                html.P("MOST AFFECTED COUNTIES",className = col_title,style = style_title),
-                dcc.Graph(figure = affected_counties, responsive = True, style = {"width":"32hw","height":"25vh"},config= plotly_display),
-                html.Hr(className = hr_class, style = hr_style),
-                html.P("TRENDS IN FATALITIES",className = col_title,style = style_title),
-                dcc.Graph(figure = deaths_trends,responsive = True, style = {"width":"30hw","height":"25vh"},config= plotly_display),
+            # dbc.Col([
+            #     html.P("MOST AFFECTED COUNTIES",className = col_title,style = style_title),
+            #     dcc.Graph(figure = affected_counties, responsive = True, style = {"width":"32hw","height":"25vh"},config= plotly_display),
+            #     html.Hr(className = hr_class, style = hr_style),
+            #     html.P("TRENDS IN FATALITIES",className = col_title,style = style_title),
+            #     dcc.Graph(figure = deaths_trends,responsive = True, style = {"width":"30hw","height":"25vh"},config= plotly_display),
                 
-                html.Hr(className = hr_class, style = hr_style),
-                html.P("FATALITIES BY AGE AND GENDER",className = col_title,style = style_title),
-                dcc.Graph(figure= age_gender_death_plot, responsive = True, style = {"width":"25hw","height":"30vh"},config= plotly_display),#
-            ],xs=10,md=5,lg=4,xxl=4,className = col_class,style = {"margin-left":"15px","margin-right":"0px","height":900}),
+            #     html.Hr(className = hr_class, style = hr_style),
+            #     html.P("FATALITIES BY AGE AND GENDER",className = col_title,style = style_title),
+            #     dcc.Graph(figure= age_gender_death_plot, responsive = True, style = {"width":"25hw","height":"30vh"},config= plotly_display),#
+            # ],xs=10,md=5,lg=4,xxl=4,className = col_class,style = {"margin-left":"15px","margin-right":"0px","height":900}),
                         
                         
-        ],justify = "center",className = classname_col,style={"height":950}),
+        
         
         reference
         
