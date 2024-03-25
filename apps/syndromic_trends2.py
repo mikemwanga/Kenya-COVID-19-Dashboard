@@ -3,8 +3,7 @@ from utils import *
 
 #*********************************************************************************************************************
 
-space = html.B(className='mb-4')
-line = html.Hr()
+
 layout = html.Div([
     dbc.Row([
         dbc.Col([
