@@ -2,20 +2,20 @@
 # $ conda create --name <env> --file <this file>
 # platform: linux-64
 
-colorlover=0.3.0=pypi_0
-colour=0.1.5=pypi_0
-comm=0.1.4=pyhd8ed1ab_0
-dash=2.15.0=pypi_0
-dash-ag-grid=31.0.1=pypi_0
-dash-bio=1.0.2=pypi_0
-dash-bootstrap-components=1.5.0=pypi_0
-dash-bootstrap-templates=1.1.0=pypi_0
-dash-core-components=2.0.0=pypi_0
-dash-html-components=2.0.0=pypi_0
-dash-iconify=0.1.2=pypi_0
-dash-mantine-components=0.12.1=pypi_0
-dash-table=5.0.0=pypi_0
-ipykernel=6.25.2=pyh2140261_0
-ipython=8.16.1=pyh0d859eb_0
-ipython-genutils=0.2.0=pypi_0
-plotly=5.17.0=pypi_0
+colorlover==0.3.0
+colour==0.1.5
+comm==0.1.4
+dash==2.15.0
+dash-ag-grid==31.0.1
+dash-bio==1.0.2
+dash-bootstrap-components==1.5.0
+dash-bootstrap-templates==1.1.0
+dash-core-components==2.0.0
+dash-html-components==2.0.0
+dash-iconify==0.1.2
+dash-mantine-components==0.12.1
+dash-table==5.0.0
+ipykernel==6.25.2
+ipython==8.16.1
+ipython-genutils==0.2.0
+plotly==5.17.0

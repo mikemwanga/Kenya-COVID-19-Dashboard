@@ -166,8 +166,8 @@ home_content = "The home page provides a summary of COVID-19 prevalence across t
 reference = dbc.Row([
                 dbc.Col(width=1),
                 dbc.Col([
-                    html.Img(src=dash.get_asset_url("../assets/kwtrp_logo.png"),style = {"width":"8vw","height":"7vh"})
-                ],width=1,style = {"margin-right":"10px",
+                    html.Img(src=dash.get_asset_url("../assets/kwtrp_logo.png"),style = {"width":"20vw","height":"5vh"})
+                ],width=2,style = {"margin-right":"10px",
                                    "display":"flex","align-items": "center","justify-content": "center",}),
                 dbc.Col([
                     html.Img(src=dash.get_asset_url("../assets/moh_kenya.png"),style = {"width":"6vw","height":"10vh"})
