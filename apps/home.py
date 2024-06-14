@@ -1,4 +1,5 @@
 from utils import *
+updated_date = "2023-06-14"
 
 def load_home_data():
     #global daily_updates_moh,county_daily_updates,daily_cases,age_gender_data,data #
@@ -99,7 +100,7 @@ def update_home_content(n_intervals):
     total_deaths = daily_updates_moh["cumulative_fatalities"].dropna().iat[-1]
     total_recoveries = daily_updates_moh["total_recoveries"].dropna().iat[-1]
     overall_positivity = round(total_cases/total_tests*100,1)
-    test_data = daily_updates_moh.loc[daily_updates_moh.index == "2023-03-30"]
+    test_data = daily_updates_moh.loc[daily_updates_moh.index == updated_date]
     new_cases_last_24hrs = test_data["new_cases_last_24_hrs"].iat[0]
     samplesize_last_24hrs = int(test_data["sample_size_last_24_hrs"].iat[0])
     posity_last_24 = round((new_cases_last_24hrs/samplesize_last_24hrs)*100,1)
